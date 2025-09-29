@@ -1,6 +1,4 @@
-<a class="molten"
-   href="https://rustwire.duckdns.org:9637/start?guild_id=1419192329713094689&channel_id=1422058709835583570">
-  <span class="molten__lava"></span>
-  <span class="molten__label">Secure Pair Link</span>
-  <span class="molten__drip"></span>
-</a>
+{
+  "version": 2,
+  "cleanUrls": true
+}
