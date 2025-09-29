@@ -37,14 +37,18 @@
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;
       overflow:hidden; background:#000;
     }
+
+    /* Background */
     #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
     .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
 
+    /* Top bar */
     .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
     .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
     img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
     .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 
+    /* Content card */
     .pair-wrap{ position:fixed; inset:0; z-index:2; display:grid; place-items:center; padding:18px; }
     .pair-card{
       width:min(920px, calc(100% - 18px));
@@ -62,6 +66,7 @@
     ol{ margin:12px 0 0; padding:0 0 0 22px; }
     li{ margin:10px 0; line-height:1.5; }
 
+    /* Buttons */
     .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
     .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
@@ -76,6 +81,7 @@
 
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
 
+    /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
@@ -89,6 +95,7 @@
   </style>
 </head>
 <body>
+  <!-- IMPORTANT: use relative paths (./) on GitHub Pages -->
   <video id="bgvid" autoplay muted loop playsinline preload="auto" src="./bg.mp4"></video>
   <div class="overlay"></div>
 
@@ -102,6 +109,16 @@
       <a class="molten" href="./" aria-label="Back Home">
         <span class="molten__lava"></span>
         <span class="molten__label">← Home</span>
+        <span class="molten__drip"></span>
+      </a>
+      <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">
+        <span class="molten__lava"></span>
+        <span class="molten__label">Join Discord</span>
+        <span class="molten__drip"></span>
+      </a>
+      <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">
+        <span class="molten__lava"></span>
+        <span class="molten__label">Add Bot</span>
         <span class="molten__drip"></span>
       </a>
     </div>
@@ -135,7 +152,7 @@
           <span class="molten__label">Add Bot</span>
           <span class="molten__drip"></span>
         </a>
-        <!-- NEW: direct secure start link to your portal -->
+        <!-- Open Secure Pair -->
         <a class="molten" href="https://proud-sides-end.loca.lt/start?guild_id=1419192329713094689&channel_id=1422058709835583570" target="_blank" rel="noopener" aria-label="Open Secure Pair">
           <span class="molten__lava"></span>
           <span class="molten__label">Open Secure Pair</span>
@@ -145,9 +162,6 @@
 
       <p style="margin-top:10px;opacity:.85">
         Need help? Ping us in <strong>#support</strong> on our Discord.
-      </p>
-      <p style="margin-top:6px;opacity:.65;font-size:13px">
-        If the secure link ever changes, ask an admin or try again later—tunnels can rotate.
       </p>
     </div>
   </div>
@@ -159,8 +173,8 @@
   </div>
 
   <script>
-    // Check the LIVE portal, not the static site
-    const PORTAL = 'https://proud-sides-end.loca.lt/robots.txt';
+    // Ping an always-present asset on your HTTPS site so the badge works
+    const PING = 'https://rustwire.duckdns.org/logo.png';
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
@@ -168,7 +182,7 @@
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
-        await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
