@@ -90,48 +90,4 @@
     <div class="logo-wrap">
       <img src="./logo.png" alt="RustWire Logo" class="logo" />
     </div>
-    <div class="btns">
-      <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener"><span class="molten__lava"></span><span class="molten__label">Join Discord</span><span class="molten__drip"></span></a>
-      <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener"><span class="molten__lava"></span><span class="molten__label">Add Bot</span><span class="molten__drip"></span></a>
-      <a class="molten" href="./pair.html"><span class="molten__lava"></span><span class="molten__label">Pair Rust+</span><span class="molten__drip"></span></a>
-    </div>
-  </div>
-
-  <div class="bottom-center">
-    <div class="title-card">
-      <h1>RustWire</h1>
-      <p>Stay connected with Rust+, events, wipes, and automation for your Rust server.</p>
-      <p style="margin-top:10px"><a href="./pair.html" class="link">Pair Rust+ with RustWire →</a></p>
-    </div>
-  </div>
-
-  <div class="status" id="status" aria-live="polite">
-    <span class="dot" id="dot"></span>
-    <span id="label">Checking status…</span>
-  </div>
-
-  <script>
-    // Ping your own static site to decide "Portal Online"
-    // Use a tiny asset that always exists on GitHub Pages
-    const PORTAL = 'https://rustwire.duckdns.org/logo.png';
-    const dot = document.getElementById('dot');
-    const label = document.getElementById('label');
-
-    async function check() {
-      try {
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 3500);
-        await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
-        clearTimeout(t);
-        dot.classList.remove('off'); dot.classList.add('on');
-        label.textContent = 'Portal Online';
-      } catch {
-        dot.classList.remove('on'); dot.classList.add('off');
-        label.textContent = 'Portal Offline';
-      }
-    }
-    check();
-    setInterval(check, 20000);
-  </script>
-</body>
-</html>
+    <div class
