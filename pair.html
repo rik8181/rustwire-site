@@ -6,21 +6,21 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pair Rust+ • RustWire</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
-  <link rel="canonical" href="https://<YOUR_PUBLIC_SITE_DOMAIN>/pair.html" />
+  <link rel="canonical" href="https://rustwire.duckdns.org/pair.html" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Pair Rust+ • RustWire" />
   <meta property="og:description" content="Link your Rust server with RustWire through the Rust+ app." />
-  <meta property="og:url" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/pair.html" />
-  <meta property="og:image" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/og-image.jpg" />
+  <meta property="og:url" content="https://rustwire.duckdns.org/pair.html" />
+  <meta property="og:image" content="https://rustwire.duckdns.org/og-image.jpg" />
   <meta property="og:image:alt" content="RustWire — Rust+ Pairing" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Pair Rust+ • RustWire" />
   <meta name="twitter:description" content="Link your Rust server with RustWire through the Rust+ app." />
-  <meta name="twitter:image" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/og-image.jpg" />
+  <meta name="twitter:image" content="https://rustwire.duckdns.org/og-image.jpg" />
 
   <link rel="icon" href="./logo.png" type="image/png" />
 
@@ -140,19 +140,6 @@
       <p style="margin-top:10px;opacity:.85">
         Need help? Ping us in <strong>#support</strong> on our Discord.
       </p>
-
-      <hr style="border:none; border-top:1px solid rgba(255,255,255,.1); margin:16px 0" />
-
-      <!-- Secure start: uses your current Cloudflare quick tunnel + real IDs -->
-      <p style="opacity:.9">
-        Secure start link:
-        <a class="link" href="https://portal-soil-fruit-johnny.trycloudflare.com/start?guild_id=1419192329713094689&channel_id=1422058709835583570" target="_blank" rel="noopener">
-          Open Secure Pair
-        </a>
-      </p>
-      <p style="opacity:.7; font-size:13px">
-        (Works while your cloudflared tunnel is running. If you restart and get a new URL, update this link.)
-      </p>
     </div>
   </div>
 
@@ -163,8 +150,8 @@
   </div>
 
   <script>
-    // Point the badge at your Cloudflare quick-tunnel (HTTPS) so browsers don't block it.
-    const PORTAL = 'https://portal-soil-fruit-johnny.trycloudflare.com/robots.txt';
+    // Keep it simple: ping an always-present asset on your own HTTPS site
+    const PING = 'https://rustwire.duckdns.org/logo.png';
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
@@ -172,7 +159,7 @@
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
-        await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
