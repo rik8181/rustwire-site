@@ -93,7 +93,7 @@
     <div class="btns">
       <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener"><span class="molten__lava"></span><span class="molten__label">Join Discord</span><span class="molten__drip"></span></a>
       <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener"><span class="molten__lava"></span><span class="molten__label">Add Bot</span><span class="molten__drip"></span></a>
-      <a class="molten" href="/pair.html"><span class="molten__lava"></span><span class="molten__label">Pair Rust+</span><span class="molten__drip"></span></a>
+      <!-- Pair button intentionally removed -->
     </div>
   </div>
 
@@ -101,7 +101,7 @@
     <div class="title-card">
       <h1>RustWire</h1>
       <p>Stay connected with Rust+, events, wipes, and automation for your Rust server.</p>
-      <p style="margin-top:10px"><a href="/pair.html" class="link">Pair Rust+ with RustWire →</a></p>
+      <!-- Link to pair page removed from front page -->
     </div>
   </div>
 
@@ -111,7 +111,9 @@
   </div>
 
   <script>
-    const PORTAL = 'https://rustwire.duckdns.org:9637/robots.txt';
+    // Use your current Cloudflare quick tunnel HTTPS URL.
+    // If you restart cloudflared and it changes, update this string.
+    const PORTAL = 'https://portal-soil-fruit-johnny.trycloudflare.com/robots.txt';
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
