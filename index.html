@@ -110,8 +110,8 @@
   </div>
 
   <script>
-    // ====== CONFIG (change if needed) ======
-    const PORTAL_ORIGIN = 'https://rustwire-proxy.fly.dev';
+    // ====== CONFIG (edit when your tunnel URL changes) ======
+    const PORTAL_ORIGIN = 'https://sad-socks-share.loca.lt'; // <— your current portal URL
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
 
@@ -119,7 +119,7 @@
     const secureBtn = document.getElementById('securePairBtn');
     secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
 
-    // Status badge: ping portal health
+    // Status badge: ping portal health (mode:no-cors = success if reachable)
     const PING = `${PORTAL_ORIGIN}/healthz`;
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
