@@ -6,26 +6,25 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pair Rust+ • RustWire</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
-  <link rel="canonical" href="https://<YOUR_GITHUB_PAGES_DOMAIN>/pair.html" />
+  <link rel="canonical" href="https://<YOUR_PUBLIC_SITE_DOMAIN>/pair.html" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Pair Rust+ • RustWire" />
   <meta property="og:description" content="Link your Rust server with RustWire through the Rust+ app." />
-  <meta property="og:url" content="https://<YOUR_GITHUB_PAGES_DOMAIN>/pair.html" />
-  <meta property="og:image" content="https://<YOUR_GITHUB_PAGES_DOMAIN>/og-image.jpg" />
+  <meta property="og:url" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/pair.html" />
+  <meta property="og:image" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/og-image.jpg" />
   <meta property="og:image:alt" content="RustWire — Rust+ Pairing" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Pair Rust+ • RustWire" />
   <meta name="twitter:description" content="Link your Rust server with RustWire through the Rust+ app." />
-  <meta name="twitter:image" content="https://<YOUR_GITHUB_PAGES_DOMAIN>/og-image.jpg" />
+  <meta name="twitter:image" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/og-image.jpg" />
 
-  <link rel="icon" href="/logo.png" type="image/png" />
+  <link rel="icon" href="./logo.png" type="image/png" />
 
   <style>
-    /* Reuse same styles as index (subset copied for this page) */
     :root{
       --rust-orange:#f0672a;
       --steel-700:#1e2940;
@@ -63,7 +62,6 @@
     ol{ margin:12px 0 0; padding:0 0 0 22px; }
     li{ margin:10px 0; line-height:1.5; }
 
-    /* Buttons (same molten style as index) */
     .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
     .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
@@ -78,7 +76,6 @@
 
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
@@ -92,17 +89,17 @@
   </style>
 </head>
 <body>
-  <video id="bgvid" autoplay muted loop playsinline preload="auto" src="/bg.mp4"></video>
+  <video id="bgvid" autoplay muted loop playsinline preload="auto" src="./bg.mp4"></video>
   <div class="overlay"></div>
 
   <div class="topbar">
     <div class="logo-wrap">
-      <a href="/" aria-label="Home">
-        <img src="/logo.png" alt="RustWire Logo" class="logo" />
+      <a href="./" aria-label="Home">
+        <img src="./logo.png" alt="RustWire Logo" class="logo" />
       </a>
     </div>
     <div class="btns">
-      <a class="molten" href="/" aria-label="Back Home">
+      <a class="molten" href="./" aria-label="Back Home">
         <span class="molten__lava"></span>
         <span class="molten__label">← Home</span>
         <span class="molten__drip"></span>
@@ -146,13 +143,15 @@
 
       <hr style="border:none; border-top:1px solid rgba(255,255,255,.1); margin:16px 0" />
 
-      <!-- Optional: link out to your secure start page (if your portal is online) -->
+      <!-- Secure start: uses your current Cloudflare quick tunnel + real IDs -->
       <p style="opacity:.9">
-        Have our secure portal running? Open:
-        <a class="link" href="https://rustwire.duckdns.org:9637/start?guild_id=YOUR_GUILD_ID&channel_id=YOUR_CHANNEL_ID">Secure Pair Link</a>
+        Secure start link:
+        <a class="link" href="https://portal-soil-fruit-johnny.trycloudflare.com/start?guild_id=1419192329713094689&channel_id=1422058709835583570" target="_blank" rel="noopener">
+          Open Secure Pair
+        </a>
       </p>
       <p style="opacity:.7; font-size:13px">
-        (Replace <code>YOUR_GUILD_ID</code> and <code>YOUR_CHANNEL_ID</code> with real IDs before sharing.)
+        (Works while your cloudflared tunnel is running. If you restart and get a new URL, update this link.)
       </p>
     </div>
   </div>
@@ -164,7 +163,8 @@
   </div>
 
   <script>
-    const PORTAL = 'https://rustwire.duckdns.org:9637/robots.txt'; // set to your HTTPS portal
+    // Point the badge at your Cloudflare quick-tunnel (HTTPS) so browsers don't block it.
+    const PORTAL = 'https://portal-soil-fruit-johnny.trycloudflare.com/robots.txt';
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
@@ -172,7 +172,7 @@
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
-        const res = await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
