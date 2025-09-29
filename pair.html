@@ -135,10 +135,19 @@
           <span class="molten__label">Add Bot</span>
           <span class="molten__drip"></span>
         </a>
+        <!-- NEW: direct secure start link to your portal -->
+        <a class="molten" href="https://proud-sides-end.loca.lt/start?guild_id=1419192329713094689&channel_id=1422058709835583570" target="_blank" rel="noopener" aria-label="Open Secure Pair">
+          <span class="molten__lava"></span>
+          <span class="molten__label">Open Secure Pair</span>
+          <span class="molten__drip"></span>
+        </a>
       </div>
 
       <p style="margin-top:10px;opacity:.85">
         Need help? Ping us in <strong>#support</strong> on our Discord.
+      </p>
+      <p style="margin-top:6px;opacity:.65;font-size:13px">
+        If the secure link ever changes, ask an admin or try again later—tunnels can rotate.
       </p>
     </div>
   </div>
@@ -150,8 +159,8 @@
   </div>
 
   <script>
-    // Keep it simple: ping an always-present asset on your own HTTPS site
-    const PING = 'https://rustwire.duckdns.org/logo.png';
+    // Check the LIVE portal, not the static site
+    const PORTAL = 'https://proud-sides-end.loca.lt/robots.txt';
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
@@ -159,7 +168,7 @@
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
-        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
