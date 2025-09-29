@@ -6,24 +6,28 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RustWire • Rust+ Companion & Server Tools</title>
   <meta name="description" content="RustWire keeps your Rust server connected with Rust+, wipes, events, and map tools." />
-  <link rel="canonical" href="https://<YOUR_GITHUB_PAGES_DOMAIN>/" />
+  <!-- TODO: replace with your real public site URL -->
+  <link rel="canonical" href="https://<YOUR_PUBLIC_SITE_DOMAIN>/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="RustWire • Rust+ Companion & Server Tools" />
   <meta property="og:description" content="Pair Rust+, see team/bases, and automate wipes & events." />
-  <meta property="og:url" content="https://<YOUR_GITHUB_PAGES_DOMAIN>/" />
-  <meta property="og:image" content="https://<YOUR_GITHUB_PAGES_DOMAIN>/og-image.jpg" />
+  <!-- TODO: replace with your real public site URL -->
+  <meta property="og:url" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/" />
+  <!-- TODO: host an og-image.jpg in your repo root and point to absolute URL -->
+  <meta property="og:image" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/og-image.jpg" />
   <meta property="og:image:alt" content="RustWire — Rust+ Companion" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="RustWire • Rust+ Companion & Server Tools" />
   <meta name="twitter:description" content="Pair Rust+, see team/bases, and automate wipes & events." />
-  <meta name="twitter:image" content="https://<YOUR_GITHUB_PAGES_DOMAIN>/og-image.jpg" />
+  <!-- TODO: replace with absolute URL to your OG image -->
+  <meta name="twitter:image" content="https://<YOUR_PUBLIC_SITE_DOMAIN>/og-image.jpg" />
 
-  <!-- Favicon (optional) -->
-  <link rel="icon" href="/logo.png" type="image/png" />
+  <!-- Favicon -->
+  <link rel="icon" href="./logo.png" type="image/png" />
 
   <style>
     :root{
@@ -193,13 +197,13 @@
 </head>
 <body>
   <!-- Fullscreen live wallpaper -->
-  <video id="bgvid" autoplay muted loop playsinline preload="auto" src="/bg.mp4"></video>
+  <video id="bgvid" autoplay muted loop playsinline preload="auto" src="./bg.mp4"></video>
   <div class="overlay"></div>
 
   <!-- Top bar -->
   <div class="topbar">
     <div class="logo-wrap">
-      <img src="/logo.png" alt="RustWire Logo" class="logo" />
+      <img src="./logo.png" alt="RustWire Logo" class="logo" />
     </div>
     <div class="btns">
       <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener" aria-label="Join Discord">
@@ -215,6 +219,12 @@
       <a class="molten" href="/pair.html" aria-label="Pair Rust+">
         <span class="molten__lava" aria-hidden="true"></span>
         <span class="molten__label">Pair Rust+</span>
+        <span class="molten__drip" aria-hidden="true"></span>
+      </a>
+      <!-- NEW: Secure Pair Link button with your real IDs -->
+      <a class="molten" href="https://rustwire.duckdns.org:9637/start?guild_id=1419192329713094689&channel_id=1422058709835583570" aria-label="Secure Pair Link">
+        <span class="molten__lava" aria-hidden="true"></span>
+        <span class="molten__label">Secure Pair</span>
         <span class="molten__drip" aria-hidden="true"></span>
       </a>
     </div>
@@ -239,10 +249,9 @@
 
   <script>
     // Lightweight status ping
-    // IMPORTANT: For this to work from HTTPS GitHub Pages, your portal must be reachable via HTTPS too
+    // IMPORTANT: For this to work from HTTPS GitHub Pages/Vercel, your portal must be reachable via HTTPS too
     // (otherwise browsers block mixed-content HTTP calls and it will show "Offline").
-    // If you have HTTPS, set PORTAL to that https URL. If not, the badge will safely show "Offline".
-    const PORTAL = 'https://rustwire.duckdns.org:9637/robots.txt'; // change to your HTTPS portal URL (any small file)
+    const PORTAL = 'https://rustwire.duckdns.org:9637/robots.txt'; // small file/endpoint on your portal
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
@@ -250,9 +259,9 @@
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
-        const res = await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        // no-cors: opaque success still counts as "reachable"
+        await fetch(PORTAL, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
-        // mode:no-cors always yields opaque response; reaching here means it didn't error -> treat as online
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
       } catch {
@@ -261,7 +270,7 @@
       }
     }
     check();
-    setInterval(check, 20000); // re-check every 20s
+    setInterval(check, 20000);
   </script>
 </body>
 </html>
