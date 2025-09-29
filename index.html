@@ -3,96 +3,53 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RustWire • Rust+ Companion & Server Tools</title>
-  <meta name="description" content="RustWire keeps your Rust server connected with Rust+, wipes, events, and map tools." />
-  <link rel="icon" href="./logo.png" type="image/png" />
-
+  <title>RustWire • Home</title>
+  <link rel="icon" href="/logo.png" type="image/png" />
   <style>
-    :root{
-      --rust-orange:#f0672a;
-      --steel-800:#111a2b;
-      --steel-700:#1e2940;
-    }
-    html,body{height:100%}
-    body{
-      margin:0; color:#e6e6e6;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;
-      background:#000;
-      /* NOTE: removed overflow:hidden to avoid accidental hiding */
-    }
-
-    /* Put video clearly behind everything */
-    #bgvid{
-      position:fixed; inset:0; width:100%; height:100%;
-      object-fit:cover; z-index:-1; filter:brightness(.9) contrast(1.05) saturate(1.06);
-    }
-
-    /* Simple top bar */
-    .topbar{
-      position:relative; z-index:2;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:14px 18px; gap:12px;
-      background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0));
-    }
-    .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
-    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
-    .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-
-    /* Button */
-    .btn{
-      display:inline-block; text-decoration:none; color:#fff; font-weight:700;
-      padding:12px 16px; border-radius:12px;
-      background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);
-      border:1px solid rgba(240,103,42,.45);
-      box-shadow: 0 6px 18px rgba(240,103,42,.28);
-      transition: transform .15s ease, box-shadow .2s ease;
-    }
-    .btn:hover{ transform:translateY(-1px); box-shadow:0 8px 22px rgba(240,103,42,.45); }
-
-    /* Center card */
-    .center{
-      position:relative; z-index:2;
-      display:grid; place-items:center; padding:24px; min-height:calc(100dvh - 80px);
-    }
-    .card{
-      width:min(860px, 100%);
-      background:rgba(17,26,43,.82);
-      border:1px solid var(--steel-700);
-      border-radius:16px; padding:20px 22px;
-      backdrop-filter: blur(6px);
-      box-shadow:0 12px 40px rgba(0,0,0,.55);
-      text-align:center;
-    }
-    h1{ margin:0 0 8px; color:var(--rust-orange); font-size:clamp(22px,5vw,34px); }
-    p{ margin:6px 0; }
-    .links{ margin-top:14px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    :root{ --rust:#f0672a; }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; background:#0a0f1a; color:#eaeaea; }
+    .wrap{ min-height:100%; display:flex; flex-direction:column; }
+    .top{ padding:16px; display:flex; align-items:center; justify-content:space-between; gap:12px; background:rgba(0,0,0,.35); border-bottom:1px solid rgba(255,255,255,.08); }
+    .brand{ display:flex; align-items:center; gap:10px; }
+    .brand img{ height:44px; width:auto; }
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; }
+    a.btn{ display:inline-block; padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:700; color:#fff; background:linear-gradient(180deg,#3b1f12,#1c0b06); border:1px solid rgba(240,103,42,.55); }
+    a.btn:hover{ filter:brightness(1.1); }
+    .hero{ flex:1; display:grid; place-items:center; padding:24px; }
+    .card{ width:min(820px, 100%); border:1px solid rgba(255,255,255,.12); border-radius:14px; background:rgba(15,22,38,.88); padding:22px; }
+    .card h1{ margin:0 0 8px; color:var(--rust); font-size:clamp(24px,4.5vw,36px); }
+    .card p{ margin:6px 0; opacity:.95; }
+    .links{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+    .foot{ padding:10px 14px; text-align:center; opacity:.7; font-size:13px; border-top:1px solid rgba(255,255,255,.08); background:rgba(0,0,0,.25); }
   </style>
 </head>
 <body>
-  <!-- IMPORTANT: keep relative paths (./) so it works on Vercel/GitHub Pages -->
-  <video id="bgvid" autoplay muted loop playsinline preload="auto" src="./bg.mp4"></video>
-
-  <div class="topbar">
-    <div class="logo-wrap">
-      <!-- If logo.png is missing, replace with text -->
-      <img src="./logo.png" alt="RustWire Logo" class="logo" onerror="this.style.display='none'">
-      <strong>RustWire</strong>
-    </div>
-    <div class="btns">
-      <a class="btn" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">Join Discord</a>
-      <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">Add Bot</a>
-      <a class="btn" href="./pair.html">Pair Rust+</a>
-    </div>
-  </div>
-
-  <div class="center">
-    <div class="card">
-      <h1>RustWire</h1>
-      <p>Stay connected with Rust+, events, wipes, and automation for your Rust server.</p>
-      <div class="links">
-        <a class="btn" href="./pair.html">Pair Rust+ →</a>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <img src="/logo.png" alt="RustWire logo" onerror="this.style.display='none'">
+        <strong>RustWire</strong>
       </div>
-    </div>
+      <nav class="btns">
+        <a class="btn" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">Join Discord</a>
+        <a class="btn" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">Add Bot</a>
+        <a class="btn" href="/pair.html">Pair Rust+</a>
+      </nav>
+    </header>
+
+    <main class="hero">
+      <section class="card">
+        <h1>RustWire is live</h1>
+        <p>Pair Rust+ and automate wipes/events for your Discord server.</p>
+        <div class="links">
+          <a class="btn" href="/pair.html">Start: Pair Rust+</a>
+          <a class="btn" href="https://rustwire.duckdns.org/" target="_blank" rel="noopener">Main site</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">If you only see this text, the page is definitely rendering.</footer>
   </div>
 </body>
 </html>
