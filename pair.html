@@ -1,47 +1,107 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pair Rust+ • RustWire</title>
-  <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0b1220;color:#eaf2ff}
-    .wrap{max-width:900px;margin:0 auto;padding:32px}
-    a{color:#7cc0ff}
-    .card{background:#111b33;border:1px solid #24365f;border-radius:12px;padding:18px}
-    h1{margin:0 0 10px;color:#ff6b2c}
-    ol{margin-top:8px}
-    .buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
-    .btn{display:inline-block;text-decoration:none;background:#1b2742;color:#fff;padding:12px 16px;border-radius:10px;border:1px solid #2a3a61;font-weight:700}
-    .btn:hover{filter:brightness(1.1)}
-    .warn{background:rgba(255,120,100,.08);border:1px solid rgba(255,120,100,.35);padding:10px;border-radius:10px;margin:10px 0}
-    code{background:#0e1730;padding:3px 6px;border-radius:6px;border:1px solid #203057}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pair Rust+ • RustWire</title>
+<style>
+  /* Reuse the exact styles from index.html so the look matches */
+  :root{
+    --rust-orange:#f0672a;
+    --steel-800:#111a2b;
+    --steel-700:#1e2940;
+    --btn-w: 170px;
+    --btn-h: 46px;
+  }
+  html,body{height:100%}
+  body{margin:0;color:#e6e6e6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;overflow:hidden;background:#000}
+  #bgvid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+  .overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg, rgba(0,0,0,.25) 0%, rgba(0,0,0,.55) 60%, rgba(0,0,0,.65) 100%);pointer-events:none}
+  .topbar{position:fixed;z-index:3;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:12px}
+  .logo-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+  img.logo{height:44px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));user-select:none}
+  .btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+  .molten{position:relative;display:inline-grid;place-items:center;width:min(var(--btn-w),46vw);height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w)));padding:0;border:none;text-decoration:none;outline:none;cursor:pointer;color:#fff;font-weight:800;letter-spacing:.6px;text-transform:uppercase;background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);border-radius:10px;box-shadow:inset 0 0 10px rgba(0,0,0,.65), 0 4px 12px rgba(240,103,42,.28);transition:transform .18s ease, filter .22s ease;overflow:hidden}
+  .molten:hover{transform:translateY(-1px) scale(1.015);filter:drop-shadow(0 8px 18px rgba(240,103,42,.5))}
+  .molten::after{content:"";position:absolute;inset:0;border-radius:10px;box-shadow:0 0 18px rgba(240,103,42,.28), inset 0 0 12px rgba(240,103,42,.20);animation:flicker 2.5s infinite ease-in-out alternate;pointer-events:none}
+  .molten__lava{--lava1:#ff9a3c;--lava2:#ff6a00;--lava3:#ff3b00;position:absolute;left:-50%;top:0;width:200%;height:200%;background:radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%),radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%),radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%);filter:blur(16px) saturate(140%);mix-blend-mode:screen;opacity:.9;animation:flow 9s linear infinite}
+  .molten__label{position:relative;z-index:2;padding:0 12px;text-shadow:0 0 8px rgba(255,120,30,.85), 0 0 18px rgba(255,90,0,.38), 0 2px 0 rgba(0,0,0,.55);font-size:clamp(12px,2.2vw,14px);white-space:nowrap}
+  .molten__drip, .molten__drip::before, .molten__drip::after{position:absolute;bottom:-10px;width:6px;height:6px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%);filter:blur(.3px);animation:drip 4.2s linear infinite}
+  .molten__drip{left:22%}
+  .molten__drip::before{content:"";left:220%;animation-delay:1.1s}
+  .molten__drip::after{content:"";left:420%;animation-delay:2.1s}
+  @keyframes flow{0%{transform:translateX(0) translateY(0)}50%{transform:translateX(-25%) translateY(-4%)}100%{transform:translateX(-50%) translateY(0)}}
+  @keyframes drip{0%{transform:translateY(0) scale(1);opacity:1}70%{transform:translateY(18px) scale(1.04);opacity:.9}100%{transform:translateY(28px) scale(.88);opacity:0}}
+  @keyframes flicker{0%{box-shadow:0 0 14px rgba(240,103,42,.2), inset 0 0 8px rgba(240,103,42,.14)}100%{box-shadow:0 0 18px rgba(240,103,42,.34), inset 0 0 11px rgba(240,103,42,.22)}}
+
+  .pair-wrap{position:fixed;inset:0;z-index:2;display:grid;place-items:center;padding:18px}
+  .pair-card{width:min(920px, calc(100% - 18px));background:rgba(17,26,43,.82);border:1px solid var(--steel-700);border-radius:16px;padding:20px 22px;backdrop-filter: blur(6px);box-shadow:0 12px 40px rgba(0,0,0,.55)}
+  .pair-card h1{margin:0 0 10px;color:var(--rust-orange);font-size:clamp(22px,5vw,32px)}
+  .banner{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background: rgba(180,0,0,.12);border: 1px solid rgba(255,60,60,.45);color:#ffd6d6;margin: 8px 0 14px}
+  .banner strong{color:#ffb3b3}
+  .pair-card ol{margin:12px 0 0;padding:0 0 0 22px}
+  .pair-card li{margin:10px 0;line-height:1.5}
+  .pair-actions{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}
+  .chip{display:inline-block;padding:2px 8px;border-radius:6px;background:#1c2540;border:1px solid #2a3556;color:#cfe2ff;font-size:.95em}
+  a.link{color:#6cb6ff;text-decoration:none;border-bottom:1px dashed rgba(108,182,255,.5)}
+  @media (max-width:560px){img.logo{height:38px}.topbar{padding:10px 12px}:root{--btn-w: 160px; --btn-h: 42px;}}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <p><a href="/">← Back</a></p>
-    <div class="card">
-      <div class="warn">⚠️ Use the command in a <strong>server text channel</strong>, not in DMs.</div>
+  <video id="bgvid" autoplay muted loop playsinline preload="auto" src="./bg.mp4"></video>
+  <div class="overlay"></div>
+
+  <div class="topbar">
+    <div class="logo-wrap">
+      <a href="./index.html" aria-label="Home"><img src="./logo.png" alt="RustWire Logo" class="logo" /></a>
+    </div>
+    <div class="btns">
+      <a class="molten" href="./index.html" aria-label="Back Home">
+        <span class="molten__lava" aria-hidden="true"></span>
+        <span class="molten__label">← Home</span>
+        <span class="molten__drip" aria-hidden="true"></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="pair-wrap">
+    <div class="pair-card">
+      <div class="banner">⚠️ <strong>Important:</strong>&nbsp; Use <code class="chip">/rustplus connect &lt;IP&gt;:&lt;appPort&gt;</code> in a <strong>server text channel</strong>. It will <em>not</em> work in DM.</div>
       <h1>Pair Rust+ with RustWire</h1>
       <ol>
-        <li>Add RustWire if you haven’t:
-          <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">Add Bot</a>
+        <li>
+          <strong>Add RustWire to your Discord:</strong>
+          Click <a class="link" target="_blank" rel="noopener" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8">Add Bot</a>.
         </li>
-        <li>In your server, run:
-          <code>/rustplus connect &lt;IP&gt;:&lt;appPort&gt;</code>
-          <div style="opacity:.85;margin-top:4px">Example: <code>136.243.70.123:28112</code></div>
+        <li>
+          <strong>Run the command in your server (not DM):</strong><br/>
+          <code class="chip">/rustplus connect &lt;IP&gt;:&lt;appPort&gt;</code><br/>
+          Example: <code class="chip">/rustplus connect 136.243.70.123:28112</code>
         </li>
-        <li>Open the Rust+ phone app → approve the new connection.</li>
+        <li>
+          <strong>Approve in Rust+ on your phone:</strong><br/>
+          Open Rust+ → Devices → tap your server → approve the new connection.<br/>
+          You’ll see a confirmation in Discord.
+        </li>
       </ol>
 
-      <div class="buttons">
-        <!-- 🔗 This takes users to your live bot page on port 9637 -->
-        <a class="btn" href="http://rustwire.duckdns.org:9637/pair" target="_blank" rel="noopener">Open Live Pair Page</a>
-        <a class="btn" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">Join Discord</a>
+      <div class="pair-actions">
+        <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener" aria-label="Join Discord">
+          <span class="molten__lava" aria-hidden="true"></span>
+          <span class="molten__label">Join Discord</span>
+          <span class="molten__drip" aria-hidden="true"></span>
+        </a>
+        <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener" aria-label="Add Bot">
+          <span class="molten__lava" aria-hidden="true"></span>
+          <span class="molten__label">Add Bot</span>
+          <span class="molten__drip" aria-hidden="true"></span>
+        </a>
       </div>
 
-      <p style="opacity:.8;margin-top:10px">You’ll see confirmation in Discord after approving in the app.</p>
+      <p style="margin-top:10px;opacity:.85">
+        Need help? Ping us in <strong>#support</strong> on our Discord.
+      </p>
     </div>
   </div>
 </body>
