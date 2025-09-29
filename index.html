@@ -110,35 +110,83 @@
   </div>
 
   <script>
-    // ====== CONFIG (update when tunnel URL changes) ======
-    const PORTAL_ORIGIN = 'https://six-humans-sink.loca.lt';
+    // ====== CONFIG: put your most recent tunnel first ======
+    const CANDIDATE_ORIGINS = [
+      'https://six-humans-sink.loca.lt',   // seen in latest bot logs as [portal] publicUrl
+      'https://polite-bees-battle.loca.lt' // seen as current LocalTunnel host in logs
+    ];
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
 
-    // Secure Pair link
     const secureBtn = document.getElementById('securePairBtn');
-    secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
-
-    // Status badge ping
-    const PING = `${PORTAL_ORIGIN}/healthz`;
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
-    async function check() {
+    function setOffline() {
+      secureBtn.setAttribute('aria-disabled', 'true');
+      secureBtn.style.opacity = '.6';
+      secureBtn.style.pointerEvents = 'none';
+      dot.classList.remove('on'); dot.classList.add('off');
+      label.textContent = 'Portal Offline';
+    }
+
+    function setOnline(origin) {
+      secureBtn.removeAttribute('aria-disabled');
+      secureBtn.style.opacity = '1';
+      secureBtn.style.pointerEvents = 'auto';
+      secureBtn.href = `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+      dot.classList.remove('off'); dot.classList.add('on');
+      label.textContent = 'Portal Online';
+      // also update periodic checker to this origin
+      startPinger(origin);
+    }
+
+    async function tryOrigin(origin, timeoutMs = 3000) {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), timeoutMs);
       try {
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 3500);
-        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        // mode: 'no-cors' – success if reachable
+        await fetch(`${origin}/healthz`, { method: 'GET', cache: 'no-store', mode: 'no-cors', signal: ctrl.signal });
         clearTimeout(t);
-        dot.classList.remove('off'); dot.classList.add('on');
-        label.textContent = 'Portal Online';
+        return true;
       } catch {
-        dot.classList.remove('on'); dot.classList.add('off');
-        label.textContent = 'Portal Offline';
+        clearTimeout(t);
+        return false;
       }
     }
-    check();
-    setInterval(check, 20000);
+
+    async function pickOrigin() {
+      for (const origin of CANDIDATE_ORIGINS) {
+        if (!origin) continue;
+        const ok = await tryOrigin(origin);
+        if (ok) return origin;
+      }
+      return null;
+    }
+
+    let pingInterval = null;
+    function startPinger(origin) {
+      if (pingInterval) clearInterval(pingInterval);
+      pingInterval = setInterval(async () => {
+        const alive = await tryOrigin(origin, 2500);
+        if (!alive) {
+          setOffline();
+          // try to pick a different working origin
+          pickOrigin().then(o => o ? setOnline(o) : setOffline());
+        }
+      }, 20000);
+    }
+
+    // Initial boot: choose a working origin
+    (async () => {
+      const origin = await pickOrigin();
+      if (origin) {
+        console.log('[rustwire] portal =', origin);
+        setOnline(origin);
+      } else {
+        setOffline();
+      }
+    })();
   </script>
 </body>
 </html>
