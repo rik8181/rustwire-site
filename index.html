@@ -88,8 +88,8 @@
         <span class="molten__lava"></span><span class="molten__label">Pair Rust+</span><span class="molten__drip"></span>
       </a>
       <!-- Secure Pair -> hits your portal /start with guild/channel; portal will redirect to token-only -->
-      <a id="securePairBtn" class="molten" href="#" rel="noopener">
-        <span class="molten__lava"></span><span class="molten__label" id="secureLabel">Open Secure Pair</span><span class="molten__drip"></span>
+      <a id="securePairBtn" class="molten" href="#" aria-disabled="true">
+        <span class="molten__lava"></span><span id="secureLabel" class="molten__label">Secure Pair (checking…)</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
@@ -110,52 +110,68 @@
   </div>
 
   <script>
-    // ====== CONFIG: set these to your current values ======
-    // From your bot logs: [portal] publicUrl = ...
-    const PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
-    const GUILD_ID = '1419192329713094689';
+    // ===================== CONFIG — EDIT THESE =====================
+    const GUILD_ID   = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
-    // From secrets.json
-    const PORTAL_TOKEN = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
+    const PORTAL_TOKEN = 'REPLACE_WITH_PORTAL_SHARED_TOKEN';
 
-    // Build Secure Pair URLs (primary param 'token', fallbacks 'shared'/'key')
-    const SECURE_URLS = [
-      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&token=${encodeURIComponent(PORTAL_TOKEN)}`,
-      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&shared=${encodeURIComponent(PORTAL_TOKEN)}`,
-      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&key=${encodeURIComponent(PORTAL_TOKEN)}`
+    // Put your current URLs here (order = priority)
+    const CANDIDATE_ORIGINS = [
+      'https://REPLACE_WITH_TRYCLOUDFLARE_URL', // e.g. https://middle-dictionary-raised-conferencing.trycloudflare.com
+      'https://REPLACE_WITH_LOCALTUNNEL_URL',   // e.g. https://major-states-count.loca.lt
+      'https://REPLACE_WITH_DUCKDNS_HOST'       // e.g. https://rustwire-portal.duckdns.org
     ];
+    // ===============================================================
 
-    const secureBtn = document.getElementById('securePairBtn');
+    const secureBtn   = document.getElementById('securePairBtn');
     const secureLabel = document.getElementById('secureLabel');
-    secureBtn.href = SECURE_URLS[0];
-
-    // Status badge: ping portal health
-    const PING = `${PORTAL_ORIGIN}/healthz`;
-    const dot = document.getElementById('dot');
+    const dot   = document.getElementById('dot');
     const label = document.getElementById('label');
 
-    async function check() {
+    function buildStartUrls(origin) {
+      const base = `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+      return [
+        `${base}&token=${encodeURIComponent(PORTAL_TOKEN)}`,
+        `${base}&shared=${encodeURIComponent(PORTAL_TOKEN)}`,
+        `${base}&key=${encodeURIComponent(PORTAL_TOKEN)}`
+      ];
+    }
+    async function isUp(origin) {
+      if (!origin || origin.includes('REPLACE_WITH')) return false;
+      const PING = `${origin}/healthz`;
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
         await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
-        dot.classList.remove('off'); dot.classList.add('on');
-        label.textContent = 'Portal Online';
-        secureBtn.setAttribute('aria-disabled', 'false');
-      } catch {
-        dot.classList.remove('on'); dot.classList.add('off');
-        label.textContent = 'Portal Offline';
-        secureBtn.setAttribute('aria-disabled', 'true');
-      }
+        return true;
+      } catch { return false; }
     }
-    check();
-    setInterval(check, 20000);
+    async function pickPortal() {
+      for (const origin of CANDIDATE_ORIGINS) {
+        if (await isUp(origin)) {
+          const [u1] = buildStartUrls(origin);
+          secureBtn.href = u1;
+          secureBtn.removeAttribute('aria-disabled');
+          secureLabel.textContent = 'Open Secure Pair';
+          dot.classList.remove('off'); dot.classList.add('on');
+          label.textContent = 'Portal Online';
+          return origin;
+        }
+      }
+      secureBtn.setAttribute('aria-disabled','true');
+      secureLabel.textContent = 'Secure Pair (offline)';
+      dot.classList.remove('on'); dot.classList.add('off');
+      label.textContent = 'Portal Offline';
+      return null;
+    }
+    pickPortal();
+    setInterval(pickPortal, 20000);
 
     secureBtn.addEventListener('click', (e) => {
       if (secureBtn.getAttribute('aria-disabled') === 'true') {
         e.preventDefault();
-        alert('Portal seems offline. Update PORTAL_ORIGIN to the latest URL from your bot logs, wait for the green status dot, then try again.');
+        alert('Secure Pair portal is offline. Restart the bot to print a fresh URL (or fix DuckDNS/Nginx), then reload this page.');
       }
     });
   </script>
