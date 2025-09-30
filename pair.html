@@ -9,9 +9,17 @@
   <link rel="icon" href="./logo.png" type="image/png" />
 
   <style>
-    :root{ --rust-orange:#f0672a; --steel-700:#1e2940; --btn-w:200px; --btn-h:56px; }
+    :root{
+      --rust-orange:#f0672a;
+      --steel-700:#1e2940;
+      --btn-w: 200px; --btn-h: 56px;
+    }
     html,body{height:100%}
-    body{ margin:0;color:#e6e6e6; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; overflow:hidden; background:#000; }
+    body{
+      margin:0;color:#e6e6e6;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;
+      overflow:hidden; background:#000;
+    }
     #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
     .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
 
@@ -41,24 +49,13 @@
     ol{ margin:12px 0 0; padding:0 0 0 22px; }
     li{ margin:10px 0; line-height:1.5; }
 
-    /* Status badge (bottom-right) */
+    .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
+
+    /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
-
-    /* Portal editor chip (bottom-left) */
-    .portal-fab{ position:fixed; left:14px; bottom:14px; z-index:3; display:flex; align-items:center; gap:10px;
-      background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:13px; }
-    .portal-host{ max-width:46vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; opacity:.9; }
-    .edit-btn{ appearance:none; border:1px solid #2a3556; background:#1c2540; color:#cfe2ff; border-radius:8px; padding:6px 9px; cursor:pointer; font-weight:600; }
-    .edit-btn:hover{ filter:brightness(1.1) }
-
-    @media (max-width:560px){
-      img.logo{ height:38px }
-      .topbar{ padding:10px 12px }
-      :root{ --btn-w: 180px; --btn-h: 52px; }
-    }
   </style>
 </head>
 <body>
@@ -99,7 +96,7 @@
         <li><strong>Approve</strong> the request in the Rust+ app on your phone.</li>
       </ol>
 
-      <div class="pair-actions" style="margin-top:14px; display:flex; gap:12px; flex-wrap:wrap;">
+      <div class="pair-actions">
         <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener" aria-label="Join Discord">
           <span class="molten__lava"></span><span class="molten__label">Join Discord</span><span class="molten__drip"></span>
         </a>
@@ -118,67 +115,115 @@
     <span id="label">Checking status…</span>
   </div>
 
-  <!-- Bottom-left portal URL editor -->
-  <div class="portal-fab" id="portalFab" aria-live="polite">
-    <span class="portal-host" id="portalHost">Portal: —</span>
-    <button class="edit-btn" id="portalEditBtn" type="button" title="Set/Change Portal URL">Change</button>
-  </div>
-
+  <!-- Owner-only portal chip (hidden by default; toggle with ⌘⌥P or ?rwadmin=1) -->
   <script>
-    // ====== CONFIG (update default if your tunnel changes) ======
-    const DEFAULT_PORTAL = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
-    const STORAGE_KEY = 'RUSTWIRE_PORTAL_ORIGIN';
-    const GUILD_ID = '1419192329713094689';
-    const CHANNEL_ID = '1422058709835583570';
+  (function(){
+    const STORAGE_KEY='RUSTWIRE_PORTAL_ORIGIN';
+    const DEFAULT_ORIGIN='https://middle-dictionary-raised-conferencing.trycloudflare.com'; // fallback
+    const GUILD_ID='1419192329713094689';
+    const CHANNEL_ID='1422058709835583570';
 
-    function getPortalOrigin(){
-      try{
-        const v = localStorage.getItem(STORAGE_KEY) || DEFAULT_PORTAL;
-        return new URL(v).origin;
-      }catch{ return DEFAULT_PORTAL; }
-    }
-    function setPortalInteractive(){
-      const cur = getPortalOrigin();
-      const v = prompt('Paste Portal URL (must start with https):', cur);
-      if(!v) return;
-      try{
-        const u = new URL(v);
-        if(u.protocol !== 'https:') return alert('Please use https://');
-        localStorage.setItem(STORAGE_KEY, u.origin);
-        location.reload();
-      }catch{ alert('Invalid URL'); }
-    }
+    const qs = new URLSearchParams(location.search);
+    const forceShow = qs.get('rwadmin') === '1';
+    const forceHide = qs.get('rwadmin') === '0';
 
-    const PORTAL_ORIGIN = getPortalOrigin();
-
-    // Wire UI
-    document.getElementById('portalHost').textContent = `Portal: ${PORTAL_ORIGIN}`;
-    document.getElementById('portalEditBtn').addEventListener('click', setPortalInteractive);
-
-    // Secure Pair link
-    const secureBtn = document.getElementById('securePairBtn');
-    secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
-
-    // Status ping
-    const PING = `${PORTAL_ORIGIN}/healthz`;
-    const dot = document.getElementById('dot');
-    const label = document.getElementById('label');
-
-    async function check() {
+    function getOrigin(){
+      const v = localStorage.getItem(STORAGE_KEY);
       try {
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 4000);
-        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
-        clearTimeout(t);
-        dot.classList.remove('off'); dot.classList.add('on');
-        label.textContent = 'Portal Online';
-      } catch {
-        dot.classList.remove('on'); dot.classList.add('off');
-        label.textContent = 'Portal Offline';
+        if (v) return new URL(v).origin;
+      } catch(e){}
+      try { return new URL(DEFAULT_ORIGIN).origin } catch(e){ return '' }
+    }
+    function setOrigin(newUrl){
+      const u=new URL(newUrl);
+      if(u.protocol!=='https:') throw new Error('Use https://');
+      localStorage.setItem(STORAGE_KEY,u.origin);
+    }
+
+    function wireSecurePair(ORIGIN){
+      const sp=document.getElementById('securePairBtn');
+      if(sp && ORIGIN){
+        sp.href = `${ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
       }
     }
-    check();
-    setInterval(check, 20000);
+
+    function ping(ORIGIN){
+      const dot=document.getElementById('dot');
+      const label=document.getElementById('label');
+      if(!ORIGIN){
+        dot.classList.remove('on'); dot.classList.add('off');
+        label.textContent='Portal URL not set';
+        return;
+      }
+      const PING=`${ORIGIN}/healthz`;
+      (async()=>{
+        try{
+          const ctrl=new AbortController();
+          const t=setTimeout(()=>ctrl.abort(),3500);
+          await fetch(PING,{method:'GET',mode:'no-cors',cache:'no-store',signal:ctrl.signal});
+          clearTimeout(t);
+          dot.classList.remove('off'); dot.classList.add('on');
+          label.textContent='Portal Online';
+        }catch{
+          dot.classList.remove('on'); dot.classList.add('off');
+          label.textContent='Portal Offline';
+        }
+      })();
+    }
+
+    function makeChip(){
+      const wrap=document.createElement('div');
+      wrap.id='rw-portal-chip';
+      wrap.style.cssText='position:fixed;left:12px;bottom:12px;z-index:9999;background:rgba(17,26,43,.92);border:1px solid #243151;color:#cfe2ff;border-radius:12px;padding:8px;display:none;align-items:center;gap:8px;font:600 13px system-ui';
+      const host=document.createElement('span');
+      host.style.cssText='max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+      const btn=document.createElement('button');
+      btn.textContent='Change';
+      btn.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
+      const hide=document.createElement('button');
+      hide.textContent='Hide';
+      hide.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
+      wrap.append(host,btn,hide);
+      document.body.appendChild(wrap);
+
+      function refresh(){
+        const o=getOrigin();
+        host.textContent = o ? `Portal: ${o}` : 'Portal: (not set)';
+      }
+      refresh();
+
+      btn.onclick=function(){
+        const cur=getOrigin() || 'https://';
+        const v=prompt('Portal URL (must start with https):', cur);
+        if(!v) return;
+        try{
+          setOrigin(v);
+          refresh();
+          const o=getOrigin();
+          wireSecurePair(o);
+          ping(o);
+        }catch(err){ alert(err.message||'Invalid URL'); }
+      };
+      hide.onclick=function(){ wrap.style.display='none' };
+
+      function toggle(){
+        wrap.style.display = (wrap.style.display==='none' || !wrap.style.display) ? 'flex' : 'none';
+      }
+      window.addEventListener('keydown',(e)=>{
+        if(e.metaKey && e.altKey && (e.key==='p'||e.key==='P')){ e.preventDefault(); toggle(); }
+      });
+
+      if(forceShow) wrap.style.display='flex';
+      if(forceHide) wrap.style.display='none';
+      return {toggle,refresh};
+    }
+
+    const ORIGIN=getOrigin();
+    wireSecurePair(ORIGIN);
+    ping(ORIGIN);
+    makeChip();
+    setInterval(()=> ping(getOrigin()), 20000);
+  })();
   </script>
 </body>
 </html>
