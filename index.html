@@ -107,7 +107,7 @@
     <span id="label">Checking status…</span>
   </div>
 
-  <!-- Owner-only portal chip (hidden by default; toggle with ⌘⌥P or ?rwadmin=1) -->
+  <!-- Owner-only portal chip (hidden by default; toggle with ⌃⇧P or ?rwadmin=1) -->
   <script>
   (function(){
     const STORAGE_KEY='RUSTWIRE_PORTAL_ORIGIN';
@@ -208,9 +208,9 @@
       function toggle(){
         wrap.style.display = (wrap.style.display==='none' || !wrap.style.display) ? 'flex' : 'none';
       }
-      // Hotkey: ⌘⌥P
+      // Hotkey: ⌃⇧P
       window.addEventListener('keydown', (e)=>{
-        if(e.metaKey && e.altKey && (e.key==='p' || e.key==='P')){ e.preventDefault(); toggle(); }
+        if(e.ctrlKey && e.shiftKey && (e.key==='p' || e.key==='P')){ e.preventDefault(); toggle(); }
       });
 
       if(forceShow) wrap.style.display='flex';
