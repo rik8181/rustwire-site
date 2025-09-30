@@ -1,36 +1,41 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Basic SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pair Rust+ • RustWire</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
   <link rel="icon" href="./logo.png" type="image/png" />
+
   <style>
-    :root{ --rust-orange:#f0672a; --steel-700:#1e2940; --btn-w:200px; --btn-h:56px; }
+    :root{
+      --rust-orange:#f0672a;
+      --steel-700:#1e2940;
+      --btn-w: 200px; --btn-h: 56px;
+    }
     html,body{height:100%}
-    body{ margin:0;color:#e6e6e6; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; overflow:hidden; background:#000; }
+    body{
+      margin:0;color:#e6e6e6;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;
+      overflow:hidden; background:#000;
+    }
     #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
     .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
+
     .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
     .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
-    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
+    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; cursor:pointer; }
     .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-    .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w),46vw);
-      height:calc(var(--btn-h)*(min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer;
-      color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase;
-      background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);
-      border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28);
-      transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
+
+    .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
     .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
-    .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0;
-      background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%), radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%), radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%);
-      filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
+    .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0; background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%), radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%), radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%); filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
     .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
-    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
+    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
     .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
+
     @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
     @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86} 100%{transform:translateY(34px) scale(.85); opacity:0} }
     @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
@@ -43,19 +48,25 @@
     .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
     ol{ margin:12px 0 0; padding:0 0 0 22px; }
     li{ margin:10px 0; line-height:1.5; }
+
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
 
+    /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
+
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
 
-    .portal-chip{ position:fixed; left:14px; bottom:14px; z-index:4; display:flex; align-items:center; gap:8px;
-      background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:13px; cursor:pointer; user-select:none; }
-    .portal-chip strong{ color:#9ecbff }
-    .portal-chip .hint{ opacity:.8 }
+    /* Owner chip bottom-left */
+    .owner-chip{ position:fixed; left:14px; bottom:14px; z-index:4; background:rgba(17,26,43,.86); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:13px; cursor:pointer; user-select:none;}
+    .owner-chip b{ color:#6cb6ff; }
 
-    @media (max-width:560px){ img.logo{ height:38px } .topbar{ padding:10px 12px } :root{ --btn-w: 180px; --btn-h: 52px; } }
+    @media (max-width:560px){
+      img.logo{ height:38px }
+      .topbar{ padding:10px 12px }
+      :root{ --btn-w: 180px; --btn-h: 52px; }
+    }
   </style>
 </head>
 <body>
@@ -63,16 +74,17 @@
   <div class="overlay"></div>
 
   <div class="topbar">
-    <div class="logo-wrap">
+    <div class="logo-wrap" title="Double-click for owner settings">
       <a href="./" aria-label="Home">
-        <img src="./logo.png" alt="RustWire Logo" class="logo" />
+        <img src="./logo.png" alt="RustWire Logo" class="logo" id="logo" />
       </a>
     </div>
     <div class="btns">
+      <!-- Keep only Home + Open Secure Pair (matching style) -->
       <a class="molten" href="./" aria-label="Back Home">
         <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
       </a>
-      <a id="securePairBtn" class="molten" href="#">
+      <a id="securePairBtn" class="molten" href="#" aria-label="Open Secure Pair">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
@@ -96,11 +108,11 @@
       </ol>
 
       <div class="pair-actions">
-        <!-- Buttons are same look/size as home -->
-        <a class="molten" href="./" aria-label="Home">
+        <!-- Same style buttons kept minimal -->
+        <a class="molten" href="./" aria-label="Back Home">
           <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
         </a>
-        <a id="securePairBtn2" class="molten" href="#">
+        <a id="securePairBtn2" class="molten" href="#" aria-label="Open Secure Pair">
           <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
         </a>
       </div>
@@ -109,76 +121,113 @@
     </div>
   </div>
 
+  <!-- Owner chip -->
+  <div class="owner-chip" id="ownerChip" title="Owner portal settings">Portal</div>
+
+  <!-- Status badge -->
   <div class="status" id="status" aria-live="polite">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
 
-  <!-- Owner-only Portal chip -->
-  <div class="portal-chip" id="portalChip" title="Click to set/lock the Portal URL">
-    <strong id="portalState">Portal: unset</strong>
-    <span class="hint">• owner-locked</span>
-  </div>
-
   <script>
-    // ===== CONFIG =====
+    // ====== Owner protection (double-click logo) ======
+    const OWNER_HASH_KEY = 'rustwire.ownerHash';
+    const PORTAL_KEY = 'rustwire.portalOrigin';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
-    const LS_KEY_PORTAL = 'rustwire.portalOrigin';
-    const LS_KEY_OWNER = 'rustwire.ownerHash';
-    const $ = s => document.querySelector(s);
-    async function sha256(t){ const e=new TextEncoder().encode(t); const b=await crypto.subtle.digest('SHA-256',e); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''); }
-    function getPortalFromQuery(){ const u=new URL(location.href); const p=u.searchParams.get('portal'); if(!p) return null; try{const url=new URL(p); if(url.protocol!=='https:')return null; return url.origin;}catch{return null;} }
-    function getPortal(){ return localStorage.getItem(LS_KEY_PORTAL)||''; }
-    function setPortal(o){ localStorage.setItem(LS_KEY_PORTAL,o); updateUI(); }
-    function hasOwner(){ return !!localStorage.getItem(LS_KEY_OWNER); }
-    async function checkOwner(){
-      if(!hasOwner()){
-        const pass=prompt('Set an owner passphrase (min 8 chars):'); if(!pass||pass.length<8) return false;
-        localStorage.setItem(LS_KEY_OWNER, await sha256(pass));
-        alert('Owner passphrase set. Keep it safe!'); return true;
-      }else{
-        const pass=prompt('Enter owner passphrase:'); if(!pass) return false;
-        const ok=(await sha256(pass))===localStorage.getItem(LS_KEY_OWNER); if(!ok) alert('Wrong passphrase.');
-        return ok;
+
+    const logo = document.getElementById('logo');
+    const ownerChip = document.getElementById('ownerChip');
+
+    let ownerUnlocked = false;
+    function sha(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')); }
+
+    async function ensureOwner(){
+      if(ownerUnlocked) return true;
+      const stored = localStorage.getItem(OWNER_HASH_KEY);
+      const pass = prompt('Owner passphrase:');
+      if(!pass){ alert('Cancelled'); return false; }
+      const h = await sha(pass);
+      if(stored && stored !== h){ alert('Wrong passphrase'); return false; }
+      if(!stored){ localStorage.setItem(OWNER_HASH_KEY, h); }
+      ownerUnlocked = true;
+      return true;
+    }
+
+    logo.addEventListener('dblclick', async ()=>{
+      if(await ensureOwner()){
+        const cur = localStorage.getItem(PORTAL_KEY) || '';
+        const val = prompt('Set Portal URL (https://…):', cur);
+        if(val){
+          try{ new URL(val); localStorage.setItem(PORTAL_KEY, val); location.reload(); }
+          catch{ alert('Invalid URL'); }
+        }
       }
-    }
-    function warnIfLocalTunnel(origin){
-      if(origin.includes('loca.lt')){
-        alert('This looks like a LocalTunnel URL.\n\nSecure Pair should use your Cloudflare (trycloudflare.com) or DuckDNS+HTTPS Portal URL.\n\nOpen your bot logs, copy the [portal] publicUrl and set it here.');
-      }
-    }
-    function updateUI(){ const origin=getPortal(); $('#portalState').textContent = origin?('Portal: '+origin.replace(/^https:\/\//,'')):'Portal: unset'; pingStatus(); setLinks(); }
-    function setLinks(){
-      const origin=getPortal();
-      const btn1=$('#securePairBtn'), btn2=$('#securePairBtn2');
-      const url = origin ? `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}` : '#';
-      if(btn1) btn1.href=url; if(btn2) btn2.href=url;
-      const click = (e)=>{ if(!origin){ e.preventDefault(); alert('Portal URL not set. Click the bottom-left chip to set it first.'); } };
-      if(btn1){ btn1.addEventListener('click', click); }
-      if(btn2){ btn2.addEventListener('click', click); }
-    }
-    async function pingStatus(){
-      const origin=getPortal(); const dot=$('#dot'), label=$('#label');
-      if(!origin){ dot.classList.remove('on'); dot.classList.add('off'); label.textContent='Portal Unset'; return; }
-      try{
-        const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),3500);
-        await fetch(origin+'/healthz',{method:'GET',cache:'no-store',mode:'no-cors',signal:ctrl.signal});
-        clearTimeout(t); dot.classList.remove('off'); dot.classList.add('on'); label.textContent='Portal Online';
-      }catch{ dot.classList.remove('on'); dot.classList.add('off'); label.textContent='Portal Offline'; }
-    }
-    $('#portalChip').addEventListener('click', async ()=>{
-      if(!(await checkOwner())) return;
-      const cur=getPortal();
-      const val=prompt('Enter Portal URL (https):', cur||'https://');
-      if(!val) return;
-      try{ const u=new URL(val); if(u.protocol!=='https:') throw new Error(); warnIfLocalTunnel(u.origin); setPortal(u.origin); }
-      catch{ alert('Please enter a valid HTTPS origin, e.g. https://abcde.trycloudflare.com'); }
     });
-    (function init(){
-      const q=getPortalFromQuery(); if(q){ setPortal(q); warnIfLocalTunnel(q); }
-      updateUI(); setInterval(pingStatus,20000);
-    })();
+
+    ownerChip.addEventListener('click', async ()=>{
+      if(await ensureOwner()){
+        const cur = localStorage.getItem(PORTAL_KEY) || '';
+        const val = prompt('Set Portal URL (https://…):', cur);
+        if(val){
+          try{ new URL(val); localStorage.setItem(PORTAL_KEY, val); location.reload(); }
+          catch{ alert('Invalid URL'); }
+        }
+      }
+    });
+
+    // ====== Build Open Secure Pair link from stored portal ======
+    function getPortal(){ return localStorage.getItem(PORTAL_KEY) || ''; }
+
+    function applyLinks(){
+      const base = getPortal();
+      const link = base ? `${base}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}` : '#';
+      for(const id of ['securePairBtn','securePairBtn2']){
+        const el = document.getElementById(id);
+        if(el){
+          el.href = link;
+          el.setAttribute('target','_blank');
+          el.setAttribute('rel','noopener');
+        }
+      }
+    }
+
+    applyLinks();
+
+    // ====== Status badge with robust probes ======
+    const dot = document.getElementById('dot');
+    const label = document.getElementById('label');
+
+    function setStatus(on){
+      dot.classList.toggle('on', on);
+      dot.classList.toggle('off', !on);
+      label.textContent = on ? 'Portal Online' : 'Portal Offline';
+    }
+
+    async function probe(url){
+      const targets = [`${url}/healthz`, url];
+      for(const t of targets){
+        try{
+          const ctrl = new AbortController();
+          const to = setTimeout(()=>ctrl.abort(), 4000);
+          await fetch(t, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+          clearTimeout(to);
+          return true;
+        }catch{}
+      }
+      return false;
+    }
+
+    async function check(){
+      const origin = getPortal();
+      if(!origin){ setStatus(false); label.textContent = 'Portal URL not set'; return; }
+      const ok = await probe(origin);
+      setStatus(ok);
+    }
+
+    check();
+    setInterval(check, 20000);
   </script>
 </body>
 </html>
