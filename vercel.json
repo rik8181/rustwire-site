@@ -1,10 +1,27 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "builds": [
-    { "src": "index.html", "use": "@vercel/static" },
-    { "src": "pair.html", "use": "@vercel/static" }
+  "name": "rustwire-site",
+  "cleanUrls": true,
+  "trailingSlash": false,
+
+  "headers": [
+    {
+      "source": "/logo.png",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/bg.mp4",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "cross-origin" }
+      ]
+    }
   ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+
+  "redirects": [
+    { "source": "/pair", "destination": "/pair.html" }
   ]
 }
