@@ -4,7 +4,7 @@
   <!-- Basic SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RustWire • Rust+ Companion & Server Tools • v2</title>
+  <title>RustWire • Rust+ Companion & Server Tools • v2.1</title>
   <meta name="description" content="RustWire keeps your Rust server connected with Rust+, wipes, events, and map tools." />
   <link rel="icon" href="./logo.png" type="image/png" />
 
@@ -20,13 +20,14 @@
     body{ margin:0;color:#e6e6e6; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; overflow:hidden; background:#000; }
 
     /* Live wallpaper video */
-    #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
+    #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; background:#000; filter:brightness(.9) contrast(1.05) saturate(1.06); }
     .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
 
     /* Top bar + molten buttons */
     .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
     .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
     img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
+    .logo-fallback{ font-weight:800; color:#fff; font-size:18px; letter-spacing:.5px; display:none; }
     .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 
     .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw);
@@ -51,7 +52,7 @@
     @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86 } 100%{transform:translateY(34px) scale(.85); opacity:0 } }
     @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
 
-    /* Bottom-center title card */
+    /* Bottom-center title card (home) */
     .bottom-center{ position:fixed; z-index:2; left:50%; bottom:3vh; transform:translateX(-50%); width:min(860px, calc(100% - 32px)); text-align:center; }
     .title-card{ display:inline-block; background:rgba(17,26,43,.76); border:1px solid var(--steel-700); border-radius:16px; padding:16px 22px; backdrop-filter: blur(6px); box-shadow:0 12px 40px rgba(0,0,0,.5); }
     .title-card h1{ margin:0 0 6px; font-size:clamp(22px,5vw,34px); color:var(--rust-orange); letter-spacing:.5px; line-height:1.15; }
@@ -64,14 +65,14 @@
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
 
-    /* Owner chip (bottom-left) */
+    /* Owner chip (bottom-left; visible only with ?rwadmin=1) */
     .ownerChip{ position:fixed; left:14px; bottom:34px; z-index:4; display:none; gap:10px; align-items:center; background:rgba(17,26,43,.9); border:1px solid #2a3556; padding:8px 10px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .ownerChip .chipLabel{ opacity:.9 }
     .ownerChip .chipBtn{ cursor:pointer; border:none; border-radius:10px; padding:8px 10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#fff; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); }
     .ownerChip .mini{ font-size:12px; opacity:.8; cursor:pointer; text-decoration:underline; }
 
     /* Version badge (bottom-left) */
-    .verBadge{ position:fixed; left:14px; bottom:10px; z-index:4; opacity:.65; font-size:12px; background:rgba(17,26,43,.7); border:1px solid #2a3556; padding:3px 7px; border-radius:8px; }
+    .verBadge{ position:fixed; left:14px; bottom:10px; z-index:4; opacity:.75; font-size:12px; background:rgba(17,26,43,.7); border:1px solid #2a3556; padding:3px 7px; border-radius:8px; }
 
     @media (max-width:560px){ img.logo{ height:38px } .topbar{ padding:10px 12px } :root{ --btn-w: 180px; --btn-h: 52px; } }
   </style>
@@ -84,7 +85,8 @@
   <!-- Top buttons -->
   <div class="topbar">
     <div class="logo-wrap">
-      <img src="./logo.png" alt="RustWire Logo" class="logo" id="logo" />
+      <img src="./logo.png" alt="RustWire Logo" class="logo" id="logo" onerror="this.style.display='none';document.getElementById('logoFallback').style.display='block';" />
+      <span id="logoFallback" class="logo-fallback">RustWire</span>
     </div>
     <div class="btns">
       <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">
@@ -93,9 +95,8 @@
       <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">
         <span class="molten__lava"></span><span class="molten__label">Add Bot</span><span class="molten__drip"></span>
       </a>
-      <!-- Removed the separate top-right "Pair Rust+" button -->
-      <!-- Secure Pair -->
-      <a id="securePairBtn" class="molten" href="#">
+      <!-- Removed top-right Pair button per request -->
+      <a id="securePairBtn" class="molten" href="#" target="_blank" rel="noopener">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
@@ -111,7 +112,7 @@
   </div>
 
   <!-- Status badge -->
-  <div class="status" id="status" aria-live="polite" title="Alt-click to toggle admin chip (owner mode)">
+  <div class="status" id="status" aria-live="polite" title="Status">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
@@ -124,20 +125,20 @@
   </div>
 
   <!-- Version badge -->
-  <div class="verBadge">v2025-09-30</div>
+  <div class="verBadge">v2025-09-30-3</div>
 
   <script>
     // ====== CONFIG ======
-    const VERSION = 'v2025-09-30';
     const DEFAULT_PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
 
-    // Admin / owner gating
+    // Owner gating
     const params = new URLSearchParams(location.search);
     if (params.get('rwadmin') === '1') localStorage.setItem('rwadmin','1');
-
     const isOwner = () => localStorage.getItem('rwadmin') === '1';
+
+    // Helpers
     const getSavedPortal = () => localStorage.getItem('portalOrigin') || '';
     const resolvePortalOrigin = () => getSavedPortal() || DEFAULT_PORTAL_ORIGIN;
 
@@ -148,22 +149,21 @@
     const ownerChip = document.getElementById('ownerChip');
     const changePortalBtn = document.getElementById('changePortalBtn');
     const resetPortalBtn = document.getElementById('resetPortalBtn');
-    const statusEl = document.getElementById('status');
-    const logo = document.getElementById('logo');
 
-    // Wire Secure Pair link
+    // Show owner chip automatically when in owner mode (no hotkeys needed)
+    if (isOwner()) ownerChip.style.display = 'flex';
+
     function applyPortalToLinks() {
       const base = resolvePortalOrigin();
       secureBtn.href = `${base}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
-      console.log('[RW] SecurePair →', secureBtn.href);
+      console.log('[RW] SecurePair URL:', secureBtn.href);
     }
 
-    // Status badge ping
     async function pingPortal() {
       const PING = `${resolvePortalOrigin()}/healthz`;
       try {
         const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 3500);
+        const t = setTimeout(()=>ctrl.abort(), 3500);
         await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
@@ -174,35 +174,8 @@
       }
     }
 
-    // Owner chip visibility toggle
-    function setChipVisible(v){ ownerChip.style.display = v ? 'flex' : 'none'; }
-    function toggleChip(){ setChipVisible(ownerChip.style.display !== 'flex'); }
-
-    // show by default for owners (unless hidden previously)
-    if (isOwner() && localStorage.getItem('rwchip') !== 'hidden') setChipVisible(true);
-
-    // Alt-click status badge toggles chip (owner only)
-    statusEl.addEventListener('click',(e)=>{
-      if (!isOwner()) return;
-      if (e.altKey) {
-        toggleChip();
-        localStorage.setItem('rwchip', ownerChip.style.display === 'flex' ? 'shown' : 'hidden');
-      }
-    });
-
-    // Triple-click logo toggles chip (owner only)
-    let logoClicks=0, logoTimer=null;
-    logo.addEventListener('click', ()=>{
-      if (!isOwner()) return;
-      logoClicks++;
-      clearTimeout(logoTimer);
-      logoTimer = setTimeout(()=>{ logoClicks=0 }, 1000);
-      if (logoClicks>=3){ logoClicks=0; toggleChip(); localStorage.setItem('rwchip', ownerChip.style.display==='flex'?'shown':'hidden'); }
-    });
-
-    // Owner actions
     changePortalBtn.addEventListener('click', ()=>{
-      if (!isOwner()) return alert('Owner mode only. Open with ?rwadmin=1 once.');
+      if (!isOwner()) return alert('Owner only. Append ?rwadmin=1 to the URL once.');
       const cur = resolvePortalOrigin();
       const val = prompt('Enter Portal URL (https://…):', cur);
       if (!val) return;
@@ -220,37 +193,6 @@
       pingPortal();
     });
 
-    // Hotkeys (mac-safe) to toggle chip:
-    //  - Option+Shift+P  (⌥⇧P)
-    //  - Control+Shift+P (⌃⇧P)
-    //  - F10
-    //  - Triple-press Escape
-    (function(){
-      let escCount = 0, escTimer = null;
-      window.addEventListener('keydown', (e)=>{
-        const isP = e.code === 'KeyP';
-        if ((e.altKey && e.shiftKey && isP) || (e.ctrlKey && e.shiftKey && isP) || e.code === 'F10') {
-          if (!isOwner()) return;
-          e.preventDefault();
-          toggleChip();
-          localStorage.setItem('rwchip', ownerChip.style.display === 'flex' ? 'shown' : 'hidden');
-          return;
-        }
-        if (e.key === 'Escape') {
-          escCount++;
-          clearTimeout(escTimer);
-          escTimer = setTimeout(()=>{ escCount = 0; }, 1200);
-          if (escCount >= 3) {
-            if (!isOwner()) return;
-            escCount = 0;
-            toggleChip();
-            localStorage.setItem('rwchip', ownerChip.style.display === 'flex' ? 'shown' : 'hidden');
-          }
-        }
-      });
-    })();
-
-    // Init
     applyPortalToLinks();
     pingPortal();
     setInterval(pingPortal, 20000);
