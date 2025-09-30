@@ -88,8 +88,8 @@
         <span class="molten__lava"></span><span class="molten__label">Pair Rust+</span><span class="molten__drip"></span>
       </a>
       <!-- Secure Pair -> hits your portal /start with guild/channel; portal will redirect to token-only -->
-      <a id="securePairBtn" class="molten" href="#">
-        <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
+      <a id="securePairBtn" class="molten" href="#" rel="noopener">
+        <span class="molten__lava"></span><span class="molten__label" id="secureLabel">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
@@ -110,19 +110,26 @@
   </div>
 
   <script>
-    // ====== CONFIG (update when tunnel URL changes) ======
-    // Use the exact URL shown in your bot logs after "[portal] publicUrl = ..."
+    // ====== CONFIG: set these to your current values ======
+    // From your bot logs: [portal] publicUrl = ...
     const PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
-    // IMPORTANT: include your portal shared token so the /start endpoint authorizes the request
+    // From secrets.json
     const PORTAL_TOKEN = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
 
-    // Build Secure Pair link (token required by most portal setups)
-    const secureBtn = document.getElementById('securePairBtn');
-    secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&token=${encodeURIComponent(PORTAL_TOKEN)}`;
+    // Build Secure Pair URLs (primary param 'token', fallbacks 'shared'/'key')
+    const SECURE_URLS = [
+      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&token=${encodeURIComponent(PORTAL_TOKEN)}`,
+      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&shared=${encodeURIComponent(PORTAL_TOKEN)}`,
+      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&key=${encodeURIComponent(PORTAL_TOKEN)}`
+    ];
 
-    // Status badge ping
+    const secureBtn = document.getElementById('securePairBtn');
+    const secureLabel = document.getElementById('secureLabel');
+    secureBtn.href = SECURE_URLS[0];
+
+    // Status badge: ping portal health
     const PING = `${PORTAL_ORIGIN}/healthz`;
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
@@ -135,13 +142,22 @@
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
+        secureBtn.setAttribute('aria-disabled', 'false');
       } catch {
         dot.classList.remove('on'); dot.classList.add('off');
         label.textContent = 'Portal Offline';
+        secureBtn.setAttribute('aria-disabled', 'true');
       }
     }
     check();
     setInterval(check, 20000);
+
+    secureBtn.addEventListener('click', (e) => {
+      if (secureBtn.getAttribute('aria-disabled') === 'true') {
+        e.preventDefault();
+        alert('Portal seems offline. Update PORTAL_ORIGIN to the latest URL from your bot logs, wait for the green status dot, then try again.');
+      }
+    });
   </script>
 </body>
 </html>
