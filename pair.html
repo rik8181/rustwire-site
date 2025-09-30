@@ -1,68 +1,47 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Basic SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pair Rust+ • RustWire</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
   <link rel="icon" href="./logo.png" type="image/png" />
-
   <style>
-    :root{
-      --rust-orange:#f0672a;
-      --steel-700:#1e2940;
-      --btn-w: 200px; --btn-h: 56px;
-    }
+    :root{ --rust-orange:#f0672a; --steel-700:#1e2940; --btn-w:200px; --btn-h:56px; }
     html,body{height:100%}
-    body{
-      margin:0;color:#e6e6e6;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;
-      overflow:hidden; background:#000;
-    }
+    body{ margin:0;color:#e6e6e6; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; overflow:hidden; background:#000; }
     #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
     .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
-
     .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
-    .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
     img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
     .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-
-    .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
+    .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w)));
+      padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase;
+      background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28);
+      transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
     .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
-    .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0; background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%), radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%), radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%); filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
+    .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0;
+      background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%), radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%), radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%); filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
     .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
     .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%;
       background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
     .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
-
     @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
     @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86} 100%{transform:translateY(34px) scale(.85); opacity:0} }
     @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
-
     .pair-wrap{ position:fixed; inset:0; z-index:2; display:grid; place-items:center; padding:18px; }
     .pair-card{ width:min(920px, calc(100% - 18px)); background:rgba(17,26,43,.82); border:1px solid var(--steel-700); border-radius:16px; padding:20px 22px; backdrop-filter: blur(6px); box-shadow:0 12px 40px rgba(0,0,0,.55); }
     .pair-card h1{ margin:0 0 10px; color:var(--rust-orange); font-size:clamp(22px,5vw,32px); }
     .banner { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:10px; background: rgba(180,0,0,.12); border: 1px solid rgba(255,60,60,.45); color:#ffd6d6; margin: 8px 0 14px; }
     .chip{ display:inline-block; padding:2px 8px; border-radius:6px; background:#1c2540; border:1px solid #2a3556; color:#cfe2ff; font-size:.95em; }
     .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
-    ol{ margin:12px 0 0; padding:0 0 0 22px; }
-    li{ margin:10px 0; line-height:1.5; }
-
+    ol{ margin:12px 0 0; padding:0 0 0 22px; } li{ margin:10px 0; line-height:1.5; }
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
-
-    /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
-
-    @media (max-width:560px){
-      img.logo{ height:38px }
-      .topbar{ padding:10px 12px }
-      :root{ --btn-w: 180px; --btn-h: 52px; }
-    }
   </style>
 </head>
 <body>
@@ -70,19 +49,10 @@
   <div class="overlay"></div>
 
   <div class="topbar">
-    <div class="logo-wrap">
-      <a href="./" aria-label="Home">
-        <img src="./logo.png" alt="RustWire Logo" class="logo" />
-      </a>
-    </div>
+    <a href="./" aria-label="Home"><img src="./logo.png" alt="RustWire Logo" class="logo" /></a>
     <div class="btns">
-      <a class="molten" href="./" aria-label="Back Home">
-        <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
-      </a>
-      <!-- Secure Pair -->
-      <a id="securePairBtn" class="molten" href="#" aria-disabled="true">
-        <span class="molten__lava"></span><span id="secureLabel" class="molten__label">Secure Pair (checking…)</span><span class="molten__drip"></span>
-      </a>
+      <a class="molten" href="./" aria-label="Back Home"><span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span></a>
+      <a id="securePairBtn" class="molten" href="#"><span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span></a>
     </div>
   </div>
 
@@ -91,12 +61,10 @@
       <div class="banner">⚠️ <strong>Important:</strong>&nbsp; Use <code class="chip">/rustplus connect &lt;IP&gt;:&lt;appPort&gt;</code> in a <strong>server text channel</strong>. It will <em>not</em> work in DM.</div>
       <h1>Pair Rust+ with RustWire</h1>
       <ol>
-        <li>
-          <strong>Add RustWire to your Discord:</strong>
+        <li><strong>Add RustWire to your Discord:</strong>
           <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener" class="link">Add Bot</a>
         </li>
-        <li>
-          <strong>Run in a server channel (not DM):</strong><br/>
+        <li><strong>Run in a server channel (not DM):</strong><br/>
           <code class="chip">/rustplus connect &lt;IP&gt;:&lt;appPort&gt;</code><br/>
           Example: <code class="chip">/rustplus connect 136.243.70.123:28112</code>
         </li>
@@ -116,141 +84,62 @@
     </div>
   </div>
 
-  <!-- Status badge -->
   <div class="status" id="status" aria-live="polite">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
 
-<script>
-  /********************** YOUR LIVE CONFIG **************************/
-  const GUILD_ID      = '1419192329713094689';
-  const CHANNEL_ID    = '1422058709835583570';
-  const PORTAL_TOKEN  = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
+  <!-- Same detector as index.html -->
+  <script>
+    const GUILD_ID     = '1419192329713094689';
+    const CHANNEL_ID   = '1422058709835583570';
+    const PORTAL_TOKEN = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
 
-  // Put the most likely-good URL first. Update these when your bot logs print new ones.
-  const CANDIDATE_ORIGINS = [
-    'https://middle-dictionary-raised-conferencing.trycloudflare.com', // Cloudflare (from logs)
-    'https://major-states-count.loca.lt',                              // LocalTunnel fallback (from logs)
-    // 'https://YOUR-SUBDOMAIN.duckdns.org'                             // add when Nginx+DuckDNS is ready
-  ];
-  /******************************************************************/
+    const CANDIDATE_ORIGINS = [
+      // 'https://rustwire.duckdns.org', // <- stable if using Nginx+DuckDNS
+      'https://middle-dictionary-raised-conferencing.trycloudflare.com',
+      'https://major-states-count.loca.lt'
+    ];
 
-  // Elements
-  const secureBtn = document.getElementById('securePairBtn');
-  const dot   = document.getElementById('dot');
-  const label = document.getElementById('label');
+    (function quickOverride(){
+      const sp = new URLSearchParams(location.search);
+      const p = sp.get('portal');
+      if (p) { localStorage.setItem('rw_portal_override', p); }
+    })();
+    const override = localStorage.getItem('rw_portal_override');
+    if (override && !CANDIDATE_ORIGINS.includes(override)) CANDIDATE_ORIGINS.unshift(override);
 
-  // Simple diagnostics line so you can see what it picked:
-  let diagEl;
-  (function addDiag() {
-    try {
-      diagEl = document.createElement('div');
-      diagEl.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:3;font:12px system-ui;color:#9bb7ff;opacity:.9';
-      diagEl.id = 'diag';
-      diagEl.textContent = 'Detecting portal…';
-      document.body.appendChild(diagEl);
-    } catch {}
-  })();
+    const secureBtn = document.getElementById('securePairBtn');
+    const dot = document.getElementById('dot'); const label = document.getElementById('label');
+    let diagEl;
+    (function(){ try{ diagEl=document.createElement('div'); diagEl.style.cssText='position:fixed;left:14px;bottom:14px;z-index:3;font:12px system-ui;color:#9bb7ff;opacity:.9'; diagEl.textContent='Detecting portal…'; document.body.appendChild(diagEl);}catch{}})();
 
-  // Robust health check that survives CORS:
-  // 1) Try normal fetch /healthz (no-cors + small timeout)
-  // 2) If that fails, try <img> load as a last-resort reachability test
-  async function isHealthy(origin) {
-    const url = origin.replace(/\/+$/,'') + '/healthz?ts=' + Date.now();
-
-    // Try fetch first (fast timeout)
-    try {
-      const ctrl = new AbortController();
-      const t = setTimeout(() => ctrl.abort(), 3500);
-      // Use no-cors so we don't get blocked by CORS preflight
-      const res = await fetch(url, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
-      clearTimeout(t);
-      // In no-cors mode we get an "opaque" response if reachable.
-      // If DNS failed or the server is down, fetch throws before this line.
-      return true;
-    } catch (_) {
-      // Fallback: <img> ping
-      try {
-        await new Promise((resolve, reject) => {
-          const img = new Image();
-          const done = setTimeout(() => { img.src = ''; reject(new Error('timeout')); }, 3500);
-          img.onload  = () => { clearTimeout(done); resolve(); };
-          img.onerror = () => { clearTimeout(done); reject(new Error('img error')); };
-          img.src = url;
-        });
-        return true;
+    async function isHealthy(origin){
+      const url = origin.replace(/\/+$/,'') + '/healthz?ts=' + Date.now();
+      try { const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),3500);
+            await fetch(url,{method:'GET',cache:'no-store',mode:'no-cors',signal:ctrl.signal}); clearTimeout(t); return true;
       } catch {
-        return false;
+        try { await new Promise((res,rej)=>{const img=new Image(); const to=setTimeout(()=>{img.src=''; rej();},3500);
+                  img.onload=()=>{clearTimeout(to); res();}; img.onerror=()=>{clearTimeout(to); rej();}; img.src=url;});
+              return true; } catch { return false; }
       }
     }
-  }
+    function setStatus(on,picked){ if(on){dot?.classList.add('on');dot?.classList.remove('off'); label&&(label.textContent='Portal Online'); diagEl&&(diagEl.textContent='Portal: '+picked);}
+                                   else {dot?.classList.add('off');dot?.classList.remove('on'); label&&(label.textContent='Portal Offline'); diagEl&&(diagEl.textContent='Portal unreachable. Tried: '+CANDIDATE_ORIGINS.join(', '));}}
+    function buildStartUrl(origin){ const base=origin.replace(/\/+$/,''); const q=new URLSearchParams({guild_id:GUILD_ID,channel_id:CHANNEL_ID,token:PORTAL_TOKEN}); return `${base}/start?${q.toString()}`; }
 
-  async function pickOrigin() {
-    for (const origin of CANDIDATE_ORIGINS) {
-      if (!origin) continue;
-      const ok = await isHealthy(origin);
-      if (ok) return origin.replace(/\/+$/,'');
-    }
-    return null;
-  }
-
-  // Update the UI based on health
-  function setStatus(on, picked) {
-    if (on) {
-      dot?.classList.remove('off'); dot?.classList.add('on');
-      if (label) label.textContent = 'Portal Online';
-      if (diagEl) diagEl.textContent = 'Portal: ' + picked;
-    } else {
-      dot?.classList.remove('on'); dot?.classList.add('off');
-      if (label) label.textContent = 'Portal Offline';
-      if (diagEl) diagEl.textContent = 'Portal unreachable. Tried: ' + CANDIDATE_ORIGINS.join(', ');
-    }
-  }
-
-  // Build the secure pair URL (token is required by your portal)
-  function buildStartUrl(origin) {
-    const base = origin.replace(/\/+$/,'');
-    const params = new URLSearchParams({
-      guild_id: GUILD_ID,
-      channel_id: CHANNEL_ID,
-      token: PORTAL_TOKEN
-    });
-    return `${base}/start?${params.toString()}`;
-  }
-
-  // Initialize
-  let ACTIVE_ORIGIN = null;
-
-  async function init() {
-    ACTIVE_ORIGIN = await pickOrigin();
-    if (ACTIVE_ORIGIN) {
-      // Set the button href and open in a new tab to avoid popup blockers
-      const url = buildStartUrl(ACTIVE_ORIGIN);
-      if (secureBtn) {
-        secureBtn.href = url;
-        secureBtn.target = '_blank';
-        secureBtn.rel = 'noopener';
-        secureBtn.addEventListener('click', (e) => {
-          // Ensure it opens even if the browser blocks navigation on synthetic click
-          try { window.open(url, '_blank', 'noopener'); } catch {}
-        });
+    let ACTIVE_ORIGIN=null;
+    async function init(){
+      for (const origin of CANDIDATE_ORIGINS){ if (!origin) continue; if (await isHealthy(origin)){ ACTIVE_ORIGIN=origin.replace(/\/+$/,''); break; } }
+      if (ACTIVE_ORIGIN){ const url=buildStartUrl(ACTIVE_ORIGIN);
+        if (secureBtn){ secureBtn.href=url; secureBtn.target='_blank'; secureBtn.rel='noopener'; secureBtn.onclick=()=>{try{window.open(url,'_blank','noopener');}catch{}}; }
+        setStatus(true, ACTIVE_ORIGIN);
+      } else {
+        if (secureBtn){ secureBtn.href='#'; secureBtn.removeAttribute('target'); secureBtn.onclick=(e)=>{e.preventDefault(); alert('Portal is offline. Restart your bot and paste the newest portal URL with ?portal=... or set LINK_PUBLIC_HOST to a stable DuckDNS domain.');}; }
+        setStatus(false);
       }
-      setStatus(true, ACTIVE_ORIGIN);
-    } else {
-      if (secureBtn) {
-        secureBtn.href = '#';
-        secureBtn.removeAttribute('target');
-        secureBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          alert('Portal is offline. Make sure your bot is running and copy the latest portal URL from the bot logs into this page.');
-        }, { once:true });
-      }
-      setStatus(false);
     }
-  }
-
-  // First run, then re-check every 20s
-  init();
-  setInterval(init, 20000);
-</script>
+    init(); setInterval(init, 20000);
+  </script>
+</body>
+</html>
