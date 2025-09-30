@@ -122,71 +122,135 @@
     <span id="label">Checking status…</span>
   </div>
 
-  <script>
-    // ===================== CONFIG — EDIT THESE =====================
-    const GUILD_ID   = '1419192329713094689';
-    const CHANNEL_ID = '1422058709835583570';
-    const PORTAL_TOKEN = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
+<script>
+  /********************** YOUR LIVE CONFIG **************************/
+  const GUILD_ID      = '1419192329713094689';
+  const CHANNEL_ID    = '1422058709835583570';
+  const PORTAL_TOKEN  = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
 
-    // Put your current URLs here (order = priority)
-    const CANDIDATE_ORIGINS = [
-      'https://middle-dictionary-raised-conferencing.trycloudflare.com,
-      'https://major-states-count.loca.lt, 
-      'https://REPLACE_WITH_DUCKDNS_HOST'       // e.g. https://rustwire-portal.duckdns.org
-    ];
-    // ===============================================================
+  // Put the most likely-good URL first. Update these when your bot logs print new ones.
+  const CANDIDATE_ORIGINS = [
+    'https://middle-dictionary-raised-conferencing.trycloudflare.com', // Cloudflare (from logs)
+    'https://major-states-count.loca.lt',                              // LocalTunnel fallback (from logs)
+    // 'https://YOUR-SUBDOMAIN.duckdns.org'                             // add when Nginx+DuckDNS is ready
+  ];
+  /******************************************************************/
 
-    const secureBtn   = document.getElementById('securePairBtn');
-    const secureLabel = document.getElementById('secureLabel');
-    const dot   = document.getElementById('dot');
-    const label = document.getElementById('label');
+  // Elements
+  const secureBtn = document.getElementById('securePairBtn');
+  const dot   = document.getElementById('dot');
+  const label = document.getElementById('label');
 
-    function buildStartUrls(origin) {
-      const base = `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
-      return [
-        `${base}&token=${encodeURIComponent(PORTAL_TOKEN)}`,
-        `${base}&shared=${encodeURIComponent(PORTAL_TOKEN)}`,
-        `${base}&key=${encodeURIComponent(PORTAL_TOKEN)}`
-      ];
-    }
-    async function isUp(origin) {
-      if (!origin || origin.includes('REPLACE_WITH')) return false;
-      const PING = `${origin}/healthz`;
+  // Simple diagnostics line so you can see what it picked:
+  let diagEl;
+  (function addDiag() {
+    try {
+      diagEl = document.createElement('div');
+      diagEl.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:3;font:12px system-ui;color:#9bb7ff;opacity:.9';
+      diagEl.id = 'diag';
+      diagEl.textContent = 'Detecting portal…';
+      document.body.appendChild(diagEl);
+    } catch {}
+  })();
+
+  // Robust health check that survives CORS:
+  // 1) Try normal fetch /healthz (no-cors + small timeout)
+  // 2) If that fails, try <img> load as a last-resort reachability test
+  async function isHealthy(origin) {
+    const url = origin.replace(/\/+$/,'') + '/healthz?ts=' + Date.now();
+
+    // Try fetch first (fast timeout)
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 3500);
+      // Use no-cors so we don't get blocked by CORS preflight
+      const res = await fetch(url, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+      clearTimeout(t);
+      // In no-cors mode we get an "opaque" response if reachable.
+      // If DNS failed or the server is down, fetch throws before this line.
+      return true;
+    } catch (_) {
+      // Fallback: <img> ping
       try {
-        const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 3500);
-        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
-        clearTimeout(t);
+        await new Promise((resolve, reject) => {
+          const img = new Image();
+          const done = setTimeout(() => { img.src = ''; reject(new Error('timeout')); }, 3500);
+          img.onload  = () => { clearTimeout(done); resolve(); };
+          img.onerror = () => { clearTimeout(done); reject(new Error('img error')); };
+          img.src = url;
+        });
         return true;
-      } catch { return false; }
-    }
-    async function pickPortal() {
-      for (const origin of CANDIDATE_ORIGINS) {
-        if (await isUp(origin)) {
-          const [u1] = buildStartUrls(origin);
-          secureBtn.href = u1;
-          secureBtn.removeAttribute('aria-disabled');
-          secureLabel.textContent = 'Open Secure Pair';
-          dot.classList.remove('off'); dot.classList.add('on');
-          label.textContent = 'Portal Online';
-          return origin;
-        }
+      } catch {
+        return false;
       }
-      secureBtn.setAttribute('aria-disabled','true');
-      secureLabel.textContent = 'Secure Pair (offline)';
-      dot.classList.remove('on'); dot.classList.add('off');
-      label.textContent = 'Portal Offline';
-      return null;
     }
-    pickPortal();
-    setInterval(pickPortal, 20000);
+  }
 
-    secureBtn.addEventListener('click', (e) => {
-      if (secureBtn.getAttribute('aria-disabled') === 'true') {
-        e.preventDefault();
-        alert('Secure Pair portal is offline. Restart the bot to print a fresh URL (or fix DuckDNS/Nginx), then reload this page.');
-      }
+  async function pickOrigin() {
+    for (const origin of CANDIDATE_ORIGINS) {
+      if (!origin) continue;
+      const ok = await isHealthy(origin);
+      if (ok) return origin.replace(/\/+$/,'');
+    }
+    return null;
+  }
+
+  // Update the UI based on health
+  function setStatus(on, picked) {
+    if (on) {
+      dot?.classList.remove('off'); dot?.classList.add('on');
+      if (label) label.textContent = 'Portal Online';
+      if (diagEl) diagEl.textContent = 'Portal: ' + picked;
+    } else {
+      dot?.classList.remove('on'); dot?.classList.add('off');
+      if (label) label.textContent = 'Portal Offline';
+      if (diagEl) diagEl.textContent = 'Portal unreachable. Tried: ' + CANDIDATE_ORIGINS.join(', ');
+    }
+  }
+
+  // Build the secure pair URL (token is required by your portal)
+  function buildStartUrl(origin) {
+    const base = origin.replace(/\/+$/,'');
+    const params = new URLSearchParams({
+      guild_id: GUILD_ID,
+      channel_id: CHANNEL_ID,
+      token: PORTAL_TOKEN
     });
-  </script>
-</body>
-</html>
+    return `${base}/start?${params.toString()}`;
+  }
+
+  // Initialize
+  let ACTIVE_ORIGIN = null;
+
+  async function init() {
+    ACTIVE_ORIGIN = await pickOrigin();
+    if (ACTIVE_ORIGIN) {
+      // Set the button href and open in a new tab to avoid popup blockers
+      const url = buildStartUrl(ACTIVE_ORIGIN);
+      if (secureBtn) {
+        secureBtn.href = url;
+        secureBtn.target = '_blank';
+        secureBtn.rel = 'noopener';
+        secureBtn.addEventListener('click', (e) => {
+          // Ensure it opens even if the browser blocks navigation on synthetic click
+          try { window.open(url, '_blank', 'noopener'); } catch {}
+        });
+      }
+      setStatus(true, ACTIVE_ORIGIN);
+    } else {
+      if (secureBtn) {
+        secureBtn.href = '#';
+        secureBtn.removeAttribute('target');
+        secureBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          alert('Portal is offline. Make sure your bot is running and copy the latest portal URL from the bot logs into this page.');
+        }, { once:true });
+      }
+      setStatus(false);
+    }
+  }
+
+  // First run, then re-check every 20s
+  init();
+  setInterval(init, 20000);
+</script>
