@@ -1,72 +1,47 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Basic SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pair Rust+ • RustWire</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
   <link rel="icon" href="./logo.png" type="image/png" />
-
   <style>
-    :root{
-      --rust-orange:#f0672a;
-      --steel-700:#1e2940;
-      --btn-w: 200px; --btn-h: 56px;
-    }
+    :root{--rust-orange:#f0672a;--steel-700:#1e2940;--btn-w:200px;--btn-h:56px}
     html,body{height:100%}
-    body{
-      margin:0;color:#e6e6e6;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;
-      overflow:hidden; background:#000;
-    }
-    #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
-    .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
-
-    .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
-    .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
-    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
-    .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
-
-    .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
-    .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
-    .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
-    .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0; background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%), radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%), radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%); filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
-    .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
-    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
-    .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
-
-    @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
-    @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86} 100%{transform:translateY(34px) scale(.85); opacity:0} }
-    @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
-
-    .pair-wrap{ position:fixed; inset:0; z-index:2; display:grid; place-items:center; padding:18px; }
-    .pair-card{ width:min(920px, calc(100% - 18px)); background:rgba(17,26,43,.82); border:1px solid var(--steel-700); border-radius:16px; padding:20px 22px; backdrop-filter: blur(6px); box-shadow:0 12px 40px rgba(0,0,0,.55); }
-    .pair-card h1{ margin:0 0 10px; color:var(--rust-orange); font-size:clamp(22px,5vw,32px); }
-    .banner { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:10px; background: rgba(180,0,0,.12); border: 1px solid rgba(255,60,60,.45); color:#ffd6d6; margin: 8px 0 14px; }
-    .chip{ display:inline-block; padding:2px 8px; border-radius:6px; background:#1c2540; border:1px solid #2a3556; color:#cfe2ff; font-size:.95em; }
-    .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
-    ol{ margin:12px 0 0; padding:0 0 0 22px; }
-    li{ margin:10px 0; line-height:1.5; }
-    .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
-
-    /* Status badge */
-    .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
-    .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
-    .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
-    .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
-
-    /* Admin setter */
-    .admin { position:fixed; top:12px; right:12px; display:none; gap:8px; z-index:4 }
-    .admin.show { display:flex }
-    .admin input{ width:min(50vw,380px); background:#0e1526; border:1px solid #2c3756; color:#dfe8ff; padding:6px 8px; border-radius:8px; outline:none; }
-    .admin button{ background:#2a334f; border:1px solid #3a466d; color:#fff; padding:6px 10px; border-radius:8px; cursor:pointer; }
-
-    @media (max-width:560px){
-      img.logo{ height:38px }
-      .topbar{ padding:10px 12px }
-      :root{ --btn-w: 180px; --btn-h: 52px; }
-    }
+    body{margin:0;color:#e6e6e6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;overflow:hidden;background:#000}
+    #bgvid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(.9) contrast(1.05) saturate(1.06)}
+    .overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.5) 60%,rgba(0,0,0,.62) 100%);pointer-events:none}
+    .topbar{position:fixed;z-index:3;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:12px;background:linear-gradient(180deg,rgba(10,15,26,.65),rgba(10,15,26,0))}
+    .logo-wrap{display:flex;align-items:center;gap:10px;min-width:0}
+    img.logo{height:44px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));user-select:none}
+    .btns{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .molten{position:relative;display:inline-grid;place-items:center;width:min(var(--btn-w),46vw);height:calc(var(--btn-h)*(min(var(--btn-w),46vw)/var(--btn-w)));padding:0;border:none;text-decoration:none;outline:none;cursor:pointer;color:#fff;font-weight:900;letter-spacing:.8px;text-transform:uppercase;background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);border-radius:12px;box-shadow:inset 0 0 10px rgba(0,0,0,.6),0 6px 18px rgba(240,103,42,.28);transition:transform .18s ease,filter .28s ease;overflow:hidden;isolation:isolate}
+    .molten:hover{transform:translateY(-1px) scale(1.015);filter:drop-shadow(0 8px 18px rgba(240,103,42,.45))}
+    .molten::after{content:"";position:absolute;inset:0;border-radius:12px;z-index:1;box-shadow:0 0 18px rgba(240,103,42,.3),inset 0 0 12px rgba(240,103,42,.22);animation:soft-flicker 3.2s ease-in-out infinite;pointer-events:none}
+    .molten__lava{--lava1:#ff9a3c;--lava2:#ff6a00;--lava3:#ff3b00;position:absolute;left:-60%;top:-10%;width:220%;height:200%;z-index:0;background:
+      radial-gradient(40% 55% at 20% 60%,var(--lava1),transparent 60%),
+      radial-gradient(45% 60% at 50% 70%,var(--lava2),transparent 60%),
+      radial-gradient(35% 50% at 80% 50%,var(--lava3),transparent 60%);
+      filter:blur(16px) saturate(140%);mix-blend-mode:screen;opacity:.88;animation:lava-flow 9s linear infinite}
+    .molten__label{position:relative;z-index:2;padding:0 16px;text-shadow:0 0 10px rgba(255,120,30,.9),0 0 26px rgba(255,90,0,.4),0 2px 0 rgba(0,0,0,.6);font-size:clamp(12px,2.4vw,16px);white-space:nowrap}
+    .molten__drip,.molten__drip::before,.molten__drip::after{position:absolute;bottom:-12px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ffa34d,#ff6a00 60%,#9a2900 100%);filter:blur(.25px);animation:drip 3.8s linear infinite;opacity:.9}
+    .molten__drip{left:24%}.molten__drip::before{content:"";left:220%;animation-delay:.9s}.molten__drip::after{content:"";left:420%;animation-delay:1.8s}
+    @keyframes lava-flow{0%{transform:translateX(0) translateY(0) scale(1)}50%{transform:translateX(-28%) translateY(-6%) scale(1.02)}100%{transform:translateX(-56%) translateY(0) scale(1)}}
+    @keyframes drip{0%{transform:translateY(0) scale(1);opacity:.95}70%{transform:translateY(22px) scale(1.06);opacity:.86}100%{transform:translateY(34px) scale(.85);opacity:0}}
+    @keyframes soft-flicker{0%{box-shadow:0 0 14px rgba(240,103,42,.22),inset 0 0 8px rgba(240,103,42,.13)}50%{box-shadow:0 0 20px rgba(240,103,42,.36),inset 0 0 12px rgba(240,103,42,.2)}100%{box-shadow:0 0 14px rgba(240,103,42,.22),inset 0 0 8px rgba(240,103,42,.13)}}
+    .pair-wrap{position:fixed;inset:0;z-index:2;display:grid;place-items:center;padding:18px}
+    .pair-card{width:min(920px,calc(100% - 18px));background:rgba(17,26,43,.82);border:1px solid var(--steel-700);border-radius:16px;padding:20px 22px;backdrop-filter:blur(6px);box-shadow:0 12px 40px rgba(0,0,0,.55)}
+    .pair-card h1{margin:0 0 10px;color:var(--rust-orange);font-size:clamp(22px,5vw,32px)}
+    .banner{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:rgba(180,0,0,.12);border:1px solid rgba(255,60,60,.45);color:#ffd6d6;margin:8px 0 14px}
+    .chip{display:inline-block;padding:2px 8px;border-radius:6px;background:#1c2540;border:1px solid #2a3556;color:#cfe2ff;font-size:.95em}
+    .link{color:#6cb6ff;text-decoration:none;border-bottom:1px dashed rgba(108,182,255,.5)}
+    ol{margin:12px 0 0;padding:0 0 0 22px} li{margin:10px 0;line-height:1.5}
+    .status{position:fixed;right:14px;bottom:14px;z-index:3;display:flex;gap:8px;align-items:center;background:rgba(17,26,43,.78);border:1px solid #243151;padding:8px 12px;border-radius:12px;backdrop-filter:blur(6px);font-size:14px}
+    .dot{width:10px;height:10px;border-radius:50%;background:#aaa;box-shadow:0 0 6px rgba(255,255,255,.25);transition:background .4s ease,box-shadow .4s ease}
+    .dot.on{background:#27d17f;box-shadow:0 0 10px rgba(39,209,127,.65)} .dot.off{background:#e05555;box-shadow:0 0 10px rgba(224,85,85,.55)}
+    .portal-chip{font-size:12px;opacity:.85}
+    @media (max-width:560px){img.logo{height:38px}.topbar{padding:10px 12px}:root{--btn-w:180px;--btn-h:52px}}
   </style>
 </head>
 <body>
@@ -75,9 +50,8 @@
 
   <div class="topbar">
     <div class="logo-wrap">
-      <a href="./" aria-label="Home">
-        <img src="./logo.png" alt="RustWire Logo" class="logo" />
-      </a>
+      <a href="./" aria-label="Home"><img src="./logo.png" alt="RustWire Logo" class="logo" /></a>
+      <span class="portal-chip" id="portalLabel"></span>
     </div>
     <div class="btns">
       <a class="molten" href="./" aria-label="Back Home">
@@ -85,6 +59,9 @@
       </a>
       <a id="securePairBtn" class="molten" href="#">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
+      </a>
+      <a id="setPortalBtn" class="molten" href="#" title="Set Portal URL">
+        <span class="molten__lava"></span><span class="molten__label">Set Portal URL</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
@@ -96,7 +73,8 @@
       <ol>
         <li>
           <strong>Add RustWire to your Discord:</strong>
-          <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener" class="link">Add Bot</a>
+          <a class="link" target="_blank" rel="noopener"
+             href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8">Add Bot</a>
         </li>
         <li>
           <strong>Run in a server channel (not DM):</strong><br/>
@@ -106,7 +84,7 @@
         <li><strong>Approve</strong> the request in the Rust+ app on your phone.</li>
       </ol>
 
-      <div class="pair-actions">
+      <div class="pair-actions" style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap">
         <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener" aria-label="Join Discord">
           <span class="molten__lava"></span><span class="molten__label">Join Discord</span><span class="molten__drip"></span>
         </a>
@@ -119,74 +97,65 @@
     </div>
   </div>
 
-  <!-- Status badge -->
-  <div class="status" id="status" aria-live="polite">
+  <div class="status" aria-live="polite">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
 
-  <!-- Admin quick setter (hidden unless ?admin=1) -->
-  <div id="adminBar" class="admin">
-    <input id="portalUrlInput" placeholder="https://your-portal.example.com" />
-    <button id="applyPortal">Set Portal URL</button>
-  </div>
-
   <script>
-    // ====== DEFAULT (will be overridden by saved value) ======
-    const DEFAULT_PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
+    // === CONFIG ===
+    const DEFAULT_PORTAL = 'https://middle-dictionary-raised-conferencing.trycloudflare.com'; // from your latest logs
+    const KEY = 'RUSTWIRE_PORTAL_ORIGIN';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
 
-    // ====== ADMIN BAR (only when ?admin=1) ======
-    const params = new URLSearchParams(location.search);
-    const adminMode = params.get('admin') === '1';
-    const adminBar = document.getElementById('adminBar');
-    if (adminMode) adminBar.classList.add('show');
-
     function getPortalOrigin(){
-      return localStorage.getItem('PORTAL_ORIGIN') || DEFAULT_PORTAL_ORIGIN;
+      try{
+        const v = localStorage.getItem(KEY) || DEFAULT_PORTAL;
+        return new URL(v).origin;
+      }catch{ return DEFAULT_PORTAL; }
     }
-    function setPortalOrigin(val){
-      localStorage.setItem('PORTAL_ORIGIN', val);
-      location.reload();
+    function setPortalOriginInteractive(){
+      const cur = getPortalOrigin();
+      const v = prompt('Paste Portal URL (must start with https):', cur);
+      if(!v) return;
+      try{
+        const u = new URL(v);
+        if(u.protocol !== 'https:') return alert('Please use https://');
+        localStorage.setItem(KEY, u.origin);
+        location.reload();
+      }catch{
+        alert('Invalid URL');
+      }
     }
 
-    // Wire admin controls
-    const input = document.getElementById('portalUrlInput');
-    const applyBtn = document.getElementById('applyPortal');
-    if (input) input.value = getPortalOrigin();
-    if (applyBtn) applyBtn.onclick = () => {
-      const val = (input.value || '').trim();
-      if (!val) return alert('Please enter a URL');
-      try { new URL(val); } catch { return alert('Invalid URL'); }
-      setPortalOrigin(val);
-    };
-
-    // ====== Secure Pair link ======
     const PORTAL_ORIGIN = getPortalOrigin();
+    document.getElementById('setPortalBtn').addEventListener('click', (e)=>{ e.preventDefault(); setPortalOriginInteractive(); });
+    document.getElementById('portalLabel').textContent = `Portal: ${PORTAL_ORIGIN}`;
+
+    // Secure Pair link
     const secureBtn = document.getElementById('securePairBtn');
     secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
 
-    // ====== Status badge ping ======
-    const PING = `${PORTAL_ORIGIN}/healthz`;
+    // Status ping
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
+    const PING = `${PORTAL_ORIGIN}/healthz`;
 
-    async function check() {
-      try {
+    async function check(){
+      try{
         const ctrl = new AbortController();
-        const t = setTimeout(() => ctrl.abort(), 3500);
-        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        const t = setTimeout(()=>ctrl.abort(), 4000);
+        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal:ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
-      } catch {
+      }catch{
         dot.classList.remove('on'); dot.classList.add('off');
         label.textContent = 'Portal Offline';
       }
     }
-    check();
-    setInterval(check, 20000);
+    check(); setInterval(check, 20000);
   </script>
 </body>
 </html>
