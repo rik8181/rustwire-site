@@ -51,17 +51,12 @@
 
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
 
-    @media (max-width:560px){
-      img.logo{ height:38px }
-      .topbar{ padding:10px 12px }
-      :root{ --btn-w: 180px; --btn-h: 52px; }
-    }
+    #rw-hotspot{ position:fixed; left:0; bottom:0; width:22px; height:22px; z-index:9998; }
   </style>
 </head>
 <body>
@@ -78,7 +73,6 @@
       <a class="molten" href="./" aria-label="Back Home">
         <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
       </a>
-      <!-- Secure Pair -->
       <a id="securePairBtn" class="molten" href="#">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
@@ -115,58 +109,55 @@
     </div>
   </div>
 
-  <!-- Status badge -->
-  <div class="status" id="status" aria-live="polite">
+  <div class="status" id="status" aria-live="polite" title="Alt-click to toggle admin chip">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
+  <div id="rw-hotspot"></div>
 
-  <!-- Owner-only portal chip (hidden by default; toggle with ⌃⇧P or ?rwadmin=1) -->
   <script>
   (function(){
     const STORAGE_KEY='RUSTWIRE_PORTAL_ORIGIN';
-    const DEFAULT_ORIGIN='https://middle-dictionary-raised-conferencing.trycloudflare.com'; // fallback
+    const ADMIN_KEY='RUSTWIRE_ADMIN';
+    const DEFAULT_ORIGIN='https://middle-dictionary-raised-conferencing.trycloudflare.com';
     const GUILD_ID='1419192329713094689';
     const CHANNEL_ID='1422058709835583570';
 
-    const qs = new URLSearchParams(location.search);
-    const forceShow = qs.get('rwadmin') === '1';
-    const forceHide = qs.get('rwadmin') === '0';
+    const qs=new URLSearchParams(location.search);
+    if(qs.get('rwadmin')==='1') localStorage.setItem(ADMIN_KEY,'1');
+    if(qs.get('rwadmin')==='0') localStorage.removeItem(ADMIN_KEY);
+    const isAdmin=!!localStorage.getItem(ADMIN_KEY);
 
     function getOrigin(){
-      const v = localStorage.getItem(STORAGE_KEY);
-      try {
-        if (v) return new URL(v).origin;
-      } catch(e){}
-      try { return new URL(DEFAULT_ORIGIN).origin } catch(e){ return '' }
+      const v=localStorage.getItem(STORAGE_KEY);
+      try{ if(v) return new URL(v).origin }catch(e){}
+      try{ return new URL(DEFAULT_ORIGIN).origin }catch(e){ return '' }
     }
-    function setOrigin(newUrl){
-      const u=new URL(newUrl);
+    function setOrigin(url){
+      const u=new URL(url);
       if(u.protocol!=='https:') throw new Error('Use https://');
       localStorage.setItem(STORAGE_KEY,u.origin);
+      return u.origin;
     }
-
-    function wireSecurePair(ORIGIN){
+    function wire(origin){
       const sp=document.getElementById('securePairBtn');
-      if(sp && ORIGIN){
-        sp.href = `${ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+      if(sp && origin){
+        sp.href = `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
       }
     }
-
-    function ping(ORIGIN){
+    function ping(origin){
       const dot=document.getElementById('dot');
       const label=document.getElementById('label');
-      if(!ORIGIN){
+      if(!origin){
         dot.classList.remove('on'); dot.classList.add('off');
         label.textContent='Portal URL not set';
         return;
       }
-      const PING=`${ORIGIN}/healthz`;
       (async()=>{
         try{
           const ctrl=new AbortController();
           const t=setTimeout(()=>ctrl.abort(),3500);
-          await fetch(PING,{method:'GET',mode:'no-cors',cache:'no-store',signal:ctrl.signal});
+          await fetch(`${origin}/healthz`,{method:'GET',mode:'no-cors',cache:'no-store',signal:ctrl.signal});
           clearTimeout(t);
           dot.classList.remove('off'); dot.classList.add('on');
           label.textContent='Portal Online';
@@ -177,24 +168,29 @@
       })();
     }
 
-    function makeChip(){
+    function chip(){
       const wrap=document.createElement('div');
       wrap.id='rw-portal-chip';
       wrap.style.cssText='position:fixed;left:12px;bottom:12px;z-index:9999;background:rgba(17,26,43,.92);border:1px solid #243151;color:#cfe2ff;border-radius:12px;padding:8px;display:none;align-items:center;gap:8px;font:600 13px system-ui';
       const host=document.createElement('span');
       host.style.cssText='max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+      const direct=document.createElement('a');
+      direct.textContent='Open';
+      direct.target='_blank'; direct.rel='noopener';
+      direct.style.cssText='text-decoration:none;border:1px dashed #2a3556;padding:6px 9px;border-radius:8px;color:#cfe2ff';
       const btn=document.createElement('button');
       btn.textContent='Change';
       btn.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
       const hide=document.createElement('button');
       hide.textContent='Hide';
       hide.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
-      wrap.append(host,btn,hide);
+      wrap.append(host,direct,btn,hide);
       document.body.appendChild(wrap);
 
       function refresh(){
         const o=getOrigin();
         host.textContent = o ? `Portal: ${o}` : 'Portal: (not set)';
+        direct.href = o ? `${o}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}` : '#';
       }
       refresh();
 
@@ -203,11 +199,8 @@
         const v=prompt('Portal URL (must start with https):', cur);
         if(!v) return;
         try{
-          setOrigin(v);
-          refresh();
-          const o=getOrigin();
-          wireSecurePair(o);
-          ping(o);
+          const o=setOrigin(v);
+          refresh(); wire(o); ping(o);
         }catch(err){ alert(err.message||'Invalid URL'); }
       };
       hide.onclick=function(){ wrap.style.display='none' };
@@ -215,20 +208,34 @@
       function toggle(){
         wrap.style.display = (wrap.style.display==='none' || !wrap.style.display) ? 'flex' : 'none';
       }
-      // Hotkey: ⌃⇧P
+
+      // Hotkeys: ⌥⇧P and ⌃⇧P
       window.addEventListener('keydown',(e)=>{
-        if(e.ctrlKey && e.shiftKey && (e.key==='p'||e.key==='P')){ e.preventDefault(); toggle(); }
+        const key=(e.key||'').toLowerCase();
+        if((e.altKey&&e.shiftKey&&key==='p')||(e.ctrlKey&&e.shiftKey&&key==='p')){
+          e.preventDefault(); toggle();
+        }
       });
 
-      if(forceShow) wrap.style.display='flex';
-      if(forceHide) wrap.style.display='none';
-      return {toggle,refresh};
+      // Hotspot dbl-click / long-press
+      const hotspot=document.getElementById('rw-hotspot');
+      let timer=null;
+      hotspot.addEventListener('dblclick',()=> toggle());
+      hotspot.addEventListener('mousedown',()=>{ timer=setTimeout(()=>toggle(),800) });
+      hotspot.addEventListener('mouseup',()=>{ clearTimeout(timer) });
+      hotspot.addEventListener('mouseleave',()=>{ clearTimeout(timer) });
+
+      // Alt-click status
+      const status=document.getElementById('status');
+      status.addEventListener('click',(e)=>{ if(e.altKey && isAdmin){ e.preventDefault(); toggle(); } });
+
+      if(qs.get('rwadmin')==='1' || isAdmin) wrap.style.display='flex';
     }
 
-    const ORIGIN=getOrigin();
-    wireSecurePair(ORIGIN);
-    ping(ORIGIN);
-    makeChip();
+    const origin=getOrigin();
+    wire(origin);
+    ping(origin);
+    chip();
     setInterval(()=> ping(getOrigin()), 20000);
   })();
   </script>
