@@ -43,28 +43,34 @@
                  radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%);
       filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
     .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
-    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
+    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
     .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
 
     @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
     @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86 } 100%{transform:translateY(34px) scale(.85); opacity:0 } }
     @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
 
-    /* Center title card */
-    .bottom-center{ position:fixed; z-index:2; left:50%; bottom:5vh; transform:translateX(-50%); width:min(860px, calc(100% - 32px)); text-align:center; }
+    /* Bottom-center title card */
+    .bottom-center{ position:fixed; z-index:2; left:50%; bottom:3vh; transform:translateX(-50%); width:min(860px, calc(100% - 32px)); text-align:center; }
     .title-card{ display:inline-block; background:rgba(17,26,43,.76); border:1px solid var(--steel-700); border-radius:16px; padding:16px 22px; backdrop-filter: blur(6px); box-shadow:0 12px 40px rgba(0,0,0,.5); }
     .title-card h1{ margin:0 0 6px; font-size:clamp(22px,5vw,34px); color:var(--rust-orange); letter-spacing:.5px; line-height:1.15; }
     .title-card p{ margin:0; color:#f0f0f0; font-size:clamp(14px,2.6vw,18px); }
     .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
 
     /* Status badge */
-    .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
+    .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; user-select:none; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
 
-    /* Owner chip + hotspot */
-    #rw-hotspot{ position:fixed; left:0; bottom:0; width:22px; height:22px; z-index:9998; }
+    /* Owner chip (bottom-left) */
+    .ownerChip{ position:fixed; left:14px; bottom:14px; z-index:4; display:none; gap:10px; align-items:center; background:rgba(17,26,43,.9); border:1px solid #2a3556; padding:8px 10px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
+    .ownerChip .chipLabel{ opacity:.9 }
+    .ownerChip .chipBtn{ cursor:pointer; border:none; border-radius:10px; padding:8px 10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#fff; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); }
+    .ownerChip .mini{ font-size:12px; opacity:.8; cursor:pointer; text-decoration:underline; }
+
+    @media (max-width:560px){ img.logo{ height:38px } .topbar{ padding:10px 12px } :root{ --btn-w: 180px; --btn-h: 52px; } }
   </style>
 </head>
 <body>
@@ -84,17 +90,15 @@
       <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">
         <span class="molten__lava"></span><span class="molten__label">Add Bot</span><span class="molten__drip"></span>
       </a>
-      <a class="molten" href="./pair.html">
-        <span class="molten__lava"></span><span class="molten__label">Pair Rust+</span><span class="molten__drip"></span>
-      </a>
-      <!-- Secure Pair -> hits your portal /start with guild/channel -->
+      <!-- Removed the top-right "Pair Rust+" button as requested -->
+      <!-- Secure Pair -->
       <a id="securePairBtn" class="molten" href="#">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
 
-  <!-- Center card -->
+  <!-- Bottom-center card -->
   <div class="bottom-center">
     <div class="title-card">
       <h1>RustWire</h1>
@@ -104,149 +108,137 @@
   </div>
 
   <!-- Status badge -->
-  <div class="status" id="status" aria-live="polite" title="Alt-click to toggle admin chip">
+  <div class="status" id="status" aria-live="polite" title="Alt-click to toggle admin chip (owner mode)">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
 
-  <!-- Invisible hotspot to toggle the chip by dbl-click / long-press -->
-  <div id="rw-hotspot" title=""></div>
+  <!-- Owner-only chip -->
+  <div class="ownerChip" id="ownerChip">
+    <span class="chipLabel">Portal:</span>
+    <button class="chipBtn" id="changePortalBtn">Change</button>
+    <span class="mini" id="resetPortalBtn" title="Use built-in default">reset</span>
+  </div>
 
-  <!-- Owner-only portal chip (toggle with ⌥⇧P / ⌃⇧P / ?rwadmin=1 / hotspot / Alt-click status) -->
   <script>
-  (function(){
-    const STORAGE_KEY='RUSTWIRE_PORTAL_ORIGIN';
-    const ADMIN_KEY='RUSTWIRE_ADMIN';
-    const DEFAULT_ORIGIN='https://middle-dictionary-raised-conferencing.trycloudflare.com'; // fallback
-    const GUILD_ID='1419192329713094689';
-    const CHANNEL_ID='1422058709835583570';
+    // ====== CONFIG ======
+    const DEFAULT_PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
+    const GUILD_ID = '1419192329713094689';
+    const CHANNEL_ID = '1422058709835583570';
 
-    // Admin param toggles persistence
-    const qs = new URLSearchParams(location.search);
-    if (qs.get('rwadmin') === '1') localStorage.setItem(ADMIN_KEY,'1');
-    if (qs.get('rwadmin') === '0') localStorage.removeItem(ADMIN_KEY);
-    const isAdmin = !!localStorage.getItem(ADMIN_KEY);
+    // Admin / owner gating
+    const params = new URLSearchParams(location.search);
+    if (params.get('rwadmin') === '1') localStorage.setItem('rwadmin','1');
 
-    function getOrigin(){
-      const v = localStorage.getItem(STORAGE_KEY);
-      try { if (v) return new URL(v).origin; } catch(e){}
-      try { return new URL(DEFAULT_ORIGIN).origin } catch(e){ return '' }
-    }
-    function setOrigin(newUrl){
-      const u = new URL(newUrl);
-      if(u.protocol !== 'https:') throw new Error('Use https://');
-      localStorage.setItem(STORAGE_KEY, u.origin);
-      return u.origin;
-    }
+    const isOwner = () => localStorage.getItem('rwadmin') === '1';
+    const getSavedPortal = () => localStorage.getItem('portalOrigin') || '';
+    const resolvePortalOrigin = () => getSavedPortal() || DEFAULT_PORTAL_ORIGIN;
 
-    function wireSecurePair(origin){
-      const sp=document.getElementById('securePairBtn');
-      if(sp && origin){
-        sp.href = `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
-      }
+    // Elements
+    const secureBtn = document.getElementById('securePairBtn');
+    const dot = document.getElementById('dot');
+    const label = document.getElementById('label');
+    const ownerChip = document.getElementById('ownerChip');
+    const changePortalBtn = document.getElementById('changePortalBtn');
+    const resetPortalBtn = document.getElementById('resetPortalBtn');
+    const statusEl = document.getElementById('status');
+
+    // Wire Secure Pair link
+    function applyPortalToLinks() {
+      const base = resolvePortalOrigin();
+      secureBtn.href = `${base}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
     }
 
-    function ping(origin){
-      const dot=document.getElementById('dot');
-      const label=document.getElementById('label');
-      if(!origin){
+    // Status badge ping
+    async function pingPortal() {
+      const PING = `${resolvePortalOrigin()}/healthz`;
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 3500);
+        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
+        clearTimeout(t);
+        dot.classList.remove('off'); dot.classList.add('on');
+        label.textContent = 'Portal Online';
+      } catch {
         dot.classList.remove('on'); dot.classList.add('off');
-        label.textContent='Portal URL not set';
-        return;
+        label.textContent = 'Portal Offline';
       }
-      const PING = `${origin}/healthz`;
-      (async()=>{
-        try{
-          const ctrl = new AbortController();
-          const t = setTimeout(()=>ctrl.abort(), 3500);
-          await fetch(PING,{method:'GET',mode:'no-cors',cache:'no-store',signal:ctrl.signal});
-          clearTimeout(t);
-          dot.classList.remove('off'); dot.classList.add('on');
-          label.textContent='Portal Online';
-        }catch{
-          dot.classList.remove('on'); dot.classList.add('off');
-          label.textContent='Portal Offline';
-        }
-      })();
     }
 
-    function makeChip(){
-      const wrap=document.createElement('div');
-      wrap.id='rw-portal-chip';
-      wrap.style.cssText='position:fixed;left:12px;bottom:12px;z-index:9999;background:rgba(17,26,43,.92);border:1px solid #243151;color:#cfe2ff;border-radius:12px;padding:8px;display:none;align-items:center;gap:8px;font:600 13px system-ui';
-      const host=document.createElement('span');
-      host.style.cssText='max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
-      const direct=document.createElement('a');
-      direct.textContent='Open';
-      direct.target='_blank';
-      direct.rel='noopener';
-      direct.style.cssText='text-decoration:none;border:1px dashed #2a3556;padding:6px 9px;border-radius:8px;color:#cfe2ff';
-      const btn=document.createElement('button');
-      btn.textContent='Change';
-      btn.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
-      const hide=document.createElement('button');
-      hide.textContent='Hide';
-      hide.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
-      wrap.append(host,direct,btn,hide);
-      document.body.appendChild(wrap);
+    // Owner chip visibility toggle
+    function setChipVisible(v){
+      ownerChip.style.display = v ? 'flex' : 'none';
+    }
+    function toggleChip(){
+      setChipVisible(ownerChip.style.display !== 'flex');
+    }
 
-      function refresh(){
-        const o=getOrigin();
-        host.textContent = o ? `Portal: ${o}` : 'Portal: (not set)';
-        direct.href = o ? `${o}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}` : '#';
+    // Show chip on load for owners (remember last state)
+    if (isOwner() && localStorage.getItem('rwchip') !== 'hidden') setChipVisible(true);
+
+    // Alt-click status badge toggles chip (owner only)
+    statusEl.addEventListener('click',(e)=>{
+      if (!isOwner()) return;
+      if (e.altKey) {
+        toggleChip();
+        localStorage.setItem('rwchip', ownerChip.style.display === 'flex' ? 'shown' : 'hidden');
       }
-      refresh();
+    });
 
-      btn.onclick=function(){
-        const cur=getOrigin() || 'https://';
-        const v=prompt('Portal URL (must start with https):', cur);
-        if(!v) return;
-        try{
-          const o=setOrigin(v);
-          refresh();
-          wireSecurePair(o);
-          ping(o);
-        }catch(err){ alert(err.message||'Invalid URL'); }
-      };
-      hide.onclick=function(){ wrap.style.display='none' };
+    // Owner actions
+    changePortalBtn.addEventListener('click', ()=>{
+      if (!isOwner()) return alert('Owner mode only. Append ?rwadmin=1 once to this page.');
+      const cur = resolvePortalOrigin();
+      const val = prompt('Enter Portal URL (https://…):', cur);
+      if (!val) return;
+      const trimmed = val.trim();
+      if (!/^https?:\/\//i.test(trimmed)) return alert('Please include http(s):// in the URL.');
+      localStorage.setItem('portalOrigin', trimmed);
+      applyPortalToLinks();
+      pingPortal();
+    });
 
-      function toggle(){
-        wrap.style.display = (wrap.style.display==='none' || !wrap.style.display) ? 'flex' : 'none';
-      }
+    resetPortalBtn.addEventListener('click', ()=>{
+      if (!isOwner()) return;
+      localStorage.removeItem('portalOrigin');
+      applyPortalToLinks();
+      pingPortal();
+    });
 
-      // Hotkeys: ⌥⇧P and ⌃⇧P
-      window.addEventListener('keydown',(e)=>{
-        const key = (e.key||'').toLowerCase();
-        if ((e.altKey && e.shiftKey && key==='p') || (e.ctrlKey && e.shiftKey && key==='p')) {
-          e.preventDefault(); toggle();
+    // Hotkeys (mac-safe) to toggle chip:
+    //  - Option+Shift+P  (⌥⇧P)
+    //  - Control+Shift+P (⌃⇧P)
+    //  - F10
+    //  - Triple-press Escape
+    (function(){
+      let escCount = 0, escTimer = null;
+      window.addEventListener('keydown', (e)=>{
+        const isP = e.code === 'KeyP';
+        if ((e.altKey && e.shiftKey && isP) || (e.ctrlKey && e.shiftKey && isP) || e.code === 'F10') {
+          if (!isOwner()) return; // keep hidden for non-owners
+          e.preventDefault();
+          toggleChip();
+          localStorage.setItem('rwchip', ownerChip.style.display === 'flex' ? 'shown' : 'hidden');
+          return;
+        }
+        if (e.key === 'Escape') {
+          escCount++;
+          clearTimeout(escTimer);
+          escTimer = setTimeout(()=>{ escCount = 0; }, 1200);
+          if (escCount >= 3) {
+            if (!isOwner()) return;
+            escCount = 0;
+            toggleChip();
+            localStorage.setItem('rwchip', ownerChip.style.display === 'flex' ? 'shown' : 'hidden');
+          }
         }
       });
+    })();
 
-      // Hotspot dbl-click or long-press
-      const hotspot = document.getElementById('rw-hotspot');
-      let pressTimer=null;
-      hotspot.addEventListener('dblclick',()=> toggle());
-      hotspot.addEventListener('mousedown',()=>{ pressTimer=setTimeout(()=>toggle(),800) });
-      hotspot.addEventListener('mouseup',()=>{ clearTimeout(pressTimer) });
-      hotspot.addEventListener('mouseleave',()=>{ clearTimeout(pressTimer) });
-
-      // Alt-click on status badge
-      const status=document.getElementById('status');
-      status.addEventListener('click',(e)=>{ if(e.altKey && isAdmin){ e.preventDefault(); toggle(); } });
-
-      // Auto-show if forced via param or first-time admin
-      if (qs.get('rwadmin')==='1' || isAdmin) wrap.style.display='flex';
-      return {toggle,refresh};
-    }
-
-    const ORIGIN = getOrigin();
-    wireSecurePair(ORIGIN);
-    ping(ORIGIN);
-    const chip = makeChip();
-
-    // Periodic re-ping
-    setInterval(()=> ping(getOrigin()), 20000);
-  })();
+    // Init
+    applyPortalToLinks();
+    pingPortal();
+    setInterval(pingPortal, 20000);
   </script>
 </body>
 </html>
