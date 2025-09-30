@@ -1,13 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Basic SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pair Rust+ • RustWire</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
   <link rel="icon" href="./logo.png" type="image/png" />
-
+  <meta name="robots" content="noindex">
   <style>
     :root{
       --rust-orange:#f0672a;
@@ -25,9 +24,10 @@
 
     .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
     .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
-    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; cursor:pointer; }
+    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
     .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 
+    /* Molten button (same as home) */
     .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
     .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
@@ -48,19 +48,20 @@
     .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
     ol{ margin:12px 0 0; padding:0 0 0 22px; }
     li{ margin:10px 0; line-height:1.5; }
-
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
 
     /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
-
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
+    .dot.na{ background:#999; box-shadow:none; }
 
-    /* Owner chip bottom-left */
-    .owner-chip{ position:fixed; left:14px; bottom:14px; z-index:4; background:rgba(17,26,43,.86); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:13px; cursor:pointer; user-select:none;}
-    .owner-chip b{ color:#6cb6ff; }
+    /* Owner chip - bottom-left */
+    .owner{ position:fixed; left:14px; bottom:14px; z-index:4; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.86); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; cursor:pointer; user-select:none;}
+    .owner .gear{ font-weight:900; color:#9ecbff }
+    .owner .txt{ opacity:.9 }
+    .owner:hover{ box-shadow:0 0 0 2px rgba(108,182,255,.2) inset; }
 
     @media (max-width:560px){
       img.logo{ height:38px }
@@ -74,17 +75,17 @@
   <div class="overlay"></div>
 
   <div class="topbar">
-    <div class="logo-wrap" title="Double-click for owner settings">
+    <div class="logo-wrap">
       <a href="./" aria-label="Home">
-        <img src="./logo.png" alt="RustWire Logo" class="logo" id="logo" />
+        <img src="./logo.png" alt="RustWire Logo" class="logo" id="logoBtn" />
       </a>
     </div>
     <div class="btns">
-      <!-- Keep only Home + Open Secure Pair (matching style) -->
+      <!-- Pair page keeps only Home + Open Secure Pair -->
       <a class="molten" href="./" aria-label="Back Home">
         <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
       </a>
-      <a id="securePairBtn" class="molten" href="#" aria-label="Open Secure Pair">
+      <a id="securePairBtn" class="molten" href="#">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
@@ -108,7 +109,6 @@
       </ol>
 
       <div class="pair-actions">
-        <!-- Same style buttons kept minimal -->
         <a class="molten" href="./" aria-label="Back Home">
           <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
         </a>
@@ -121,113 +121,117 @@
     </div>
   </div>
 
-  <!-- Owner chip -->
-  <div class="owner-chip" id="ownerChip" title="Owner portal settings">Portal</div>
-
   <!-- Status badge -->
   <div class="status" id="status" aria-live="polite">
-    <span class="dot" id="dot"></span>
-    <span id="label">Checking status…</span>
+    <span class="dot na" id="dot"></span>
+    <span id="label">Portal not set</span>
+  </div>
+
+  <!-- Owner chip -->
+  <div class="owner" id="ownerChip" title="Owner: set portal URL">
+    <span class="gear">⚙️</span>
+    <span class="txt">Portal</span>
   </div>
 
   <script>
-    // ====== Owner protection (double-click logo) ======
-    const OWNER_HASH_KEY = 'rustwire.ownerHash';
+    // ====== CONFIG ======
+    const OWNER_PASSPHRASE = 'YOUR_OWNER_PASSPHRASE_HERE'; // <- change this
     const PORTAL_KEY = 'rustwire.portalOrigin';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
 
-    const logo = document.getElementById('logo');
-    const ownerChip = document.getElementById('ownerChip');
-
-    let ownerUnlocked = false;
-    function sha(s){ return crypto.subtle.digest('SHA-256', new TextEncoder().encode(s)).then(b=>Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')); }
-
-    async function ensureOwner(){
-      if(ownerUnlocked) return true;
-      const stored = localStorage.getItem(OWNER_HASH_KEY);
-      const pass = prompt('Owner passphrase:');
-      if(!pass){ alert('Cancelled'); return false; }
-      const h = await sha(pass);
-      if(stored && stored !== h){ alert('Wrong passphrase'); return false; }
-      if(!stored){ localStorage.setItem(OWNER_HASH_KEY, h); }
-      ownerUnlocked = true;
-      return true;
-    }
-
-    logo.addEventListener('dblclick', async ()=>{
-      if(await ensureOwner()){
-        const cur = localStorage.getItem(PORTAL_KEY) || '';
-        const val = prompt('Set Portal URL (https://…):', cur);
-        if(val){
-          try{ new URL(val); localStorage.setItem(PORTAL_KEY, val); location.reload(); }
-          catch{ alert('Invalid URL'); }
-        }
+    // ====== Owner gate ======
+    async function ensureOwner() {
+      const ok = localStorage.getItem('rustwire.ownerOK') === 'yes';
+      if (ok) return true;
+      const input = prompt('Owner passphrase:');
+      if (!input) return false;
+      if (input === OWNER_PASSPHRASE) {
+        localStorage.setItem('rustwire.ownerOK', 'yes');
+        alert('Owner unlocked.');
+        return true;
       }
-    });
-
-    ownerChip.addEventListener('click', async ()=>{
-      if(await ensureOwner()){
-        const cur = localStorage.getItem(PORTAL_KEY) || '';
-        const val = prompt('Set Portal URL (https://…):', cur);
-        if(val){
-          try{ new URL(val); localStorage.setItem(PORTAL_KEY, val); location.reload(); }
-          catch{ alert('Invalid URL'); }
-        }
-      }
-    });
-
-    // ====== Build Open Secure Pair link from stored portal ======
-    function getPortal(){ return localStorage.getItem(PORTAL_KEY) || ''; }
-
-    function applyLinks(){
-      const base = getPortal();
-      const link = base ? `${base}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}` : '#';
-      for(const id of ['securePairBtn','securePairBtn2']){
-        const el = document.getElementById(id);
-        if(el){
-          el.href = link;
-          el.setAttribute('target','_blank');
-          el.setAttribute('rel','noopener');
-        }
-      }
-    }
-
-    applyLinks();
-
-    // ====== Status badge with robust probes ======
-    const dot = document.getElementById('dot');
-    const label = document.getElementById('label');
-
-    function setStatus(on){
-      dot.classList.toggle('on', on);
-      dot.classList.toggle('off', !on);
-      label.textContent = on ? 'Portal Online' : 'Portal Offline';
-    }
-
-    async function probe(url){
-      const targets = [`${url}/healthz`, url];
-      for(const t of targets){
-        try{
-          const ctrl = new AbortController();
-          const to = setTimeout(()=>ctrl.abort(), 4000);
-          await fetch(t, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
-          clearTimeout(to);
-          return true;
-        }catch{}
-      }
+      alert('Incorrect passphrase.');
       return false;
     }
 
-    async function check(){
-      const origin = getPortal();
-      if(!origin){ setStatus(false); label.textContent = 'Portal URL not set'; return; }
-      const ok = await probe(origin);
-      setStatus(ok);
+    function normalizeOrigin(val){
+      try{
+        const u = new URL(val);
+        if (/(^|\.)developers\.cloudflare\.com$/i.test(u.hostname)) {
+          throw new Error('Cloudflare docs is not a portal.');
+        }
+        return u.origin;
+      }catch(e){ throw new Error('Invalid URL'); }
     }
 
-    check();
-    setInterval(check, 20000);
+    async function setPortalInteractive() {
+      const cur = localStorage.getItem(PORTAL_KEY) || '';
+      const val = prompt('Set Portal URL (https://…):', cur);
+      if (!val) return;
+      try {
+        const origin = normalizeOrigin(val);
+        localStorage.setItem(PORTAL_KEY, origin);
+        buildSecureLinks();
+        updateStatus();
+        alert('Portal set to: ' + origin);
+      } catch(e) {
+        alert('Invalid portal URL: ' + e.message);
+      }
+    }
+
+    document.getElementById('ownerChip').addEventListener('click', async () => {
+      if (await ensureOwner()) await setPortalInteractive();
+    });
+    document.getElementById('logoBtn').addEventListener('dblclick', async () => {
+      if (await ensureOwner()) await setPortalInteractive();
+    });
+
+    // ====== Secure Pair links ======
+    function getOrigin(){ return localStorage.getItem(PORTAL_KEY) || ''; }
+
+    function buildSecureLinks(){
+      const origin = getOrigin();
+      const btns = [document.getElementById('securePairBtn'), document.getElementById('securePairBtn2')].filter(Boolean);
+      if (!origin){
+        btns.forEach(b => b.setAttribute('href','#'));
+        return;
+      }
+      const url = origin + '/start?guild_id=' + encodeURIComponent(GUILD_ID) + '&channel_id=' + encodeURIComponent(CHANNEL_ID);
+      btns.forEach(b => b.setAttribute('href', url));
+    }
+
+    // ====== Status badge & ping ======
+    const dot = document.getElementById('dot');
+    const label = document.getElementById('label');
+
+    function setBadge(state, text){
+      dot.classList.remove('on','off','na');
+      dot.classList.add(state);
+      label.textContent = text;
+    }
+
+    async function ping(origin){
+      const url = origin + '/healthz';
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(), 3500);
+      try{
+        await fetch(url, {method:'GET', cache:'no-store', mode:'no-cors', signal:ctrl.signal});
+        clearTimeout(t);
+        return true;
+      }catch{ clearTimeout(t); return false; }
+    }
+
+    async function updateStatus(){
+      const origin = getOrigin();
+      if (!origin){ setBadge('na','Portal not set'); return; }
+      const ok = await ping(origin);
+      setBadge(ok?'on':'off', ok?'Portal Online':'Portal Offline');
+    }
+
+    buildSecureLinks();
+    updateStatus();
+    setInterval(updateStatus, 20000);
   </script>
 </body>
 </html>
