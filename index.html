@@ -43,8 +43,7 @@
                  radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%);
       filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
     .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
-    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
+    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
     .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
 
     @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
@@ -63,6 +62,9 @@
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
+
+    /* Owner chip + hotspot */
+    #rw-hotspot{ position:fixed; left:0; bottom:0; width:22px; height:22px; z-index:9998; }
   </style>
 </head>
 <body>
@@ -102,47 +104,57 @@
   </div>
 
   <!-- Status badge -->
-  <div class="status" id="status" aria-live="polite">
+  <div class="status" id="status" aria-live="polite" title="Alt-click to toggle admin chip">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
 
-  <!-- Owner-only portal chip (hidden by default; toggle with ⌃⇧P or ?rwadmin=1) -->
+  <!-- Invisible hotspot to toggle the chip by dbl-click / long-press -->
+  <div id="rw-hotspot" title=""></div>
+
+  <!-- Owner-only portal chip (toggle with ⌥⇧P / ⌃⇧P / ?rwadmin=1 / hotspot / Alt-click status) -->
   <script>
   (function(){
     const STORAGE_KEY='RUSTWIRE_PORTAL_ORIGIN';
+    const ADMIN_KEY='RUSTWIRE_ADMIN';
     const DEFAULT_ORIGIN='https://middle-dictionary-raised-conferencing.trycloudflare.com'; // fallback
     const GUILD_ID='1419192329713094689';
     const CHANNEL_ID='1422058709835583570';
 
-    // Helpers
+    // Admin param toggles persistence
     const qs = new URLSearchParams(location.search);
-    const forceShow = qs.get('rwadmin') === '1';
-    const forceHide = qs.get('rwadmin') === '0';
+    if (qs.get('rwadmin') === '1') localStorage.setItem(ADMIN_KEY,'1');
+    if (qs.get('rwadmin') === '0') localStorage.removeItem(ADMIN_KEY);
+    const isAdmin = !!localStorage.getItem(ADMIN_KEY);
 
     function getOrigin(){
       const v = localStorage.getItem(STORAGE_KEY);
-      try {
-        if (v) return new URL(v).origin;
-      } catch(e){}
+      try { if (v) return new URL(v).origin; } catch(e){}
       try { return new URL(DEFAULT_ORIGIN).origin } catch(e){ return '' }
     }
-
     function setOrigin(newUrl){
       const u = new URL(newUrl);
       if(u.protocol !== 'https:') throw new Error('Use https://');
       localStorage.setItem(STORAGE_KEY, u.origin);
+      return u.origin;
     }
 
-    function ping(ORIGIN){
+    function wireSecurePair(origin){
+      const sp=document.getElementById('securePairBtn');
+      if(sp && origin){
+        sp.href = `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+      }
+    }
+
+    function ping(origin){
       const dot=document.getElementById('dot');
       const label=document.getElementById('label');
-      if(!ORIGIN){
+      if(!origin){
         dot.classList.remove('on'); dot.classList.add('off');
         label.textContent='Portal URL not set';
         return;
       }
-      const PING = `${ORIGIN}/healthz`;
+      const PING = `${origin}/healthz`;
       (async()=>{
         try{
           const ctrl = new AbortController();
@@ -158,32 +170,30 @@
       })();
     }
 
-    function wireSecurePair(ORIGIN){
-      const sp=document.getElementById('securePairBtn');
-      if(sp && ORIGIN){
-        sp.href = `${ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
-      }
-    }
-
-    // Build chip UI
-    function makeChip(ORIGIN){
+    function makeChip(){
       const wrap=document.createElement('div');
       wrap.id='rw-portal-chip';
       wrap.style.cssText='position:fixed;left:12px;bottom:12px;z-index:9999;background:rgba(17,26,43,.92);border:1px solid #243151;color:#cfe2ff;border-radius:12px;padding:8px;display:none;align-items:center;gap:8px;font:600 13px system-ui';
       const host=document.createElement('span');
       host.style.cssText='max-width:46vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis';
+      const direct=document.createElement('a');
+      direct.textContent='Open';
+      direct.target='_blank';
+      direct.rel='noopener';
+      direct.style.cssText='text-decoration:none;border:1px dashed #2a3556;padding:6px 9px;border-radius:8px;color:#cfe2ff';
       const btn=document.createElement('button');
       btn.textContent='Change';
       btn.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
       const hide=document.createElement('button');
       hide.textContent='Hide';
       hide.style.cssText='border:1px solid #2a3556;background:#1c2540;color:#cfe2ff;border-radius:8px;padding:6px 9px;cursor:pointer';
-      wrap.append(host,btn,hide);
+      wrap.append(host,direct,btn,hide);
       document.body.appendChild(wrap);
 
       function refresh(){
         const o=getOrigin();
         host.textContent = o ? `Portal: ${o}` : 'Portal: (not set)';
+        direct.href = o ? `${o}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}` : '#';
       }
       refresh();
 
@@ -192,38 +202,47 @@
         const v=prompt('Portal URL (must start with https):', cur);
         if(!v) return;
         try{
-          setOrigin(v);
+          const o=setOrigin(v);
           refresh();
-          const o=getOrigin();
           wireSecurePair(o);
           ping(o);
-        }catch(err){
-          alert(err.message||'Invalid URL');
-        }
+        }catch(err){ alert(err.message||'Invalid URL'); }
       };
-
       hide.onclick=function(){ wrap.style.display='none' };
 
-      // Expose toggler
       function toggle(){
         wrap.style.display = (wrap.style.display==='none' || !wrap.style.display) ? 'flex' : 'none';
       }
-      // Hotkey: ⌃⇧P
-      window.addEventListener('keydown', (e)=>{
-        if(e.ctrlKey && e.shiftKey && (e.key==='p' || e.key==='P')){ e.preventDefault(); toggle(); }
+
+      // Hotkeys: ⌥⇧P and ⌃⇧P
+      window.addEventListener('keydown',(e)=>{
+        const key = (e.key||'').toLowerCase();
+        if ((e.altKey && e.shiftKey && key==='p') || (e.ctrlKey && e.shiftKey && key==='p')) {
+          e.preventDefault(); toggle();
+        }
       });
 
-      if(forceShow) wrap.style.display='flex';
-      if(forceHide) wrap.style.display='none';
+      // Hotspot dbl-click or long-press
+      const hotspot = document.getElementById('rw-hotspot');
+      let pressTimer=null;
+      hotspot.addEventListener('dblclick',()=> toggle());
+      hotspot.addEventListener('mousedown',()=>{ pressTimer=setTimeout(()=>toggle(),800) });
+      hotspot.addEventListener('mouseup',()=>{ clearTimeout(pressTimer) });
+      hotspot.addEventListener('mouseleave',()=>{ clearTimeout(pressTimer) });
 
-      return {toggle, refresh};
+      // Alt-click on status badge
+      const status=document.getElementById('status');
+      status.addEventListener('click',(e)=>{ if(e.altKey && isAdmin){ e.preventDefault(); toggle(); } });
+
+      // Auto-show if forced via param or first-time admin
+      if (qs.get('rwadmin')==='1' || isAdmin) wrap.style.display='flex';
+      return {toggle,refresh};
     }
 
-    // Init
     const ORIGIN = getOrigin();
     wireSecurePair(ORIGIN);
     ping(ORIGIN);
-    const chip = makeChip(ORIGIN);
+    const chip = makeChip();
 
     // Periodic re-ping
     setInterval(()=> ping(getOrigin()), 20000);
