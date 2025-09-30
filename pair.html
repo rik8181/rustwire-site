@@ -33,7 +33,8 @@
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
     .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0; background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%), radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%), radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%); filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
     .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
-    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
+    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
     .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
 
     @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
@@ -79,8 +80,8 @@
         <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
       </a>
       <!-- Secure Pair -->
-      <a id="securePairBtn" class="molten" href="#" rel="noopener">
-        <span class="molten__lava"></span><span class="molten__label" id="secureLabel">Open Secure Pair</span><span class="molten__drip"></span>
+      <a id="securePairBtn" class="molten" href="#" aria-disabled="true">
+        <span class="molten__lava"></span><span id="secureLabel" class="molten__label">Secure Pair (checking…)</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
@@ -122,55 +123,68 @@
   </div>
 
   <script>
-    // ====== CONFIG (update when tunnel URL changes) ======
-    // Use the value printed in your bot logs after: "[portal] publicUrl = ..."
-    const PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
-    const GUILD_ID = '1419192329713094689';
+    // ===================== CONFIG — EDIT THESE =====================
+    const GUILD_ID   = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
-    // IMPORTANT: include your portal shared token (from secrets.json -> PORTAL_SHARED_TOKEN)
-    const PORTAL_TOKEN = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
+    const PORTAL_TOKEN = 'REPLACE_WITH_PORTAL_SHARED_TOKEN';
 
-    const secureBtn = document.getElementById('securePairBtn');
-    const secureLabel = document.getElementById('secureLabel');
-
-    // Build the Secure Pair URL (primary param 'token'; a few builds also accept 'shared' or 'key')
-    const SECURE_URLS = [
-      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&token=${encodeURIComponent(PORTAL_TOKEN)}`,
-      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&shared=${encodeURIComponent(PORTAL_TOKEN)}`,
-      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&key=${encodeURIComponent(PORTAL_TOKEN)}`
+    // Put your current URLs here (order = priority)
+    const CANDIDATE_ORIGINS = [
+      'https://REPLACE_WITH_TRYCLOUDFLARE_URL', // e.g. https://middle-dictionary-raised-conferencing.trycloudflare.com
+      'https://REPLACE_WITH_LOCALTUNNEL_URL',   // e.g. https://major-states-count.loca.lt
+      'https://REPLACE_WITH_DUCKDNS_HOST'       // e.g. https://rustwire-portal.duckdns.org
     ];
-    // Default to first
-    secureBtn.href = SECURE_URLS[0];
+    // ===============================================================
 
-    // Status badge ping
-    const PING = `${PORTAL_ORIGIN}/healthz`;
-    const dot = document.getElementById('dot');
+    const secureBtn   = document.getElementById('securePairBtn');
+    const secureLabel = document.getElementById('secureLabel');
+    const dot   = document.getElementById('dot');
     const label = document.getElementById('label');
 
-    async function check() {
+    function buildStartUrls(origin) {
+      const base = `${origin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+      return [
+        `${base}&token=${encodeURIComponent(PORTAL_TOKEN)}`,
+        `${base}&shared=${encodeURIComponent(PORTAL_TOKEN)}`,
+        `${base}&key=${encodeURIComponent(PORTAL_TOKEN)}`
+      ];
+    }
+    async function isUp(origin) {
+      if (!origin || origin.includes('REPLACE_WITH')) return false;
+      const PING = `${origin}/healthz`;
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
-        // mode:no-cors -> resolves if reachable (healthz doesn't need CORS)
         await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
-        dot.classList.remove('off'); dot.classList.add('on');
-        label.textContent = 'Portal Online';
-        secureBtn.setAttribute('aria-disabled', 'false');
-      } catch {
-        dot.classList.remove('on'); dot.classList.add('off');
-        label.textContent = 'Portal Offline';
-        secureBtn.setAttribute('aria-disabled', 'true');
-      }
+        return true;
+      } catch { return false; }
     }
-    check();
-    setInterval(check, 20000);
+    async function pickPortal() {
+      for (const origin of CANDIDATE_ORIGINS) {
+        if (await isUp(origin)) {
+          const [u1] = buildStartUrls(origin);
+          secureBtn.href = u1;
+          secureBtn.removeAttribute('aria-disabled');
+          secureLabel.textContent = 'Open Secure Pair';
+          dot.classList.remove('off'); dot.classList.add('on');
+          label.textContent = 'Portal Online';
+          return origin;
+        }
+      }
+      secureBtn.setAttribute('aria-disabled','true');
+      secureLabel.textContent = 'Secure Pair (offline)';
+      dot.classList.remove('on'); dot.classList.add('off');
+      label.textContent = 'Portal Offline';
+      return null;
+    }
+    pickPortal();
+    setInterval(pickPortal, 20000);
 
-    // If portal looks offline, prevent a confusing click
     secureBtn.addEventListener('click', (e) => {
       if (secureBtn.getAttribute('aria-disabled') === 'true') {
         e.preventDefault();
-        alert('Portal seems offline. Wait for the green status dot and try again.\nIf it stays offline, update PORTAL_ORIGIN to the latest trycloudflare URL from your bot logs.');
+        alert('Secure Pair portal is offline. Restart the bot to print a fresh URL (or fix DuckDNS/Nginx), then reload this page.');
       }
     });
   </script>
