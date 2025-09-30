@@ -27,7 +27,7 @@
     img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
     .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 
-    /* Molten button (same as home) */
+    /* Molten button (shared style) */
     .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
     .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
@@ -63,6 +63,9 @@
     .owner .txt{ opacity:.9 }
     .owner:hover{ box-shadow:0 0 0 2px rgba(108,182,255,.2) inset; }
 
+    /* Disabled look for offline/unset */
+    .disabled{ opacity:.6; pointer-events:none; }
+
     @media (max-width:560px){
       img.logo{ height:38px }
       .topbar{ padding:10px 12px }
@@ -81,11 +84,11 @@
       </a>
     </div>
     <div class="btns">
-      <!-- Pair page keeps only Home + Open Secure Pair -->
+      <!-- Pair page: only Home + Open Secure Pair -->
       <a class="molten" href="./" aria-label="Back Home">
         <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
       </a>
-      <a id="securePairBtn" class="molten" href="#">
+      <a id="securePairBtn" class="molten" href="#" target="_blank" rel="noopener" aria-label="Open Secure Pair">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
@@ -112,7 +115,7 @@
         <a class="molten" href="./" aria-label="Back Home">
           <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
         </a>
-        <a id="securePairBtn2" class="molten" href="#" aria-label="Open Secure Pair">
+        <a id="securePairBtn2" class="molten" href="#" target="_blank" rel="noopener" aria-label="Open Secure Pair">
           <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
         </a>
       </div>
@@ -135,10 +138,16 @@
 
   <script>
     // ====== CONFIG ======
-    const OWNER_PASSPHRASE = 'M@drid19810811'; // <- change this
+    const OWNER_PASSPHRASE = 'M@drid19810811'; // keep in sync with index.html
+    const DEFAULT_PORTAL_ORIGIN = 'https://portal.rustwire.co.uk';
     const PORTAL_KEY = 'rustwire.portalOrigin';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
+
+    // Initialize default once if not set
+    if (!localStorage.getItem(PORTAL_KEY)) {
+      localStorage.setItem(PORTAL_KEY, DEFAULT_PORTAL_ORIGIN);
+    }
 
     // ====== Owner gate ======
     async function ensureOwner() {
@@ -190,15 +199,29 @@
     // ====== Secure Pair links ======
     function getOrigin(){ return localStorage.getItem(PORTAL_KEY) || ''; }
 
+    let portalOnline = false;
+
     function buildSecureLinks(){
       const origin = getOrigin();
       const btns = [document.getElementById('securePairBtn'), document.getElementById('securePairBtn2')].filter(Boolean);
       if (!origin){
-        btns.forEach(b => b.setAttribute('href','#'));
+        btns.forEach(b => { b.href = '#'; b.classList.add('disabled'); });
         return;
       }
       const url = origin + '/start?guild_id=' + encodeURIComponent(GUILD_ID) + '&channel_id=' + encodeURIComponent(CHANNEL_ID);
-      btns.forEach(b => b.setAttribute('href', url));
+      btns.forEach(b => { b.href = url; if (portalOnline) b.classList.remove('disabled'); });
+    }
+
+    // prevent navigation if offline/unset
+    function guardClicks(){
+      const btns = [document.getElementById('securePairBtn'), document.getElementById('securePairBtn2')].filter(Boolean);
+      btns.forEach(b => b.addEventListener('click', (e) => {
+        const origin = getOrigin();
+        if (!origin || !portalOnline){
+          e.preventDefault();
+          alert('Portal is offline or not set. Use the ⚙️ Portal button (bottom-left) or double-click the logo to set it.');
+        }
+      }));
     }
 
     // ====== Status badge & ping ======
@@ -224,11 +247,14 @@
 
     async function updateStatus(){
       const origin = getOrigin();
-      if (!origin){ setBadge('na','Portal not set'); return; }
+      if (!origin){ portalOnline = false; setBadge('na','Portal not set'); buildSecureLinks(); return; }
       const ok = await ping(origin);
+      portalOnline = ok;
       setBadge(ok?'on':'off', ok?'Portal Online':'Portal Offline');
+      buildSecureLinks();
     }
 
+    guardClicks();
     buildSecureLinks();
     updateStatus();
     setInterval(updateStatus, 20000);
