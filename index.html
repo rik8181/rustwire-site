@@ -116,11 +116,17 @@
   </div>
 
   <script>
-    // ====== CONFIG (edit constants) ======
-    const OWNER_PASSPHRASE = 'M@drid19810811'; // <- change this
+    // ====== CONFIG ======
+    const OWNER_PASSPHRASE = 'M@drid19810811';           // <- your passphrase
+    const DEFAULT_PORTAL_ORIGIN = 'https://portal.rustwire.co.uk'; // <- new Cloudflare hostname
     const PORTAL_KEY = 'rustwire.portalOrigin';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
+
+    // If no portal saved, initialize to default
+    if (!localStorage.getItem(PORTAL_KEY)) {
+      localStorage.setItem(PORTAL_KEY, DEFAULT_PORTAL_ORIGIN);
+    }
 
     // ====== Owner gate ======
     async function ensureOwner() {
