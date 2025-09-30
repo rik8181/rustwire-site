@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- v2025-09-30-5 -->
+  <!-- v2025-09-30-7 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Pair Rust+ • RustWire</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
-  <link rel="icon" href="./logo.png" type="image/png" />
+  <link rel="icon" href="./logo.png?v=7" type="image/png" />
   <style>
     :root{--rust-orange:#f0672a;--steel-700:#1e2940;--btn-w:200px;--btn-h:56px}
     html,body{height:100%}
@@ -40,33 +40,34 @@
     ol{margin:12px 0 0;padding:0 0 0 22px}
     li{margin:10px 0;line-height:1.5}
 
-    /* Status (shows only after you change portal locally) */
     .status{position:fixed;right:14px;bottom:14px;z-index:3;display:none;gap:8px;align-items:center;background:rgba(17,26,43,.78);border:1px solid #243151;padding:8px 12px;border-radius:12px;backdrop-filter:blur(6px);font-size:14px;user-select:none}
     .dot{width:10px;height:10px;border-radius:50%;background:#aaa;box-shadow:0 0 6px rgba(255,255,255,.25)}
     .dot.on{background:#27d17f;box-shadow:0 0 10px rgba(39,209,127,.65)}
     .dot.off{background:#e05555;box-shadow:0 0 10px rgba(224,85,85,.55)}
 
-    /* Portal chip (always visible; local only) */
     .ownerChip{position:fixed;left:14px;bottom:14px;z-index:4;display:flex;gap:8px;align-items:center;background:rgba(17,26,43,.9);border:1px solid #2a3556;padding:8px 10px;border-radius:12px;backdrop-filter:blur(6px);font-size:13px}
     .ownerChip .mini{opacity:.75}
     .ownerChip button{cursor:pointer;border:none;border-radius:10px;padding:8px 10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#fff;background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);box-shadow:inset 0 0 10px rgba(0,0,0,.6),0 6px 18px rgba(240,103,42,.28)}
 
     .ver{position:fixed;left:14px;bottom:54px;z-index:4;opacity:.8;font-size:12px;background:rgba(17,26,43,.7);border:1px solid #2a3556;padding:3px 7px;border-radius:8px}
+    .assetErr{display:none;position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:5;background:rgba(120,0,0,.75);border:1px solid rgba(255,80,80,.7);padding:8px 12px;border-radius:10px;font-size:13px}
+    .assetErr a{color:#ffd6d6;text-decoration:underline}
 
     @media (max-width:560px){img.logo{height:38px}.topbar{padding:10px 12px}:root{--btn-w:180px;--btn-h:52px}}
   </style>
 </head>
 <body>
-  <video id="bgvid" autoplay muted loop playsinline preload="auto" poster="./logo.png?v=5">
-    <source src="./bg.mp4?v=5" type="video/mp4" />
+  <video id="bgvid" autoplay muted loop playsinline preload="auto" poster="./logo.png?v=7">
+    <source src="./bg.mp4?v=7" type="video/mp4" />
+    <source src="/bg.mp4?v=7" type="video/mp4" />
   </video>
   <div class="overlay"></div>
 
   <div class="topbar">
     <div class="logo-wrap">
       <a href="./" aria-label="Home">
-        <img src="./logo.png?v=5" alt="RustWire Logo" class="logo" onerror="this.style.display='none';document.getElementById('logo-fb').style.display='block';" />
-        <span id="logo-fb" class="logo-fb">RustWire</span>
+        <img id="logoImg" src="./logo.png?v=7" alt="RustWire Logo" class="logo" />
+        <span id="logoText" class="logo-fb">RustWire</span>
       </a>
     </div>
     <div class="btns">
@@ -109,7 +110,11 @@
     <button id="changePortalBtn">Change</button>
     <a id="clearPortalBtn" class="mini" href="#" title="Reset to default">reset</a>
   </div>
-  <div class="ver">v2025-09-30-5</div>
+
+  <div class="ver">v2025-09-30-7</div>
+  <div class="assetErr" id="assetErr">
+    Assets missing: check that <code>bg.mp4</code> and <code>logo.png</code> exist in the same folder as this page. Try opening <a id="testLogo" href="#">logo</a> / <a id="testVideo" href="#">video</a> directly.
+  </div>
 
   <script>
     const DEFAULT_PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
@@ -127,7 +132,6 @@
     function setSecureLink(){
       const href = `${portalOrigin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
       secureBtn.href = href;
-      console.log('[RW] Secure Pair URL:', href);
     }
     async function pingPortal(){
       if (saved) statusBox.style.display = 'flex';
@@ -145,6 +149,7 @@
       }
     }
 
+    // Owner chip
     document.getElementById('changePortalBtn').onclick=()=>{
       const cur = localStorage.getItem('portalOrigin') || DEFAULT_PORTAL_ORIGIN;
       const val = prompt('Enter portal URL (e.g. https://example.tld):', cur);
@@ -160,8 +165,45 @@
       location.reload();
     };
 
+    // Assets fallback & tip
+    const assetErr = document.getElementById('assetErr');
+    const testLogo = document.getElementById('testLogo');
+    const testVideo = document.getElementById('testVideo');
+
+    const logoImg = document.getElementById('logoImg');
+    const logoText = document.getElementById('logoText');
+
+    logoImg.addEventListener('error', ()=>{
+      if (!logoImg.dataset.fallbackTried){
+        logoImg.dataset.fallbackTried='1';
+        logoImg.src = '/logo.png?v=7';
+        return;
+      }
+      logoImg.style.display='none';
+      logoText.style.display='block';
+      showAssetTip();
+    });
+
     const v=document.getElementById('bgvid');
-    v?.addEventListener('error',()=>{v.remove();document.body.style.background='#0b0f1a';});
+    function videoFailed(){
+      if (!v.dataset.fallbackTried){
+        v.dataset.fallbackTried='1';
+        v.innerHTML = '<source src="/bg.mp4?v=7" type="video/mp4" /><source src="./bg.mp4?v=7" type="video/mp4" />';
+        v.load(); v.play().catch(()=>{});
+        return;
+      }
+      v.remove();
+      document.body.style.background='#0b0f1a';
+      showAssetTip();
+    }
+    v.addEventListener('error', videoFailed);
+    v.addEventListener('stalled', videoFailed);
+
+    function showAssetTip(){
+      assetErr.style.display='block';
+      testLogo.href = new URL('./logo.png?v=7', location.href).href;
+      testVideo.href = new URL('./bg.mp4?v=7', location.href).href;
+    }
 
     setSecureLink();
     pingPortal();
