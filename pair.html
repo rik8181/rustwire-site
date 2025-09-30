@@ -4,7 +4,7 @@
   <!-- Basic SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Pair Rust+ • RustWire</title>
+  <title>Pair Rust+ • RustWire • v2</title>
   <meta name="description" content="Link your Rust server with RustWire through the Rust+ app." />
   <link rel="icon" href="./logo.png" type="image/png" />
 
@@ -53,10 +53,13 @@
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; user-select:none; }
 
     /* Owner chip (bottom-left) */
-    .ownerChip{ position:fixed; left:14px; bottom:14px; z-index:4; display:none; gap:10px; align-items:center; background:rgba(17,26,43,.9); border:1px solid #2a3556; padding:8px 10px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
+    .ownerChip{ position:fixed; left:14px; bottom:34px; z-index:4; display:none; gap:10px; align-items:center; background:rgba(17,26,43,.9); border:1px solid #2a3556; padding:8px 10px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .ownerChip .chipLabel{ opacity:.9 }
     .ownerChip .chipBtn{ cursor:pointer; border:none; border-radius:10px; padding:8px 10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:#fff; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); }
     .ownerChip .mini{ font-size:12px; opacity:.8; cursor:pointer; text-decoration:underline; }
+
+    /* Version badge */
+    .verBadge{ position:fixed; left:14px; bottom:10px; z-index:4; opacity:.65; font-size:12px; background:rgba(17,26,43,.7); border:1px solid #2a3556; padding:3px 7px; border-radius:8px; }
 
     @media (max-width:560px){
       img.logo{ height:38px }
@@ -72,7 +75,7 @@
   <div class="topbar">
     <div class="logo-wrap">
       <a href="./" aria-label="Home">
-        <img src="./logo.png" alt="RustWire Logo" class="logo" />
+        <img src="./logo.png" alt="RustWire Logo" class="logo" id="logo" />
       </a>
     </div>
     <div class="btns">
@@ -103,7 +106,6 @@
         <li><strong>Approve</strong> the request in the Rust+ app on your phone.</li>
       </ol>
 
-      <!-- Removed "Join Discord" and "Add Bot" big buttons on this page -->
       <p style="margin-top:10px;opacity:.85">Need help? Ping us in <strong>#support</strong> on our Discord.</p>
     </div>
   </div>
@@ -121,8 +123,12 @@
     <span class="mini" id="resetPortalBtn" title="Use built-in default">reset</span>
   </div>
 
+  <!-- Version badge -->
+  <div class="verBadge">v2025-09-30</div>
+
   <script>
     // ====== CONFIG ======
+    const VERSION = 'v2025-09-30';
     const DEFAULT_PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
@@ -143,14 +149,14 @@
     const changePortalBtn = document.getElementById('changePortalBtn');
     const resetPortalBtn = document.getElementById('resetPortalBtn');
     const statusEl = document.getElementById('status');
+    const logo = document.getElementById('logo');
 
-    // Wire Secure Pair link
     function applyPortalToLinks() {
       const base = resolvePortalOrigin();
       secureBtn.href = `${base}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+      console.log('[RW] SecurePair →', secureBtn.href);
     }
 
-    // Status badge ping
     async function pingPortal() {
       const PING = `${resolvePortalOrigin()}/healthz`;
       try {
@@ -166,13 +172,10 @@
       }
     }
 
-    // Owner chip visibility toggle
     function setChipVisible(v){ ownerChip.style.display = v ? 'flex' : 'none'; }
     function toggleChip(){ setChipVisible(ownerChip.style.display !== 'flex'); }
-
     if (isOwner() && localStorage.getItem('rwchip') !== 'hidden') setChipVisible(true);
 
-    // Alt-click status badge toggles chip (owner only)
     statusEl.addEventListener('click',(e)=>{
       if (!isOwner()) return;
       if (e.altKey) {
@@ -181,9 +184,17 @@
       }
     });
 
-    // Owner actions
+    let logoClicks=0, logoTimer=null;
+    logo.addEventListener('click', ()=>{
+      if (!isOwner()) return;
+      logoClicks++;
+      clearTimeout(logoTimer);
+      logoTimer = setTimeout(()=>{ logoClicks=0 }, 1000);
+      if (logoClicks>=3){ logoClicks=0; toggleChip(); localStorage.setItem('rwchip', ownerChip.style.display==='flex'?'shown':'hidden'); }
+    });
+
     changePortalBtn.addEventListener('click', ()=>{
-      if (!isOwner()) return alert('Owner mode only. Append ?rwadmin=1 once to this page.');
+      if (!isOwner()) return alert('Owner mode only. Open with ?rwadmin=1 once.');
       const cur = resolvePortalOrigin();
       const val = prompt('Enter Portal URL (https://…):', cur);
       if (!val) return;
@@ -201,11 +212,6 @@
       pingPortal();
     });
 
-    // Hotkeys (mac-safe) to toggle chip:
-    //  - Option+Shift+P  (⌥⇧P)
-    //  - Control+Shift+P (⌃⇧P)
-    //  - F10
-    //  - Triple-press Escape
     (function(){
       let escCount = 0, escTimer = null;
       window.addEventListener('keydown', (e)=>{
@@ -231,7 +237,6 @@
       });
     })();
 
-    // Init
     applyPortalToLinks();
     pingPortal();
     setInterval(pingPortal, 20000);
