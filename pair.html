@@ -56,6 +56,12 @@
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
+
+    @media (max-width:560px){
+      img.logo{ height:38px }
+      .topbar{ padding:10px 12px }
+      :root{ --btn-w: 180px; --btn-h: 52px; }
+    }
   </style>
 </head>
 <body>
@@ -115,7 +121,7 @@
     <span id="label">Checking status…</span>
   </div>
 
-  <!-- Owner-only portal chip (hidden by default; toggle with ⌘⌥P or ?rwadmin=1) -->
+  <!-- Owner-only portal chip (hidden by default; toggle with ⌃⇧P or ?rwadmin=1) -->
   <script>
   (function(){
     const STORAGE_KEY='RUSTWIRE_PORTAL_ORIGIN';
@@ -209,8 +215,9 @@
       function toggle(){
         wrap.style.display = (wrap.style.display==='none' || !wrap.style.display) ? 'flex' : 'none';
       }
+      // Hotkey: ⌃⇧P
       window.addEventListener('keydown',(e)=>{
-        if(e.metaKey && e.altKey && (e.key==='p'||e.key==='P')){ e.preventDefault(); toggle(); }
+        if(e.ctrlKey && e.shiftKey && (e.key==='p'||e.key==='P')){ e.preventDefault(); toggle(); }
       });
 
       if(forceShow) wrap.style.display='flex';
