@@ -1,58 +1,85 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <!-- Basic SEO -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RustWire • Rust+ Companion & Server Tools</title>
   <meta name="description" content="RustWire keeps your Rust server connected with Rust+, wipes, events, and map tools." />
   <link rel="icon" href="./logo.png" type="image/png" />
+
   <style>
     :root{
       --rust-orange:#f0672a; --steel-900:#0a0f1a; --steel-800:#111a2b; --steel-700:#1e2940;
-      --btn-w:200px; --btn-h:56px;
+      --btn-w: 200px; --btn-h: 56px;
     }
     html,body{height:100%}
-    body{margin:0;color:#e6e6e6;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;overflow:hidden;background:#000;}
-    #bgvid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(.9) contrast(1.05) saturate(1.06)}
-    .overlay{position:fixed;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,.5) 60%,rgba(0,0,0,.62) 100%);pointer-events:none}
-    .topbar{position:fixed;z-index:3;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;gap:12px;background:linear-gradient(180deg,rgba(10,15,26,.65),rgba(10,15,26,0))}
-    .logo-wrap{display:flex;align-items:center;gap:10px;min-width:0}
-    img.logo{height:44px;width:auto;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));user-select:none}
-    .btns{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .molten{position:relative;display:inline-grid;place-items:center;width:min(var(--btn-w),46vw);height:calc(var(--btn-h)*(min(var(--btn-w),46vw)/var(--btn-w)));padding:0;border:none;text-decoration:none;outline:none;cursor:pointer;color:#fff;font-weight:900;letter-spacing:.8px;text-transform:uppercase;background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);border-radius:12px;box-shadow:inset 0 0 10px rgba(0,0,0,.6),0 6px 18px rgba(240,103,42,.28);transition:transform .18s ease,filter .28s ease;overflow:hidden;isolation:isolate}
-    .molten:hover{transform:translateY(-1px) scale(1.015);filter:drop-shadow(0 8px 18px rgba(240,103,42,.45))}
-    .molten::after{content:"";position:absolute;inset:0;border-radius:12px;z-index:1;box-shadow:0 0 18px rgba(240,103,42,.3),inset 0 0 12px rgba(240,103,42,.22);animation:soft-flicker 3.2s ease-in-out infinite;pointer-events:none}
-    .molten__lava{--lava1:#ff9a3c;--lava2:#ff6a00;--lava3:#ff3b00;position:absolute;left:-60%;top:-10%;width:220%;height:200%;z-index:0;background:
-      radial-gradient(40% 55% at 20% 60%,var(--lava1),transparent 60%),
-      radial-gradient(45% 60% at 50% 70%,var(--lava2),transparent 60%),
-      radial-gradient(35% 50% at 80% 50%,var(--lava3),transparent 60%);
-      filter:blur(16px) saturate(140%);mix-blend-mode:screen;opacity:.88;animation:lava-flow 9s linear infinite}
-    .molten__label{position:relative;z-index:2;padding:0 16px;text-shadow:0 0 10px rgba(255,120,30,.9),0 0 26px rgba(255,90,0,.4),0 2px 0 rgba(0,0,0,.6);font-size:clamp(12px,2.4vw,16px);white-space:nowrap}
-    .molten__drip,.molten__drip::before,.molten__drip::after{position:absolute;bottom:-12px;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#ffa34d,#ff6a00 60%,#9a2900 100%);filter:blur(.25px);animation:drip 3.8s linear infinite;opacity:.9}
-    .molten__drip{left:24%}.molten__drip::before{content:"";left:220%;animation-delay:.9s}.molten__drip::after{content:"";left:420%;animation-delay:1.8s}
-    @keyframes lava-flow{0%{transform:translateX(0) translateY(0) scale(1)}50%{transform:translateX(-28%) translateY(-6%) scale(1.02)}100%{transform:translateX(-56%) translateY(0) scale(1)}}
-    @keyframes drip{0%{transform:translateY(0) scale(1);opacity:.95}70%{transform:translateY(22px) scale(1.06);opacity:.86}100%{transform:translateY(34px) scale(.85);opacity:0}}
-    @keyframes soft-flicker{0%{box-shadow:0 0 14px rgba(240,103,42,.22),inset 0 0 8px rgba(240,103,42,.13)}50%{box-shadow:0 0 20px rgba(240,103,42,.36),inset 0 0 12px rgba(240,103,42,.2)}100%{box-shadow:0 0 14px rgba(240,103,42,.22),inset 0 0 8px rgba(240,103,42,.13)}}
-    .bottom-center{position:fixed;z-index:2;left:50%;bottom:5vh;transform:translateX(-50%);width:min(860px,calc(100% - 32px));text-align:center}
-    .title-card{display:inline-block;background:rgba(17,26,43,.76);border:1px solid var(--steel-700);border-radius:16px;padding:16px 22px;backdrop-filter:blur(6px);box-shadow:0 12px 40px rgba(0,0,0,.5)}
-    .title-card h1{margin:0 0 6px;font-size:clamp(22px,5vw,34px);color:var(--rust-orange);letter-spacing:.5px;line-height:1.15}
-    .title-card p{margin:0;color:#f0f0f0;font-size:clamp(14px,2.6vw,18px)}
-    .link{color:#6cb6ff;text-decoration:none;border-bottom:1px dashed rgba(108,182,255,.5)}
-    .status{position:fixed;right:14px;bottom:14px;z-index:3;display:flex;gap:8px;align-items:center;background:rgba(17,26,43,.78);border:1px solid #243151;padding:8px 12px;border-radius:12px;backdrop-filter:blur(6px);font-size:14px}
-    .dot{width:10px;height:10px;border-radius:50%;background:#aaa;box-shadow:0 0 6px rgba(255,255,255,.25);transition:background .4s ease,box-shadow .4s ease}
-    .dot.on{background:#27d17f;box-shadow:0 0 10px rgba(39,209,127,.65)} .dot.off{background:#e05555;box-shadow:0 0 10px rgba(224,85,85,.55)}
-    .portal-chip{font-size:12px;opacity:.85}
-    @media (max-width:560px){img.logo{height:38px}.topbar{padding:10px 12px}:root{--btn-w:180px;--btn-h:52px}}
+    body{ margin:0;color:#e6e6e6; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; overflow:hidden; background:#000; }
+
+    /* Live wallpaper video */
+    #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
+    .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
+
+    /* Top bar + molten buttons */
+    .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
+    .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
+    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
+    .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+
+    .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw);
+      height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer;
+      color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase;
+      background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);
+      border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28);
+      transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
+    .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
+    .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
+    .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0;
+      background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%),
+                 radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%),
+                 radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%);
+      filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
+    .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
+    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%;
+      background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
+    .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
+
+    @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
+    @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86 } 100%{transform:translateY(34px) scale(.85); opacity:0 } }
+    @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
+
+    /* Center title card */
+    .bottom-center{ position:fixed; z-index:2; left:50%; bottom:5vh; transform:translateX(-50%); width:min(860px, calc(100% - 32px)); text-align:center; }
+    .title-card{ display:inline-block; background:rgba(17,26,43,.76); border:1px solid var(--steel-700); border-radius:16px; padding:16px 22px; backdrop-filter: blur(6px); box-shadow:0 12px 40px rgba(0,0,0,.5); }
+    .title-card h1{ margin:0 0 6px; font-size:clamp(22px,5vw,34px); color:var(--rust-orange); letter-spacing:.5px; line-height:1.15; }
+    .title-card p{ margin:0; color:#f0f0f0; font-size:clamp(14px,2.6vw,18px); }
+    .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
+
+    /* Status badge (bottom-right) */
+    .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
+    .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
+    .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
+    .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
+
+    /* Portal editor chip (bottom-left) */
+    .portal-fab{ position:fixed; left:14px; bottom:14px; z-index:3; display:flex; align-items:center; gap:10px;
+      background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:13px; }
+    .portal-host{ max-width:46vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; opacity:.9; }
+    .edit-btn{ appearance:none; border:1px solid #2a3556; background:#1c2540; color:#cfe2ff; border-radius:8px; padding:6px 9px; cursor:pointer; font-weight:600; }
+    .edit-btn:hover{ filter:brightness(1.1) }
+
+    @media (max-width:560px){ img.logo{ height:38px } .topbar{ padding:10px 12px } :root{ --btn-w: 180px; --btn-h: 52px; } }
   </style>
 </head>
 <body>
+  <!-- Live wallpaper -->
   <video id="bgvid" autoplay muted loop playsinline preload="auto" src="./bg.mp4"></video>
   <div class="overlay"></div>
 
+  <!-- Top buttons -->
   <div class="topbar">
     <div class="logo-wrap">
       <img src="./logo.png" alt="RustWire Logo" class="logo" />
-      <span class="portal-chip" id="portalLabel"></span>
     </div>
     <div class="btns">
       <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">
@@ -64,16 +91,14 @@
       <a class="molten" href="./pair.html">
         <span class="molten__lava"></span><span class="molten__label">Pair Rust+</span><span class="molten__drip"></span>
       </a>
+      <!-- Secure Pair -> hits your portal /start with guild/channel; portal will redirect to token-only -->
       <a id="securePairBtn" class="molten" href="#">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
-      </a>
-      <!-- Set Portal URL -->
-      <a id="setPortalBtn" class="molten" href="#" title="Set Portal URL">
-        <span class="molten__lava"></span><span class="molten__label">Set Portal URL</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
 
+  <!-- Center card -->
   <div class="bottom-center">
     <div class="title-card">
       <h1>RustWire</h1>
@@ -82,65 +107,73 @@
     </div>
   </div>
 
-  <div class="status" aria-live="polite">
+  <!-- Status badge -->
+  <div class="status" id="status" aria-live="polite">
     <span class="dot" id="dot"></span>
     <span id="label">Checking status…</span>
   </div>
 
+  <!-- Bottom-left portal URL editor -->
+  <div class="portal-fab" id="portalFab" aria-live="polite">
+    <span class="portal-host" id="portalHost">Portal: —</span>
+    <button class="edit-btn" id="portalEditBtn" type="button" title="Set/Change Portal URL">Change</button>
+  </div>
+
   <script>
-    // === CONFIG ===
-    const DEFAULT_PORTAL = 'https://middle-dictionary-raised-conferencing.trycloudflare.com'; // from your latest logs
-    const KEY = 'RUSTWIRE_PORTAL_ORIGIN';
+    // ====== CONFIG (update default if your tunnel changes) ======
+    const DEFAULT_PORTAL = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
+    const STORAGE_KEY = 'RUSTWIRE_PORTAL_ORIGIN';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
 
     function getPortalOrigin(){
       try{
-        const v = localStorage.getItem(KEY) || DEFAULT_PORTAL;
+        const v = localStorage.getItem(STORAGE_KEY) || DEFAULT_PORTAL;
         return new URL(v).origin;
       }catch{ return DEFAULT_PORTAL; }
     }
-    function setPortalOriginInteractive(){
+    function setPortalInteractive(){
       const cur = getPortalOrigin();
       const v = prompt('Paste Portal URL (must start with https):', cur);
       if(!v) return;
       try{
         const u = new URL(v);
         if(u.protocol !== 'https:') return alert('Please use https://');
-        localStorage.setItem(KEY, u.origin);
+        localStorage.setItem(STORAGE_KEY, u.origin);
         location.reload();
-      }catch{
-        alert('Invalid URL');
-      }
+      }catch{ alert('Invalid URL'); }
     }
 
     const PORTAL_ORIGIN = getPortalOrigin();
-    document.getElementById('setPortalBtn').addEventListener('click', (e)=>{ e.preventDefault(); setPortalOriginInteractive(); });
-    document.getElementById('portalLabel').textContent = `Portal: ${PORTAL_ORIGIN}`;
 
-    // Wire Secure Pair link
+    // Wire UI
+    document.getElementById('portalHost').textContent = `Portal: ${PORTAL_ORIGIN}`;
+    document.getElementById('portalEditBtn').addEventListener('click', setPortalInteractive);
+
+    // Secure Pair link
     const secureBtn = document.getElementById('securePairBtn');
     secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
 
-    // Status ping
+    // Status badge ping
+    const PING = `${PORTAL_ORIGIN}/healthz`;
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
-    const PING = `${PORTAL_ORIGIN}/healthz`;
 
-    async function check(){
-      try{
+    async function check() {
+      try {
         const ctrl = new AbortController();
-        const t = setTimeout(()=>ctrl.abort(), 4000);
-        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal:ctrl.signal });
+        const t = setTimeout(() => ctrl.abort(), 4000);
+        await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
-      }catch{
+      } catch {
         dot.classList.remove('on'); dot.classList.add('off');
         label.textContent = 'Portal Offline';
       }
     }
-    check(); setInterval(check, 20000);
+    check();
+    setInterval(check, 20000);
   </script>
 </body>
 </html>
