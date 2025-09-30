@@ -79,8 +79,8 @@
         <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
       </a>
       <!-- Secure Pair -->
-      <a id="securePairBtn" class="molten" href="#">
-        <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
+      <a id="securePairBtn" class="molten" href="#" rel="noopener">
+        <span class="molten__lava"></span><span class="molten__label" id="secureLabel">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
@@ -123,13 +123,24 @@
 
   <script>
     // ====== CONFIG (update when tunnel URL changes) ======
+    // Use the value printed in your bot logs after: "[portal] publicUrl = ..."
     const PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
+    // IMPORTANT: include your portal shared token (from secrets.json -> PORTAL_SHARED_TOKEN)
+    const PORTAL_TOKEN = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
 
-    // Secure Pair link
     const secureBtn = document.getElementById('securePairBtn');
-    secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+    const secureLabel = document.getElementById('secureLabel');
+
+    // Build the Secure Pair URL (primary param 'token'; a few builds also accept 'shared' or 'key')
+    const SECURE_URLS = [
+      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&token=${encodeURIComponent(PORTAL_TOKEN)}`,
+      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&shared=${encodeURIComponent(PORTAL_TOKEN)}`,
+      `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&key=${encodeURIComponent(PORTAL_TOKEN)}`
+    ];
+    // Default to first
+    secureBtn.href = SECURE_URLS[0];
 
     // Status badge ping
     const PING = `${PORTAL_ORIGIN}/healthz`;
@@ -140,17 +151,28 @@
       try {
         const ctrl = new AbortController();
         const t = setTimeout(() => ctrl.abort(), 3500);
+        // mode:no-cors -> resolves if reachable (healthz doesn't need CORS)
         await fetch(PING, { method:'GET', cache:'no-store', mode:'no-cors', signal: ctrl.signal });
         clearTimeout(t);
         dot.classList.remove('off'); dot.classList.add('on');
         label.textContent = 'Portal Online';
+        secureBtn.setAttribute('aria-disabled', 'false');
       } catch {
         dot.classList.remove('on'); dot.classList.add('off');
         label.textContent = 'Portal Offline';
+        secureBtn.setAttribute('aria-disabled', 'true');
       }
     }
     check();
     setInterval(check, 20000);
+
+    // If portal looks offline, prevent a confusing click
+    secureBtn.addEventListener('click', (e) => {
+      if (secureBtn.getAttribute('aria-disabled') === 'true') {
+        e.preventDefault();
+        alert('Portal seems offline. Wait for the green status dot and try again.\nIf it stays offline, update PORTAL_ORIGIN to the latest trycloudflare URL from your bot logs.');
+      }
+    });
   </script>
 </body>
 </html>
