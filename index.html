@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- v2025-09-30-5 -->
+  <!-- v2025-09-30-7 -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>RustWire • Rust+ Companion & Server Tools</title>
   <meta name="description" content="RustWire keeps your Rust server connected with Rust+, wipes, events, and map tools." />
-  <link rel="icon" href="./logo.png" type="image/png" />
+  <link rel="icon" href="./logo.png?v=7" type="image/png" />
   <style>
     :root{ --rust-orange:#f0672a; --steel-700:#1e2940; --btn-w:200px; --btn-h:56px; }
     html,body{height:100%}
@@ -60,24 +60,26 @@
     .ownerChip .mini{opacity:.75}
     .ownerChip button{cursor:pointer;border:none;border-radius:10px;padding:8px 10px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:#fff;background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);box-shadow:inset 0 0 10px rgba(0,0,0,.6),0 6px 18px rgba(240,103,42,.28)}
 
-    /* Version badge */
+    /* Version & asset error */
     .ver{position:fixed;left:14px;bottom:54px;z-index:4;opacity:.8;font-size:12px;background:rgba(17,26,43,.7);border:1px solid #2a3556;padding:3px 7px;border-radius:8px}
+    .assetErr{display:none;position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:5;background:rgba(120,0,0,.75);border:1px solid rgba(255,80,80,.7);padding:8px 12px;border-radius:10px;font-size:13px}
+    .assetErr a{color:#ffd6d6;text-decoration:underline}
 
     @media (max-width:560px){img.logo{height:38px}.topbar{padding:10px 12px}:root{--btn-w:180px;--btn-h:52px}}
   </style>
 </head>
 <body>
-  <!-- Live wallpaper -->
-  <video id="bgvid" autoplay muted loop playsinline preload="auto" poster="./logo.png?v=5">
-    <source src="./bg.mp4?v=5" type="video/mp4" />
+  <!-- Live wallpaper tries ./ and / -->
+  <video id="bgvid" autoplay muted loop playsinline preload="auto" poster="./logo.png?v=7">
+    <source src="./bg.mp4?v=7" type="video/mp4" />
+    <source src="/bg.mp4?v=7" type="video/mp4" />
   </video>
   <div class="overlay"></div>
 
-  <!-- Top buttons -->
   <div class="topbar">
     <div class="logo-wrap">
-      <img src="./logo.png?v=5" alt="RustWire Logo" class="logo" onerror="this.style.display='none';document.getElementById('logo-fb').style.display='block';" />
-      <span id="logo-fb" class="logo-fb">RustWire</span>
+      <img id="logoImg" src="./logo.png?v=7" alt="RustWire Logo" class="logo" />
+      <span id="logoText" class="logo-fb">RustWire</span>
     </div>
     <div class="btns">
       <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">
@@ -86,38 +88,38 @@
       <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">
         <span class="molten__lava"></span><span class="molten__label">Add Bot</span><span class="molten__drip"></span>
       </a>
-      <!-- Keep "Open Secure Pair" in topbar; removed "Pair Rust+" per request -->
+      <!-- Removed "Pair Rust+" from topbar per your request -->
       <a id="securePairBtn" class="molten" href="#" target="_blank" rel="noopener">
         <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
       </a>
     </div>
   </div>
 
-  <!-- Bottom-center card -->
   <div class="bottom-center">
     <div class="title-card">
       <h1>RustWire</h1>
       <p>Stay connected with Rust+, events, wipes, and automation for your Rust server.</p>
       <p style="margin-top:10px">
-        <a href="./pair.html?v=5" class="link" id="pairLink">Pair Rust+ with RustWire →</a>
+        <a href="./pair.html?v=7" class="link" id="pairLink">Pair Rust+ with RustWire →</a>
       </p>
     </div>
   </div>
 
-  <!-- Status (shows after you change portal locally) -->
   <div class="status" id="status">
     <span class="dot" id="dot"></span>
     <span id="label">Checking portal…</span>
   </div>
 
-  <!-- Portal chip (local only) -->
   <div class="ownerChip">
     <span class="mini">Portal (local):</span>
     <button id="changePortalBtn">Change</button>
     <a id="clearPortalBtn" class="mini" href="#" title="Reset to default">reset</a>
   </div>
 
-  <div class="ver">v2025-09-30-5</div>
+  <div class="ver">v2025-09-30-7</div>
+  <div class="assetErr" id="assetErr">
+    Assets missing: check that <code>bg.mp4</code> and <code>logo.png</code> exist in the same folder as this page. Try opening <a id="testLogo" href="#">logo</a> / <a id="testVideo" href="#">video</a> directly.
+  </div>
 
   <script>
     // ====== CONFIG ======
@@ -131,18 +133,16 @@
     const label = document.getElementById('label');
     const secureBtn = document.getElementById('securePairBtn');
 
-    // Portal origin comes from localStorage if set
     const saved = localStorage.getItem('portalOrigin') || '';
     const portalOrigin = saved || DEFAULT_PORTAL_ORIGIN;
 
     function setSecureLink(){
       const href = `${portalOrigin}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
       secureBtn.href = href;
-      console.log('[RW] Secure Pair URL:', href);
     }
 
     async function pingPortal(){
-      if (saved) statusBox.style.display = 'flex'; // only if you changed it locally
+      if (saved) statusBox.style.display = 'flex';
       const PING = `${portalOrigin}/healthz`;
       try{
         const ctrl = new AbortController();
@@ -157,7 +157,7 @@
       }
     }
 
-    // Change/Reset portal URL (local only)
+    // Owner chip (local only)
     document.getElementById('changePortalBtn').onclick = () => {
       const cur = localStorage.getItem('portalOrigin') || DEFAULT_PORTAL_ORIGIN;
       const val = prompt('Enter portal URL (e.g. https://example.tld):', cur);
@@ -167,15 +167,52 @@
       localStorage.setItem('portalOrigin', trimmed);
       location.reload();
     };
-    document.getElementById('clearPortalBtn').onclick = (e) => {
-      e.preventDefault();
-      localStorage.removeItem('portalOrigin');
-      location.reload();
-    };
+    document.getElementById('clearPortalBtn').onclick = (e) => { e.preventDefault(); localStorage.removeItem('portalOrigin'); location.reload(); };
 
-    // Video fallback
+    // Video + Logo fallbacks + quick asset self-check
+    const assetErr = document.getElementById('assetErr');
+    const testLogo = document.getElementById('testLogo');
+    const testVideo = document.getElementById('testVideo');
+
+    const logoImg = document.getElementById('logoImg');
+    const logoText = document.getElementById('logoText');
+    let logoOk = false, videoOk = false;
+
+    logoImg.addEventListener('load', ()=>{ logoOk = true; });
+    logoImg.addEventListener('error', ()=>{
+      // try root path once
+      if (!logoImg.dataset.fallbackTried){
+        logoImg.dataset.fallbackTried = '1';
+        logoImg.src = '/logo.png?v=7';
+        return;
+      }
+      logoImg.style.display='none';
+      logoText.style.display='block';
+      showAssetTip();
+    });
+
     const v=document.getElementById('bgvid');
-    v?.addEventListener('error',()=>{ v.remove(); document.body.style.background='#0b0f1a'; });
+    function videoFailed(){
+      if (!v.dataset.fallbackTried){
+        v.dataset.fallbackTried = '1';
+        // swap sources order to try the other path again
+        v.innerHTML = '<source src="/bg.mp4?v=7" type="video/mp4" /><source src="./bg.mp4?v=7" type="video/mp4" />';
+        v.load(); v.play().catch(()=>{});
+        return;
+      }
+      v.remove();
+      document.body.style.background='#0b0f1a';
+      showAssetTip();
+    }
+    v.addEventListener('error', videoFailed);
+    v.addEventListener('stalled', videoFailed);
+    v.addEventListener('loadeddata', ()=>{ videoOk = true; });
+
+    function showAssetTip(){
+      assetErr.style.display='block';
+      testLogo.href = new URL('./logo.png?v=7', location.href).href;
+      testVideo.href = new URL('./bg.mp4?v=7', location.href).href;
+    }
 
     setSecureLink();
     pingPortal();
