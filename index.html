@@ -111,13 +111,16 @@
 
   <script>
     // ====== CONFIG (update when tunnel URL changes) ======
+    // Use the exact URL shown in your bot logs after "[portal] publicUrl = ..."
     const PORTAL_ORIGIN = 'https://middle-dictionary-raised-conferencing.trycloudflare.com';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1422058709835583570';
+    // IMPORTANT: include your portal shared token so the /start endpoint authorizes the request
+    const PORTAL_TOKEN = '0970eb8f98effe47812f3522390f7e72a01fda7cfaff11d5890d1a2854fc0739';
 
-    // Secure Pair link
+    // Build Secure Pair link (token required by most portal setups)
     const secureBtn = document.getElementById('securePairBtn');
-    secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}`;
+    secureBtn.href = `${PORTAL_ORIGIN}/start?guild_id=${encodeURIComponent(GUILD_ID)}&channel_id=${encodeURIComponent(CHANNEL_ID)}&token=${encodeURIComponent(PORTAL_TOKEN)}`;
 
     // Status badge ping
     const PING = `${PORTAL_ORIGIN}/healthz`;
