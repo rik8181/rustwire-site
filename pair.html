@@ -37,6 +37,19 @@
     li{ margin:10px 0; line-height:1.5; }
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
 
+    .subtle-hr{ border:none; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); margin:18px 0; }
+
+    /* token generator UI */
+    .tokensec{ margin-top:8px; padding:12px; border-radius:12px; background:rgba(18,26,44,.55); border:1px solid #263756; }
+    .row{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+    .in{ flex:1 1 260px; min-width:220px; padding:10px 12px; border-radius:10px; border:1px solid #2a3556; background:#0e1626; color:#e6e6e6; outline:none; }
+    .in:focus{ box-shadow:0 0 0 2px rgba(108,182,255,.25) inset; }
+    .btn{ appearance:none; border:none; border-radius:10px; padding:10px 14px; background:#243654; color:#e6f1ff; cursor:pointer; font-weight:700; }
+    .btn:hover{ background:#2b3f60 }
+    .btn:disabled{ opacity:.6; cursor:not-allowed }
+
+    .out{ margin-top:10px; white-space:pre-wrap; word-break:break-word; background:#0c1321; border:1px solid #243151; padding:10px; border-radius:10px; font-size:13px; color:#cfe2ff; }
+
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
@@ -55,6 +68,11 @@
       .topbar{ padding:10px 12px }
       :root{ --btn-w: 180px; --btn-h: 52px; }
     }
+
+    /* fun little animations used above */
+    @keyframes soft-flicker{ 0%,100%{opacity:.9} 50%{opacity:.75} }
+    @keyframes lava-flow{ 0%{transform:translateX(0)} 100%{transform:translateX(-20%)} }
+    @keyframes drip{ 0%{transform:translateY(0)} 70%{transform:translateY(16px); opacity:.3} 100%{transform:translateY(0); opacity:.9} }
   </style>
 </head>
 <body>
@@ -103,6 +121,23 @@
         </a>
       </div>
 
+      <hr class="subtle-hr" />
+
+      <!-- NEW: Steam link token generator -->
+      <h2 style="margin:0 0 8px;font-size:clamp(18px,3.8vw,22px);color:#ffc499">Link your Steam to Discord (token)</h2>
+      <p style="margin:0 0 10px;opacity:.85">
+        Generate a token and paste it into Discord with <code class="chip">/linksteam finish &lt;token&gt;</code>.
+        After linking, you can run <code class="chip">/inventory</code> without typing your SteamID.
+      </p>
+      <div class="tokensec" role="group" aria-label="Generate link token">
+        <div class="row">
+          <input id="sid" class="in" inputmode="numeric" pattern="\\d{17}" maxlength="17" placeholder="Enter SteamID64 (17 digits, e.g. 7656119xxxxxxxxxx)" />
+          <button id="gen" class="btn">Generate token</button>
+          <button id="copy" class="btn" disabled>Copy command</button>
+        </div>
+        <pre id="out" class="out" aria-live="polite">Waiting to generate…</pre>
+      </div>
+
       <p style="margin-top:10px;opacity:.85">Need help? Ping us in <strong>#support</strong> on our Discord.</p>
     </div>
   </div>
@@ -120,7 +155,7 @@
   <script>
     // ====== CONFIG ======
     const OWNER_PASSPHRASE = 'M@drid19810811';
-    const DEFAULT_PORTAL_ORIGIN = 'https://rustwire-site-nburbbwi4-patriks-projects-09b5310f.vercel.app';
+    const DEFAULT_PORTAL_ORIGIN = 'https://portal.rustwire.co.uk';
     const PORTAL_KEY = 'rustwire.portalOrigin';
     const GUILD_ID = '1419192329713094689';
     const CHANNEL_ID = '1421219082207891507'; // change if you want a different default
@@ -186,7 +221,6 @@
         btns.forEach(b => { b.href = '#'; b.classList.add('disabled'); });
         return;
       }
-      // Rewrite makes /start -> /start.html (see vercel.json)
       const url = origin + '/start?guild_id=' + encodeURIComponent(GUILD_ID) + '&channel_id=' + encodeURIComponent(CHANNEL_ID);
       btns.forEach(b => { b.href = url; if (portalOnline) b.classList.remove('disabled'); });
     }
@@ -235,6 +269,59 @@
     buildSecureLinks();
     updateStatus();
     setInterval(updateStatus, 20000);
+
+    // ====== NEW: token generator logic ======
+    const sidEl  = document.getElementById('sid');
+    const genEl  = document.getElementById('gen');
+    const copyEl = document.getElementById('copy');
+    const outEl  = document.getElementById('out');
+
+    function validSteamId(s){ return /^\d{17}$/.test(String(s||'').trim()); }
+
+    genEl.addEventListener('click', async () => {
+      const sid = sidEl.value.trim();
+      if (!validSteamId(sid)) {
+        outEl.textContent = 'Error: please enter a valid 17-digit SteamID64.';
+        copyEl.disabled = true;
+        return;
+      }
+      outEl.textContent = 'Generating token…';
+      genEl.disabled = true;
+      try {
+        const r = await fetch('/api/mktoken', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ steamid: sid })
+        });
+        const j = await r.json().catch(()=>({ ok:false, error:'bad_json' }));
+        if (!j.ok || !j.token) {
+          outEl.textContent = 'Error generating token: ' + (j.error || r.status);
+          copyEl.disabled = true;
+          return;
+        }
+        const cmd = `/linksteam finish ${j.token}`;
+        outEl.textContent = `Copy this into any server channel where the bot is present:\n${cmd}`;
+        copyEl.disabled = false;
+        copyEl.dataset.cmd = cmd;
+      } catch (e) {
+        outEl.textContent = 'Network error generating token.';
+        copyEl.disabled = true;
+      } finally {
+        genEl.disabled = false;
+      }
+    });
+
+    copyEl.addEventListener('click', async () => {
+      const cmd = copyEl.dataset.cmd || '';
+      if (!cmd) return;
+      try {
+        await navigator.clipboard.writeText(cmd);
+        copyEl.textContent = 'Copied!';
+        setTimeout(()=> copyEl.textContent = 'Copy command', 1200);
+      } catch {
+        outEl.textContent += '\n\nCould not access clipboard. Copy manually.';
+      }
+    });
   </script>
 </body>
 </html>
