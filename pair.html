@@ -8,17 +8,9 @@
   <link rel="icon" href="./logo.png" type="image/png" />
   <meta name="robots" content="noindex">
   <style>
-    :root{
-      --rust-orange:#f0672a;
-      --steel-700:#1e2940;
-      --btn-w: 200px; --btn-h: 56px;
-    }
+    :root{ --rust-orange:#f0672a; --steel-700:#1e2940; --btn-w: 200px; --btn-h: 56px; }
     html,body{height:100%}
-    body{
-      margin:0;color:#e6e6e6;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif;
-      overflow:hidden; background:#000;
-    }
+    body{ margin:0;color:#e6e6e6; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; overflow:hidden; background:#000; }
     #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
     .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
 
@@ -27,7 +19,6 @@
     img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
     .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
 
-    /* Molten button (shared style) */
     .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw); height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer; color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase; background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%); border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28); transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
     .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
     .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
@@ -35,10 +26,6 @@
     .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
     .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
     .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
-
-    @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
-    @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86} 100%{transform:translateY(34px) scale(.85); opacity:0} }
-    @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
 
     .pair-wrap{ position:fixed; inset:0; z-index:2; display:grid; place-items:center; padding:18px; }
     .pair-card{ width:min(920px, calc(100% - 18px)); background:rgba(17,26,43,.82); border:1px solid var(--steel-700); border-radius:16px; padding:20px 22px; backdrop-filter: blur(6px); box-shadow:0 12px 40px rgba(0,0,0,.55); }
@@ -50,26 +37,18 @@
     li{ margin:10px 0; line-height:1.5; }
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
 
-    /* Status badge */
     .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
     .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
     .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
     .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
     .dot.na{ background:#999; box-shadow:none; }
 
-    /* Owner chip - bottom-left */
     .owner{ position:fixed; left:14px; bottom:14px; z-index:4; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.86); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; cursor:pointer; user-select:none;}
     .owner .gear{ font-weight:900; color:#9ecbff }
     .owner .txt{ opacity:.9 }
     .owner:hover{ box-shadow:0 0 0 2px rgba(108,182,255,.2) inset; }
 
-    /* Disabled look for offline/unset */
     .disabled{ opacity:.6; pointer-events:none; }
-
-    /* NEW: Advanced token-link UI */
-    .muted{ opacity:.75; font-size:14px; }
-    .codebox{ background:#0a1118; border:1px dashed rgba(255,255,255,.15); padding:12px; border-radius:8px; word-break:break-all; margin-top:8px; }
-    .sep{ height:1px; border:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); margin:16px 0; }
 
     @media (max-width:560px){
       img.logo{ height:38px }
@@ -89,7 +68,6 @@
       </a>
     </div>
     <div class="btns">
-      <!-- Pair page: only Home + Open Secure Pair -->
       <a class="molten" href="./" aria-label="Back Home">
         <span class="molten__lava"></span><span class="molten__label">← Home</span><span class="molten__drip"></span>
       </a>
@@ -126,44 +104,14 @@
       </div>
 
       <p style="margin-top:10px;opacity:.85">Need help? Ping us in <strong>#support</strong> on our Discord.</p>
-
-      <!-- NEW: Advanced token-to-code helper (no terminal needed) -->
-      <hr class="sep" />
-
-      <h2 style="margin:0 0 8px">Advanced: Link with existing token</h2>
-      <p class="muted" style="margin:0 0 10px">
-        Already have your Rust+ token? Generate a <em>secure code</em> here and run
-        <code class="chip">/rust link code &lt;paste&gt;</code> in your Discord server.
-      </p>
-
-      <label for="rwSteamId" style="display:block;margin:10px 0 6px;font-weight:600">SteamID64</label>
-      <input id="rwSteamId" placeholder="7656… (17 digits)" inputmode="numeric" autocomplete="off" />
-
-      <label for="rwToken" style="display:block;margin:14px 0 6px;font-weight:600">Rust+ Token</label>
-      <textarea id="rwToken" placeholder="Paste your Rust+ token here…" style="min-height:120px"></textarea>
-
-      <div class="pair-actions" style="align-items:center">
-        <a id="genCodeBtn" class="molten" href="#" aria-label="Generate Link Code">
-          <span class="molten__lava"></span><span class="molten__label">Generate Link Code</span><span class="molten__drip"></span>
-        </a>
-        <a id="copyCodeBtn" class="molten disabled" href="#" aria-label="Copy Code">
-          <span class="molten__lava"></span><span class="molten__label">Copy</span><span class="molten__drip"></span>
-        </a>
-        <span id="genStatus" class="muted"></span>
-      </div>
-
-      <div id="rwCode" class="codebox" hidden></div>
-      <!-- /NEW -->
     </div>
   </div>
 
-  <!-- Status badge -->
   <div class="status" id="status" aria-live="polite">
     <span class="dot na" id="dot"></span>
     <span id="label">Portal not set</span>
   </div>
 
-  <!-- Owner chip -->
   <div class="owner" id="ownerChip" title="Owner: set portal URL">
     <span class="gear">⚙️</span>
     <span class="txt">Portal</span>
@@ -171,18 +119,16 @@
 
   <script>
     // ====== CONFIG ======
-    const OWNER_PASSPHRASE = 'M@drid19810811'; // keep in sync with index.html
-    const DEFAULT_PORTAL_ORIGIN = 'https://portal.rustwire.co.uk';
+    const OWNER_PASSPHRASE = 'M@drid19810811';
+    const DEFAULT_PORTAL_ORIGIN = 'https://rustwire-site-nburbbwi4-patriks-projects-09b5310f.vercel.app';
     const PORTAL_KEY = 'rustwire.portalOrigin';
     const GUILD_ID = '1419192329713094689';
-    const CHANNEL_ID = '1422058709835583570';
+    const CHANNEL_ID = '1421219082207891507'; // change if you want a different default
 
-    // Initialize default once if not set
     if (!localStorage.getItem(PORTAL_KEY)) {
       localStorage.setItem(PORTAL_KEY, DEFAULT_PORTAL_ORIGIN);
     }
 
-    // ====== Owner gate ======
     async function ensureOwner() {
       const ok = localStorage.getItem('rustwire.ownerOK') === 'yes';
       if (ok) return true;
@@ -229,7 +175,6 @@
       if (await ensureOwner()) await setPortalInteractive();
     });
 
-    // ====== Secure Pair links ======
     function getOrigin(){ return localStorage.getItem(PORTAL_KEY) || ''; }
 
     let portalOnline = false;
@@ -241,11 +186,11 @@
         btns.forEach(b => { b.href = '#'; b.classList.add('disabled'); });
         return;
       }
+      // Rewrite makes /start -> /start.html (see vercel.json)
       const url = origin + '/start?guild_id=' + encodeURIComponent(GUILD_ID) + '&channel_id=' + encodeURIComponent(CHANNEL_ID);
       btns.forEach(b => { b.href = url; if (portalOnline) b.classList.remove('disabled'); });
     }
 
-    // prevent navigation if offline/unset
     function guardClicks(){
       const btns = [document.getElementById('securePairBtn'), document.getElementById('securePairBtn2')].filter(Boolean);
       btns.forEach(b => b.addEventListener('click', (e) => {
@@ -257,7 +202,6 @@
       }));
     }
 
-    // ====== Status badge & ping ======
     const dot = document.getElementById('dot');
     const label = document.getElementById('label');
 
@@ -268,7 +212,7 @@
     }
 
     async function ping(origin){
-      const url = origin + '/healthz';
+      const url = origin + '/api/healthz';
       const ctrl = new AbortController();
       const t = setTimeout(()=>ctrl.abort(), 3500);
       try{
@@ -291,65 +235,6 @@
     buildSecureLinks();
     updateStatus();
     setInterval(updateStatus, 20000);
-
-    // ====== Token → secure code (uses /api/sign) ======
-    const elSteam = document.getElementById('rwSteamId');
-    const elToken = document.getElementById('rwToken');
-    const elGen   = document.getElementById('genCodeBtn');
-    const elCopy  = document.getElementById('copyCodeBtn');
-    const elCode  = document.getElementById('rwCode');
-    const elStat  = document.getElementById('genStatus');
-
-    function showOk(msg){ if(elStat){ elStat.textContent = msg; elStat.style.color = '#34d399'; } }
-    function showErr(msg){ if(elStat){ elStat.textContent = msg; elStat.style.color = '#f87171'; } }
-
-    async function generateSecureCode(e){
-      if(e) e.preventDefault();
-      if(!elSteam || !elToken || !elCode || !elCopy){ return; }
-      elStat.textContent = ''; elCode.hidden = true; elCode.textContent = '';
-      elCopy.classList.add('disabled');
-
-      const steamId = (elSteam.value || '').trim();
-      const token   = (elToken.value || '').trim();
-
-      if (!/^\d{17}$/.test(steamId)) { showErr('Enter a valid 17-digit SteamID64.'); return; }
-      if (token.length < 16) { showErr('Token looks too short.'); return; }
-
-      try{
-        elGen.classList.add('disabled');
-        const res = await fetch('/api/sign', {
-          method:'POST',
-          headers: { 'Content-Type':'application/json' },
-          body: JSON.stringify({ steamId, token })
-        });
-        const data = await res.json().catch(()=>null);
-        if(!res.ok || !data || !data.code){
-          throw new Error((data && data.error) ? data.error : ('HTTP '+res.status));
-        }
-        elCode.textContent = data.code;
-        elCode.hidden = false;
-        elCopy.classList.remove('disabled');
-        showOk('Code generated. Use /rust link code <paste> in Discord.');
-      }catch(err){
-        showErr(err.message || 'Failed to generate code');
-      }finally{
-        elGen.classList.remove('disabled');
-      }
-    }
-
-    async function copySecureCode(e){
-      if(e) e.preventDefault();
-      if(!elCode || !elCode.textContent){ return; }
-      try{
-        await navigator.clipboard.writeText(elCode.textContent);
-        showOk('Copied!');
-      }catch{
-        showErr('Copy failed — select and copy manually.');
-      }
-    }
-
-    if (elGen) elGen.addEventListener('click', generateSecureCode);
-    if (elCopy) elCopy.addEventListener('click', copySecureCode);
   </script>
 </body>
 </html>
