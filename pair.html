@@ -66,6 +66,11 @@
     /* Disabled look for offline/unset */
     .disabled{ opacity:.6; pointer-events:none; }
 
+    /* NEW: Advanced token-link UI */
+    .muted{ opacity:.75; font-size:14px; }
+    .codebox{ background:#0a1118; border:1px dashed rgba(255,255,255,.15); padding:12px; border-radius:8px; word-break:break-all; margin-top:8px; }
+    .sep{ height:1px; border:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); margin:16px 0; }
+
     @media (max-width:560px){
       img.logo{ height:38px }
       .topbar{ padding:10px 12px }
@@ -121,6 +126,34 @@
       </div>
 
       <p style="margin-top:10px;opacity:.85">Need help? Ping us in <strong>#support</strong> on our Discord.</p>
+
+      <!-- NEW: Advanced token-to-code helper (no terminal needed) -->
+      <hr class="sep" />
+
+      <h2 style="margin:0 0 8px">Advanced: Link with existing token</h2>
+      <p class="muted" style="margin:0 0 10px">
+        Already have your Rust+ token? Generate a <em>secure code</em> here and run
+        <code class="chip">/rust link code &lt;paste&gt;</code> in your Discord server.
+      </p>
+
+      <label for="rwSteamId" style="display:block;margin:10px 0 6px;font-weight:600">SteamID64</label>
+      <input id="rwSteamId" placeholder="7656… (17 digits)" inputmode="numeric" autocomplete="off" />
+
+      <label for="rwToken" style="display:block;margin:14px 0 6px;font-weight:600">Rust+ Token</label>
+      <textarea id="rwToken" placeholder="Paste your Rust+ token here…" style="min-height:120px"></textarea>
+
+      <div class="pair-actions" style="align-items:center">
+        <a id="genCodeBtn" class="molten" href="#" aria-label="Generate Link Code">
+          <span class="molten__lava"></span><span class="molten__label">Generate Link Code</span><span class="molten__drip"></span>
+        </a>
+        <a id="copyCodeBtn" class="molten disabled" href="#" aria-label="Copy Code">
+          <span class="molten__lava"></span><span class="molten__label">Copy</span><span class="molten__drip"></span>
+        </a>
+        <span id="genStatus" class="muted"></span>
+      </div>
+
+      <div id="rwCode" class="codebox" hidden></div>
+      <!-- /NEW -->
     </div>
   </div>
 
@@ -258,6 +291,65 @@
     buildSecureLinks();
     updateStatus();
     setInterval(updateStatus, 20000);
+
+    // ====== Token → secure code (uses /api/sign) ======
+    const elSteam = document.getElementById('rwSteamId');
+    const elToken = document.getElementById('rwToken');
+    const elGen   = document.getElementById('genCodeBtn');
+    const elCopy  = document.getElementById('copyCodeBtn');
+    const elCode  = document.getElementById('rwCode');
+    const elStat  = document.getElementById('genStatus');
+
+    function showOk(msg){ if(elStat){ elStat.textContent = msg; elStat.style.color = '#34d399'; } }
+    function showErr(msg){ if(elStat){ elStat.textContent = msg; elStat.style.color = '#f87171'; } }
+
+    async function generateSecureCode(e){
+      if(e) e.preventDefault();
+      if(!elSteam || !elToken || !elCode || !elCopy){ return; }
+      elStat.textContent = ''; elCode.hidden = true; elCode.textContent = '';
+      elCopy.classList.add('disabled');
+
+      const steamId = (elSteam.value || '').trim();
+      const token   = (elToken.value || '').trim();
+
+      if (!/^\d{17}$/.test(steamId)) { showErr('Enter a valid 17-digit SteamID64.'); return; }
+      if (token.length < 16) { showErr('Token looks too short.'); return; }
+
+      try{
+        elGen.classList.add('disabled');
+        const res = await fetch('/api/sign', {
+          method:'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ steamId, token })
+        });
+        const data = await res.json().catch(()=>null);
+        if(!res.ok || !data || !data.code){
+          throw new Error((data && data.error) ? data.error : ('HTTP '+res.status));
+        }
+        elCode.textContent = data.code;
+        elCode.hidden = false;
+        elCopy.classList.remove('disabled');
+        showOk('Code generated. Use /rust link code <paste> in Discord.');
+      }catch(err){
+        showErr(err.message || 'Failed to generate code');
+      }finally{
+        elGen.classList.remove('disabled');
+      }
+    }
+
+    async function copySecureCode(e){
+      if(e) e.preventDefault();
+      if(!elCode || !elCode.textContent){ return; }
+      try{
+        await navigator.clipboard.writeText(elCode.textContent);
+        showOk('Copied!');
+      }catch{
+        showErr('Copy failed — select and copy manually.');
+      }
+    }
+
+    if (elGen) elGen.addEventListener('click', generateSecureCode);
+    if (elCopy) elCopy.addEventListener('click', copySecureCode);
   </script>
 </body>
 </html>
