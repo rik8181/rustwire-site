@@ -33,6 +33,8 @@
     .banner { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:10px; background: rgba(180,0,0,.12); border: 1px solid rgba(255,60,60,.45); color:#ffd6d6; margin: 8px 0 14px; }
     .chip{ display:inline-block; padding:2px 8px; border-radius:6px; background:#1c2540; border:1px solid #2a3556; color:#cfe2ff; font-size:.95em; }
     .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
+    .mono{ font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+
     ol{ margin:12px 0 0; padding:0 0 0 22px; }
     li{ margin:10px 0; line-height:1.5; }
     .pair-actions{ margin-top:14px; display:flex; gap:12px; flex-wrap:wrap; }
@@ -119,6 +121,29 @@
         <a id="securePairBtn2" class="molten" href="#" target="_blank" rel="noopener" aria-label="Open Secure Pair">
           <span class="molten__lava"></span><span class="molten__label">Open Secure Pair</span><span class="molten__drip"></span>
         </a>
+      </div>
+
+      <hr class="subtle-hr" />
+
+      <!-- RW pairing code (one-time code) -->
+      <h2 style="margin:12px 0 8px;font-size:clamp(18px,3.8vw,22px);color:#ffc499">
+        Pair with a one-time code
+      </h2>
+      <p style="margin:0 0 10px;opacity:.85">
+        On Discord, run <code class="chip">/rustplus link</code> and paste this code.
+      </p>
+
+      <div class="tokensec" role="group" aria-label="Generate pairing code">
+        <div class="row">
+          <div id="rwCode" class="in mono" style="font-weight:700; text-align:center;"></div>
+          <button id="rwCopy" class="btn">Copy</button>
+          <button id="rwNew"  class="btn">New code</button>
+        </div>
+        <div id="rwTtl" class="out" aria-live="polite">Expires in 05:00</div>
+      </div>
+
+      <div id="rwPaired" class="success" style="display:none; margin-top:10px;">
+        ✅ Paired! Your Discord is now linked.
       </div>
 
       <hr class="subtle-hr" />
@@ -269,6 +294,86 @@
     buildSecureLinks();
     updateStatus();
     setInterval(updateStatus, 20000);
+
+    // ====== RW pairing code (code-box + poll) ======
+    const RW_TTL_MS = 5 * 60 * 1000;
+
+    const rwCodeEl = document.getElementById('rwCode');
+    const rwCopyEl = document.getElementById('rwCopy');
+    const rwNewEl  = document.getElementById('rwNew');
+    const rwTtlEl  = document.getElementById('rwTtl');
+    const rwOkEl   = document.getElementById('rwPaired');
+
+    let rwCode = '';
+    let rwCreatedAt = 0;
+    let rwTtlTimer = null;
+    let rwPollTimer = null;
+
+    function rwPart() {
+      return Math.random().toString(36).toUpperCase().slice(2,6).replace(/[^A-Z0-9]/g,'A').padEnd(4,'A');
+    }
+    function rwGenCode(){ return `RW-${rwPart()}-${rwPart()}`; }
+
+    function rwFormatTTL(ms){
+      const s = Math.max(0, Math.floor(ms/1000));
+      const m = String(Math.floor(s/60)).padStart(2,'0');
+      const r = String(s%60).padStart(2,'0');
+      return `${m}:${r}`;
+    }
+    function rwSave(){ localStorage.setItem('rw_pair_code', JSON.stringify({ code: rwCode, createdAt: rwCreatedAt })); }
+
+    function rwStartTTL(){
+      clearInterval(rwTtlTimer);
+      rwTtlTimer = setInterval(()=>{
+        const left = RW_TTL_MS - (Date.now() - rwCreatedAt);
+        rwTtlEl.textContent = 'Expires in ' + rwFormatTTL(left);
+        if (left <= 0) clearInterval(rwTtlTimer);
+      }, 1000);
+    }
+
+    async function rwPoll(){
+      clearInterval(rwPollTimer);
+      rwPollTimer = setInterval(async ()=>{
+        try{
+          const res = await fetch(`/api/pair-status?code=${encodeURIComponent(rwCode)}`);
+          if(!res.ok) return;
+          const data = await res.json();
+          if(data.claimed){
+            clearInterval(rwPollTimer);
+            rwOkEl.style.display = 'block';
+          }
+        }catch{}
+      }, 3000);
+    }
+
+    function rwSetCode(c){
+      rwCode = c;
+      rwCreatedAt = Date.now();
+      rwCodeEl.textContent = rwCode;
+      rwOkEl.style.display = 'none';
+      rwSave();
+      rwStartTTL();
+      rwPoll();
+    }
+
+    // init on load
+    (function rwInit(){
+      const saved = JSON.parse(localStorage.getItem('rw_pair_code') || 'null');
+      if(saved && Date.now() - saved.createdAt < RW_TTL_MS){
+        rwCode = saved.code;
+        rwCreatedAt = saved.createdAt;
+      } else {
+        rwCode = rwGenCode();
+        rwCreatedAt = Date.now();
+        rwSave();
+      }
+      rwCodeEl.textContent = rwCode;
+      rwStartTTL();
+      rwPoll();
+
+      rwCopyEl.onclick = () => navigator.clipboard.writeText(rwCode);
+      rwNewEl.onclick  = () => rwSetCode(rwGenCode());
+    })();
 
     // ====== NEW: token generator logic ======
     const sidEl  = document.getElementById('sid');
