@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RustWire • Secure Pair</title>
+<style>
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b1220;color:#eaeef6;display:grid;place-items:center;min-height:100vh}
+  .card{background:#121b2f;border:1px solid #243151;border-radius:14px;padding:22px;max-width:680px;width:calc(100% - 24px);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  h1{margin:0 0 8px;color:#f0672a}
+  .row{margin:10px 0}
+  .code{font-size:28px;font-weight:900;background:#0f1728;border:1px dashed #314064;padding:10px 14px;border-radius:10px;letter-spacing:1px}
+  .muted{opacity:.8}
+  button{margin-top:10px;padding:10px 14px;border-radius:10px;border:1px solid #314064;background:#182342;color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>Secure Pair</h1>
+    <div id="msg" class="row">Generating one-time link code…</div>
+    <div class="row"><div id="code" class="code">—</div></div>
+    <div class="row muted">Use this in your Discord server: <b>/rustplus link code:&nbsp;<span id="ex">RW-XXXX-XXXX</span></b></div>
+    <button id="copyBtn">Copy Code</button>
+  </div>
+<script>
+  function qs(k){return new URL(location.href).searchParams.get(k)||''}
+  async function main(){
+    const guild = qs('guild_id'); const channel = qs('channel_id');
+    const r = await fetch(`/api/sign?guild_id=${encodeURIComponent(guild)}&channel_id=${encodeURIComponent(channel)}`,{cache:'no-store'});
+    const elCode = document.getElementById('code'); const elMsg = document.getElementById('msg'); const elEx = document.getElementById('ex');
+    if(!r.ok){ elMsg.textContent='Failed to create code.'; elCode.textContent='—'; return; }
+    const j = await r.json();
+    elCode.textContent = j.code || '—'; elEx.textContent = j.code || 'RW-XXXX-XXXX';
+    elMsg.textContent = 'Code valid for ~5 minutes';
+    document.getElementById('copyBtn').onclick = async ()=>{ try{ await navigator.clipboard.writeText(j.code); elMsg.textContent='Copied!'; }catch{} };
+  }
+  main();
+</script>
+</body>
+</html>
