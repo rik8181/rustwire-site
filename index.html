@@ -1,196 +1,617 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>RustWire • Rust+ Companion & Server Tools</title>
-  <meta name="description" content="RustWire keeps your Rust server connected with Rust+, wipes, events, and map tools." />
-  <link rel="icon" href="./logo.png" type="image/png" />
-  <meta name="robots" content="noindex">
-  <style>
-    :root{
-      --rust-orange:#f0672a;
-      --steel-900:#0a0f1a;
-      --steel-800:#111a2b;
-      --steel-700:#1e2940;
-      --btn-w: 200px; --btn-h: 56px;
-    }
-    html,body{height:100%}
-    body{ margin:0;color:#e6e6e6; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Helvetica,Arial,sans-serif; overflow:hidden; background:#000; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RustWire — Rust Discord Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    #bgvid{ position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:0; filter:brightness(.9) contrast(1.05) saturate(1.06); }
-    .overlay{ position:fixed; inset:0; z-index:1; background:linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,.5) 60%, rgba(0,0,0,.62) 100%); pointer-events:none; }
+  :root {
+    --rust:    #CE422B;
+    --orange:  #FF6B35;
+    --bg:      #0B0B0B;
+    --bg2:     #111111;
+    --bg3:     #181818;
+    --border:  rgba(206,66,43,0.18);
+    --text:    #E8E0D8;
+    --muted:   #6B6560;
+    --white:   #F5F0EB;
+  }
 
-    .topbar{ position:fixed; z-index:3; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; gap:12px; background: linear-gradient(180deg, rgba(10,15,26,.65), rgba(10,15,26,0)); }
-    .logo-wrap{ display:flex; align-items:center; gap:10px; min-width:0; }
-    img.logo{ height:44px; width:auto; filter: drop-shadow(0 4px 10px rgba(0,0,0,.6)); user-select:none; }
-    .btns{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  html { scroll-behavior: smooth; }
 
-    .molten{ position:relative; display:inline-grid; place-items:center; width:min(var(--btn-w), 46vw);
-      height:calc(var(--btn-h) * (min(var(--btn-w),46vw)/var(--btn-w))); padding:0; border:none; text-decoration:none; outline:none; cursor:pointer;
-      color:#fff; font-weight:900; letter-spacing:.8px; text-transform:uppercase;
-      background:linear-gradient(180deg,#3b1f12 0%,#2a130a 60%,#1c0b06 100%);
-      border-radius:12px; box-shadow: inset 0 0 10px rgba(0,0,0,.6), 0 6px 18px rgba(240,103,42,.28);
-      transition:transform .18s ease, filter .28s ease; overflow:hidden; isolation:isolate; }
-    .molten:hover{ transform:translateY(-1px) scale(1.015); filter: drop-shadow(0 8px 18px rgba(240,103,42,.45)); }
-    .molten::after{ content:""; position:absolute; inset:0; border-radius:12px; z-index:1; box-shadow:0 0 18px rgba(240,103,42,.3), inset 0 0 12px rgba(240,103,42,.22); animation:soft-flicker 3.2s ease-in-out infinite; pointer-events:none; }
-    .molten__lava{ --lava1:#ff9a3c; --lava2:#ff6a00; --lava3:#ff3b00; position:absolute; left:-60%; top:-10%; width:220%; height:200%; z-index:0;
-      background: radial-gradient(40% 55% at 20% 60%, var(--lava1), transparent 60%),
-                 radial-gradient(45% 60% at 50% 70%, var(--lava2), transparent 60%),
-                 radial-gradient(35% 50% at 80% 50%, var(--lava3), transparent 60%);
-      filter: blur(16px) saturate(140%); mix-blend-mode: screen; opacity:.88; animation:lava-flow 9s linear infinite; }
-    .molten__label{ position:relative; z-index:2; padding:0 16px; text-shadow:0 0 10px rgba(255,120,30,.9), 0 0 26px rgba(255,90,0,.4), 0 2px 0 rgba(0,0,0,.6); font-size:clamp(12px,2.4vw,16px); white-space:nowrap; }
-    .molten__drip, .molten__drip::before, .molten__drip::after{ position:absolute; bottom:-12px; width:7px; height:7px; border-radius:50%;
-      background:radial-gradient(circle at 30% 30%, #ffa34d, #ff6a00 60%, #9a2900 100%); filter: blur(.25px); animation:drip 3.8s linear infinite; opacity:.9; }
-    .molten__drip{ left:24% } .molten__drip::before{ content:""; left:220%; animation-delay:.9s } .molten__drip::after { content:""; left:420%; animation-delay:1.8s }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
 
-    @keyframes lava-flow { 0%{transform:translateX(0) translateY(0) scale(1)} 50%{transform:translateX(-28%) translateY(-6%) scale(1.02)} 100%{transform:translateX(-56%) translateY(0) scale(1)} }
-    @keyframes drip { 0%{transform:translateY(0) scale(1); opacity:.95} 70%{transform:translateY(22px) scale(1.06); opacity:.86 } 100%{transform:translateY(34px) scale(.85); opacity:0 } }
-    @keyframes soft-flicker { 0%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } 50%{ box-shadow:0 0 20px rgba(240,103,42,.36), inset 0 0 12px rgba(240,103,42,.2) } 100%{ box-shadow:0 0 14px rgba(240,103,42,.22), inset 0 0 8px rgba(240,103,42,.13) } }
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 60px;
+    background: rgba(11,11,11,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 22px; letter-spacing: 2px;
+    color: var(--white); text-decoration: none;
+  }
+  .nav-logo span { color: var(--rust); }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    color: var(--muted); font-size: 13px; font-weight: 500;
+    text-decoration: none; letter-spacing: 1px; text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+  .nav-cta {
+    background: var(--rust); color: var(--white) !important;
+    padding: 8px 20px; border-radius: 3px; font-weight: 600 !important;
+    transition: background 0.2s !important;
+  }
+  .nav-cta:hover { background: var(--orange) !important; color: var(--white) !important; }
 
-    .bottom-center{ position:fixed; z-index:2; left:50%; bottom:5vh; transform:translateX(-50%); width:min(860px, calc(100% - 32px)); text-align:center; }
-    .title-card{ display:inline-block; background:rgba(17,26,43,.76); border:1px solid var(--steel-700); border-radius:16px; padding:16px 22px; backdrop-filter: blur(6px); box-shadow:0 12px 40px rgba(0,0,0,.5); }
-    .title-card h1{ margin:0 0 6px; font-size:clamp(22px,5vw,34px); color:var(--rust-orange); letter-spacing:.5px; line-height:1.15; }
-    .title-card p{ margin:0; color:#f0f0f0; font-size:clamp(14px,2.6vw,18px); }
-    .link{ color:#6cb6ff; text-decoration:none; border-bottom:1px dashed rgba(108,182,255,.5); }
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 24px 80px;
+    position: relative; overflow: hidden;
+  }
 
-    .status{ position:fixed; right:14px; bottom:14px; z-index:3; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.78); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; }
-    .dot{ width:10px; height:10px; border-radius:50%; background:#aaa; box-shadow:0 0 6px rgba(255,255,255,.25); transition: background .4s ease, box-shadow .4s ease; }
-    .dot.on{ background:#27d17f; box-shadow:0 0 10px rgba(39,209,127,.65); }
-    .dot.off{ background:#e05555; box-shadow:0 0 10px rgba(224,85,85,.55); }
-    .dot.na{ background:#999; box-shadow:none; }
+  /* Pulse radar background */
+  .radar {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    pointer-events: none;
+  }
+  .radar-ring {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(206,66,43,0.15);
+    animation: pulse-ring 3s ease-out infinite;
+  }
+  .radar-ring:nth-child(1) { width: 200px; height: 200px; animation-delay: 0s; }
+  .radar-ring:nth-child(2) { width: 340px; height: 340px; animation-delay: 0.6s; }
+  .radar-ring:nth-child(3) { width: 480px; height: 480px; animation-delay: 1.2s; }
+  .radar-ring:nth-child(4) { width: 620px; height: 620px; animation-delay: 1.8s; }
+  @keyframes pulse-ring {
+    0%   { opacity: 0.6; transform: translate(-50%,-50%) scale(0.8); }
+    100% { opacity: 0;   transform: translate(-50%,-50%) scale(1.1); }
+  }
 
-    .owner{ position:fixed; left:14px; bottom:14px; z-index:4; display:flex; gap:8px; align-items:center; background:rgba(17,26,43,.86); border:1px solid #243151; padding:8px 12px; border-radius:12px; backdrop-filter: blur(6px); font-size:14px; cursor:pointer; user-select:none;}
-    .owner .gear{ font-weight:900; color:#9ecbff }
-    .owner .txt{ opacity:.9 }
-    .owner:hover{ box-shadow:0 0 0 2px rgba(108,182,255,.2) inset; }
+  /* Scanline overlay */
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+  }
 
-    @media (max-width:560px){ img.logo{ height:38px } .topbar{ padding:10px 12px } :root{ --btn-w: 180px; --btn-h: 52px; } }
-  </style>
+  .hero-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--rust); margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: ''; display: block; width: 32px; height: 1px; background: var(--rust);
+  }
+
+  .hero h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(56px, 9vw, 110px);
+    font-weight: 700; line-height: 0.92;
+    letter-spacing: -1px;
+    color: var(--white);
+    margin-bottom: 8px;
+    position: relative; z-index: 1;
+  }
+  .hero h1 .accent { color: var(--rust); }
+
+  .hero-sub {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(18px, 2.5vw, 28px);
+    font-weight: 500; letter-spacing: 4px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 28px; position: relative; z-index: 1;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    font-size: 15px; color: #8a847e; line-height: 1.7;
+    margin-bottom: 44px; position: relative; z-index: 1;
+  }
+
+  .hero-buttons {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .btn-primary {
+    background: var(--rust); color: var(--white);
+    padding: 14px 32px; border-radius: 3px;
+    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
+    transition: background 0.2s, transform 0.15s;
+    border: none; cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--orange); transform: translateY(-1px); }
+  .btn-secondary {
+    background: transparent; color: var(--text);
+    padding: 14px 32px; border-radius: 3px;
+    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.12);
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+  }
+  .btn-secondary:hover { border-color: var(--rust); color: var(--white); transform: translateY(-1px); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 32px 40px;
+    display: flex; justify-content: center; gap: 80px; flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 36px; font-weight: 700; color: var(--white);
+    line-height: 1;
+  }
+  .stat-num span { color: var(--rust); }
+  .stat-label {
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin-top: 4px;
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 96px 24px; max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--rust); margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(32px, 4vw, 52px); font-weight: 700;
+    color: var(--white); line-height: 1.1; margin-bottom: 16px;
+  }
+  .section-desc {
+    font-size: 15px; color: #7a7470; max-width: 520px; line-height: 1.7;
+    margin-bottom: 56px;
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+  }
+  .feature-card {
+    background: var(--bg2); padding: 36px 32px;
+    transition: background 0.2s;
+  }
+  .feature-card:hover { background: var(--bg3); }
+  .feature-icon {
+    width: 40px; height: 40px; margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .feature-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px; font-weight: 600; color: var(--white);
+    margin-bottom: 10px; letter-spacing: 0.5px;
+  }
+  .feature-desc { font-size: 14px; color: #6b6560; line-height: 1.65; }
+
+  /* ── COMMANDS ── */
+  .commands-tabs {
+    display: flex; gap: 0; margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 12px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; letter-spacing: 1px;
+    color: var(--muted); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px; transition: color 0.2s, border-color 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .tab.active { color: var(--rust); border-bottom-color: var(--rust); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .commands-panel { display: none; padding: 32px 0; }
+  .commands-panel.active { display: block; }
+
+  .cmd-list { display: flex; flex-direction: column; gap: 2px; }
+  .cmd-row {
+    display: grid; grid-template-columns: 260px 1fr;
+    gap: 24px; padding: 16px 20px;
+    background: var(--bg2); border-left: 2px solid transparent;
+    transition: border-color 0.15s, background 0.15s;
+    align-items: start;
+  }
+  .cmd-row:hover { border-left-color: var(--rust); background: var(--bg3); }
+  .cmd-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; color: var(--orange); font-weight: 500;
+  }
+  .cmd-desc { font-size: 13px; color: #7a7470; }
+
+  /* ── CHANGELOG ── */
+  .changelog-list { display: flex; flex-direction: column; gap: 0; }
+  .changelog-entry {
+    display: grid; grid-template-columns: 140px 1fr;
+    gap: 32px; padding: 28px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .changelog-entry:first-child { border-top: 1px solid rgba(255,255,255,0.04); }
+  .changelog-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--muted); padding-top: 4px; letter-spacing: 1px;
+  }
+  .changelog-badge {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    padding: 2px 8px; border-radius: 2px; margin-bottom: 10px;
+  }
+  .badge-new { background: rgba(206,66,43,0.15); color: var(--rust); }
+  .badge-fix { background: rgba(255,107,53,0.12); color: var(--orange); }
+  .badge-improve { background: rgba(100,100,255,0.1); color: #8888ff; }
+  .changelog-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 18px; font-weight: 600; color: var(--white); margin-bottom: 8px;
+  }
+  .changelog-desc { font-size: 13px; color: #6b6560; line-height: 1.6; }
+
+  /* ── SUPPORT ── */
+  .support-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;
+  }
+  .support-card {
+    background: var(--bg2); border: 1px solid var(--border);
+    padding: 32px 28px; border-radius: 2px;
+    text-decoration: none; transition: border-color 0.2s, transform 0.15s;
+    display: block;
+  }
+  .support-card:hover { border-color: var(--rust); transform: translateY(-2px); }
+  .support-card-icon { font-size: 28px; margin-bottom: 16px; }
+  .support-card-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px; font-weight: 600; color: var(--white); margin-bottom: 8px;
+  }
+  .support-card-desc { font-size: 13px; color: #6b6560; line-height: 1.6; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-logo {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 18px; letter-spacing: 2px; color: var(--muted);
+  }
+  .footer-logo span { color: var(--rust); }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .footer-links a {
+    font-size: 12px; color: var(--muted); text-decoration: none; letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+  .footer-links a:hover { color: var(--rust); }
+  .footer-copy { font-size: 12px; color: #3a3530; }
+
+  /* ── DIVIDER ── */
+  .full-divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--rust); border-radius: 2px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .stats-bar { gap: 40px; padding: 24px; }
+    section { padding: 64px 20px; }
+    .changelog-entry { grid-template-columns: 1fr; gap: 8px; }
+    footer { flex-direction: column; text-align: center; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .radar-ring { animation: none; }
+    * { transition: none !important; }
+  }
+</style>
 </head>
 <body>
-  <video id="bgvid" autoplay muted loop playsinline preload="auto" src="./bg.mp4"></video>
-  <div class="overlay"></div>
 
-  <div class="topbar">
-    <div class="logo-wrap">
-      <img src="./logo.png" alt="RustWire Logo" class="logo" id="logoBtn" />
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">RUST<span>WIRE</span></a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#commands">Commands</a></li>
+    <li><a href="#changelog">Changelog</a></li>
+    <li><a href="#support">Support</a></li>
+    <li><a href="https://discord.gg/Ws44MGuKGq" class="nav-cta">Join Server</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="radar">
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+  </div>
+
+  <div class="hero-eyebrow">Live Feed</div>
+  <h1>RUST<span class="accent">WIRE</span></h1>
+  <div class="hero-sub">Rust Discord Bot</div>
+  <p class="hero-desc">
+    Real-time Rust news, Twitch &amp; Kick Drops, skin releases, devblogs, 
+    Facepunch commits, Oxide updates, ban logs and player tools — 
+    delivered automatically to your Discord server.
+  </p>
+  <div class="hero-buttons">
+    <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary">Add to Discord</a>
+    <a href="https://discord.gg/Ws44MGuKGq" class="btn-secondary">Join Community</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-num">10<span>K+</span></div>
+    <div class="stat-label">Discord Users</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">100<span>+</span></div>
+    <div class="stat-label">Servers</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">24<span>/7</span></div>
+    <div class="stat-label">Uptime</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">15<span>min</span></div>
+    <div class="stat-label">Update Interval</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">// what it does</div>
+  <h2 class="section-title">Everything Rust,<br>in one bot.</h2>
+  <p class="section-desc">Set it up once, forget about it. RustWire watches the Rust ecosystem 24/7 and posts directly to your channels.</p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🎮</div>
+      <div class="feature-title">Twitch & Kick Drops</div>
+      <div class="feature-desc">Automatically posts active drop campaigns the moment they go live. Never miss a free skin again.</div>
     </div>
-    <div class="btns">
-      <a class="molten" href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener">
-        <span class="molten__lava"></span><span class="molten__label">Join Discord</span><span class="molten__drip"></span>
-      </a>
-      <a class="molten" href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&scope=bot+applications.commands&permissions=8" target="_blank" rel="noopener">
-        <span class="molten__lava"></span><span class="molten__label">Add Bot</span><span class="molten__drip"></span>
-      </a>
+    <div class="feature-card">
+      <div class="feature-icon">🎨</div>
+      <div class="feature-title">Skins & DLC</div>
+      <div class="feature-desc">New Steam Workshop skins and DLC releases posted instantly with prices in your server's region.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📰</div>
+      <div class="feature-title">Devblogs & News</div>
+      <div class="feature-desc">Facepunch devblogs, community posts and general Rust news delivered the moment they're published.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛠️</div>
+      <div class="feature-title">Commits & Oxide</div>
+      <div class="feature-desc">Facepunch GitHub commits and Oxide/uMod plugin updates tracked and posted automatically.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚫</div>
+      <div class="feature-title">Ban Logs</div>
+      <div class="feature-desc">Latest BattleMetrics org bans, plus your own server ban log with full user profile information.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚙️</div>
+      <div class="feature-title">Player Tools</div>
+      <div class="feature-desc">Player stats, Steam VAC checks, hours verification with tier roles, raid calculator and more.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔒</div>
+      <div class="feature-title">Content Filter</div>
+      <div class="feature-desc">Automatic detection and removal of CSAM spam links with instant ban. Opt-in per server.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧹</div>
+      <div class="feature-title">Wipe Schedule</div>
+      <div class="feature-desc">Track forced wipe dates, set custom wipe countdowns, and notify your community automatically.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔍</div>
+      <div class="feature-title">LFG System</div>
+      <div class="feature-desc">Looking-for-group board with team size, playstyle filters and automatic expiry.</div>
+    </div>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<!-- COMMANDS -->
+<section id="commands">
+  <div class="section-label">// commands</div>
+  <h2 class="section-title">Every command<br>you need.</h2>
+  <p class="section-desc">All commands are slash-based. No prefix, no confusion.</p>
+
+  <div class="commands-tabs">
+    <button class="tab active" onclick="showTab('rust')">/ rust</button>
+    <button class="tab" onclick="showTab('wire')">/wire</button>
+    <button class="tab" onclick="showTab('other')">Other</button>
+  </div>
+
+  <div class="commands-panel active" id="tab-rust">
+    <div class="cmd-list">
+      <div class="cmd-row"><span class="cmd-name">/rust drops</span><span class="cmd-desc">Post current Twitch Drop campaigns</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust kick-drops</span><span class="cmd-desc">Post current Kick Drop campaigns</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust skins</span><span class="cmd-desc">Post latest Steam Workshop skin releases</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust dlc</span><span class="cmd-desc">Post available Rust DLC with prices</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust devblogs</span><span class="cmd-desc">Post last 3 Facepunch devblogs</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust commits</span><span class="cmd-desc">Post latest Facepunch GitHub commits</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust oxide</span><span class="cmd-desc">Post latest Oxide/uMod updates</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust bans</span><span class="cmd-desc">Post latest org bans (BattleMetrics API required)</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust bancheck [steamid]</span><span class="cmd-desc">Check Steam VAC, Game and Community bans</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust playtime [steamid]</span><span class="cmd-desc">Show Rust hours + total Steam + top 5 games</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust wipe</span><span class="cmd-desc">Show next forced wipe date</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust filter [on/off]</span><span class="cmd-desc">Enable or disable content filter on this server (admin)</span></div>
+      <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices (e.g. GB, US)</span></div>
     </div>
   </div>
 
-  <div class="bottom-center">
-    <div class="title-card">
-      <h1>RustWire</h1>
-      <p>Stay connected with Rust+, events, wipes, and automation for your Rust server.</p>
-      <p style="margin-top:10px"><a href="./pair.html" class="link">Pair Rust+ with RustWire →</a></p>
+  <div class="commands-panel" id="tab-wire">
+    <div class="cmd-list">
+      <div class="cmd-row"><span class="cmd-name">/wire setupchannels</span><span class="cmd-desc">Create feed channels in this server (admin)</span></div>
+      <div class="cmd-row"><span class="cmd-name">/wire repopulate</span><span class="cmd-desc">Immediately post latest content to all feed channels (admin)</span></div>
+      <div class="cmd-row"><span class="cmd-name">/wire setregion</span><span class="cmd-desc">Set region for this server</span></div>
     </div>
   </div>
 
-  <div class="status" id="status" aria-live="polite">
-    <span class="dot na" id="dot"></span>
-    <span id="label">Portal not set</span>
+  <div class="commands-panel" id="tab-other">
+    <div class="cmd-list">
+      <div class="cmd-row"><span class="cmd-name">/lfg post</span><span class="cmd-desc">Post a looking-for-group listing</span></div>
+      <div class="cmd-row"><span class="cmd-name">/lfg search</span><span class="cmd-desc">Find players to team up with</span></div>
+      <div class="cmd-row"><span class="cmd-name">/raid</span><span class="cmd-desc">Calculate raid costs for any structure</span></div>
+      <div class="cmd-row"><span class="cmd-name">/wipeschedule setup</span><span class="cmd-desc">Configure wipe countdown for your server</span></div>
+      <div class="cmd-row"><span class="cmd-name">/wipeschedule enable/disable</span><span class="cmd-desc">Toggle wipe notifications</span></div>
+    </div>
   </div>
+</section>
 
-  <div class="owner" id="ownerChip" title="Owner: set portal URL">
-    <span class="gear">⚙️</span>
-    <span class="txt">Portal</span>
+<div class="full-divider"></div>
+
+<!-- CHANGELOG -->
+<section id="changelog">
+  <div class="section-label">// changelog</div>
+  <h2 class="section-title">What's new.</h2>
+  <p class="section-desc">Recent updates and improvements to RustWire.</p>
+
+  <div class="changelog-list">
+    <div class="changelog-entry">
+      <div class="changelog-date">Jun 2026</div>
+      <div>
+        <div class="changelog-badge badge-new">New</div>
+        <div class="changelog-title">Kick Drops Support</div>
+        <div class="changelog-desc">RustWire now tracks and posts Rust Kick Drop campaigns automatically via kick.facepunch.com — same as Twitch Drops, with a dedicated #kick-drops channel.</div>
+      </div>
+    </div>
+    <div class="changelog-entry">
+      <div class="changelog-date">Jun 2026</div>
+      <div>
+        <div class="changelog-badge badge-new">New</div>
+        <div class="changelog-title">Ban Log Channel</div>
+        <div class="changelog-desc">Manual and automatic bans now post a detailed embed with user profile, account age, join date, ban reason and who banned them.</div>
+      </div>
+    </div>
+    <div class="changelog-entry">
+      <div class="changelog-date">Jun 2026</div>
+      <div>
+        <div class="changelog-badge badge-new">New</div>
+        <div class="changelog-title">Per-Server Content Filter</div>
+        <div class="changelog-desc">Server admins can now enable or disable the content filter independently on their server using /rust filter on/off.</div>
+      </div>
+    </div>
+    <div class="changelog-entry">
+      <div class="changelog-date">Jun 2026</div>
+      <div>
+        <div class="changelog-badge badge-fix">Fix</div>
+        <div class="changelog-title">Autopost Performance</div>
+        <div class="changelog-desc">Shared feeds (commits, oxide, drops) are now fetched once per cycle instead of once per server, eliminating timeout spam on large deployments.</div>
+      </div>
+    </div>
+    <div class="changelog-entry">
+      <div class="changelog-date">May 2026</div>
+      <div>
+        <div class="changelog-badge badge-improve">Improve</div>
+        <div class="changelog-title">10,000 Users Milestone</div>
+        <div class="changelog-desc">RustWire reached 10,000 Discord users across 100+ servers. Privileged intent review submitted to Discord.</div>
+      </div>
+    </div>
   </div>
+</section>
 
-  <script>
-    // ====== CONFIG ======
-    const OWNER_PASSPHRASE = 'M@drid19810811';
-    const DEFAULT_PORTAL_ORIGIN = 'https://rustwire-site-nburbbwi4-patriks-projects-09b5310f.vercel.app';
-    const PORTAL_KEY = 'rustwire.portalOrigin';
-    const GUILD_ID = '1419192329713094689';
-    const CHANNEL_ID = '1421219082207891507'; // update if you want a different default
+<div class="full-divider"></div>
 
-    if (!localStorage.getItem(PORTAL_KEY)) {
-      localStorage.setItem(PORTAL_KEY, DEFAULT_PORTAL_ORIGIN);
-    }
+<!-- SUPPORT -->
+<section id="support">
+  <div class="section-label">// support</div>
+  <h2 class="section-title">Need help?</h2>
+  <p class="section-desc">Got a question, found a bug, or want to suggest a feature? We're here.</p>
 
-    async function ensureOwner() {
-      const ok = localStorage.getItem('rustwire.ownerOK') === 'yes';
-      if (ok) return true;
-      const input = prompt('Owner passphrase:');
-      if (!input) return false;
-      if (input === OWNER_PASSPHRASE) {
-        localStorage.setItem('rustwire.ownerOK', 'yes');
-        alert('Owner unlocked.');
-        return true;
-      }
-      alert('Incorrect passphrase.');
-      return false;
-    }
+  <div class="support-grid">
+    <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
+      <div class="support-card-icon">💬</div>
+      <div class="support-card-title">Discord Server</div>
+      <div class="support-card-desc">Join the RustWire Hub for support, announcements, and to chat with other server owners using the bot.</div>
+    </a>
+    <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
+      <div class="support-card-icon">🐛</div>
+      <div class="support-card-title">Report a Bug</div>
+      <div class="support-card-desc">Found something broken? Head to #bug-reports in our Discord and let us know. We fix things fast.</div>
+    </a>
+    <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
+      <div class="support-card-icon">💡</div>
+      <div class="support-card-title">Feature Requests</div>
+      <div class="support-card-desc">Have an idea for a new feature? Share it in #suggestions and the community can vote on it.</div>
+    </a>
+  </div>
+</section>
 
-    function normalizeOrigin(val){
-      try{
-        const u = new URL(val);
-        if (/(^|\.)developers\.cloudflare\.com$/i.test(u.hostname)) {
-          throw new Error('Cloudflare docs is not a portal.');
-        }
-        return u.origin;
-      }catch(e){ throw new Error('Invalid URL'); }
-    }
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">RUST<span>WIRE</span></div>
+  <div class="footer-links">
+    <a href="#features">Features</a>
+    <a href="#commands">Commands</a>
+    <a href="#changelog">Changelog</a>
+    <a href="https://discord.gg/Ws44MGuKGq">Discord</a>
+    <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands">Invite Bot</a>
+  </div>
+  <div class="footer-copy">© 2026 RustWire. Not affiliated with Facepunch Studios.</div>
+</footer>
 
-    async function setPortalInteractive() {
-      const cur = localStorage.getItem(PORTAL_KEY) || '';
-      const val = prompt('Set Portal URL (https://…):', cur);
-      if (!val) return;
-      try {
-        const origin = normalizeOrigin(val);
-        localStorage.setItem(PORTAL_KEY, origin);
-        updateStatus();
-        alert('Portal set to: ' + origin);
-      } catch(e) {
-        alert('Invalid portal URL: ' + e.message);
-      }
-    }
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.commands-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="showTab('${name}')"]`).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+</script>
 
-    document.getElementById('ownerChip').addEventListener('click', async () => {
-      if (await ensureOwner()) await setPortalInteractive();
-    });
-    document.getElementById('logoBtn').addEventListener('dblclick', async () => {
-      if (await ensureOwner()) await setPortalInteractive();
-    });
-
-    // ====== Status badge & ping ======
-    const dot = document.getElementById('dot');
-    const label = document.getElementById('label');
-
-    function setBadge(state, text){
-      dot.classList.remove('on','off','na');
-      dot.classList.add(state);
-      label.textContent = text;
-    }
-
-    async function ping(origin){
-      const url = origin + '/api/healthz';
-      const ctrl = new AbortController();
-      const t = setTimeout(()=>ctrl.abort(), 3500);
-      try{
-        await fetch(url, {method:'GET', cache:'no-store', mode:'no-cors', signal:ctrl.signal});
-        clearTimeout(t);
-        return true;
-      }catch{ clearTimeout(t); return false; }
-    }
-
-    async function updateStatus(){
-      const origin = localStorage.getItem(PORTAL_KEY) || '';
-      if (!origin){ setBadge('na','Portal not set'); return; }
-      const ok = await ping(origin);
-      setBadge(ok?'on':'off', ok?'Portal Online':'Portal Offline');
-    }
-
-    updateStatus();
-    setInterval(updateStatus, 20000);
-  </script>
 </body>
 </html>
