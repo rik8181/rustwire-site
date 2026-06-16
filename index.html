@@ -461,20 +461,88 @@ footer {
 ::-webkit-scrollbar-thumb { background: var(--orange); }
 
 /* RESPONSIVE */
+/* ── TABLET (768px - 900px) ── */
 @media (max-width: 900px) {
   nav { padding: 0 20px; }
   .nav-links { display: none; }
-  .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+  .nav-hamburger { display: flex; }
+  .hero { grid-template-columns: 1fr; padding: 100px 32px 60px; }
   .live-feed { display: none; }
-  .section { padding: 64px 24px; }
-  .features-grid { grid-template-columns: 1fr; }
-  .feature-card { border-right: none; }
-  .quickstart-grid { grid-template-columns: 1fr; }
+  .section { padding: 64px 32px; }
+  .section-inner { padding: 0 !important; }
+  .features-grid { grid-template-columns: 1fr 1fr; }
+  .feature-card:nth-child(2n) { border-right: none; }
+  .feature-card:nth-child(3n) { border-right: 1px solid rgba(229,98,26,0.1); }
+  .quickstart-grid { grid-template-columns: 1fr; gap: 32px; }
   .big-stats-grid { grid-template-columns: 1fr 1fr; }
-  .support-grid { grid-template-columns: 1fr; }
-  footer { grid-template-columns: 1fr 1fr; padding: 40px 24px; }
+  .big-stat { padding: 28px 20px; }
+  .big-stat-num { font-size: 36px; }
+  .support-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  footer { grid-template-columns: 1fr 1fr; padding: 40px 32px; gap: 28px; }
   .footer-brand { grid-column: span 2; }
   .cl-entry { grid-template-columns: 1fr; gap: 8px; }
+  .cmd-row { grid-template-columns: 1fr; gap: 4px; }
+}
+
+/* ── MOBILE (max 600px) ── */
+@media (max-width: 600px) {
+  nav { padding: 0 16px; }
+  .hero { padding: 88px 16px 48px; }
+  .hero h1 { font-size: 48px; }
+  .hero-desc { font-size: 11px; }
+  .hero-btns { flex-direction: column; }
+  .btn-primary, .btn-outline { width: 100%; text-align: center; justify-content: center; }
+  .hero-stats { gap: 24px; flex-wrap: wrap; }
+  .section { padding: 48px 16px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card { border-right: none !important; }
+  .big-stats-grid { grid-template-columns: 1fr 1fr; }
+  .big-stat { padding: 20px 16px; border-right: none; border-bottom: 1px solid rgba(229,98,26,0.1); }
+  .big-stat-num { font-size: 28px; }
+  .support-grid { grid-template-columns: 1fr; }
+  .cmd-tabs { gap: 0; }
+  .cmd-tab { padding: 10px 12px; font-size: 10px; }
+  .cmd-row { grid-template-columns: 1fr; gap: 4px; padding: 12px 12px; }
+  .cmd-name { font-size: 11px; }
+  .cmd-desc { font-size: 10px; }
+  footer { grid-template-columns: 1fr; padding: 32px 16px; }
+  .footer-brand { grid-column: span 1; }
+  .quickstart-box { padding: 20px 16px; }
+  .quickstart-line { font-size: 11px; }
+  .section-title { font-size: 28px; }
+  .hazard, .hazard-bottom { height: 6px; }
+}
+
+/* ── HAMBURGER MENU ── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column; gap: 5px; cursor: pointer;
+  padding: 8px; background: none; border: none;
+}
+.nav-hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: var(--orange); transition: all 0.3s;
+}
+.nav-mobile {
+  display: none;
+  position: fixed; top: 64px; left: 0; right: 0;
+  background: rgba(10,10,10,0.98);
+  border-bottom: 1px solid rgba(229,98,26,0.2);
+  padding: 16px 20px; z-index: 99;
+  flex-direction: column; gap: 0;
+}
+.nav-mobile.open { display: flex; }
+.nav-mobile a {
+  color: var(--muted); font-size: 13px; font-weight: 500;
+  text-decoration: none; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  transition: color 0.2s;
+}
+.nav-mobile a:hover { color: var(--white); }
+.nav-mobile .nav-cta {
+  background: var(--orange) !important; color: #000 !important;
+  text-align: center; margin-top: 12px; padding: 14px;
+  border-bottom: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -511,7 +579,21 @@ footer {
     <li><a href="https://discord.gg/Ws44MGuKGq">Discord</a></li>
     <li><a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="nav-cta">Add Bot →</a></li>
   </ul>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<!-- Mobile Menu -->
+<div class="nav-mobile" id="nav-mobile">
+  <a href="#features" onclick="closeMenu()">Features</a>
+  <a href="#commands" onclick="closeMenu()">Commands</a>
+  <a href="#stats" onclick="closeMenu()">Stats</a>
+  <a href="#changelog" onclick="closeMenu()">Changelog</a>
+  <a href="#support" onclick="closeMenu()">Support</a>
+  <a href="https://discord.gg/Ws44MGuKGq" onclick="closeMenu()">Discord</a>
+  <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="nav-cta" onclick="closeMenu()">Add Bot →</a>
+</div>
 
 <!-- HERO -->
 <div class="hero">
@@ -893,6 +975,18 @@ footer {
 </footer>
 
 <script>
+// ── HAMBURGER MENU ────────────────────────────────────────
+function toggleMenu() {
+  document.getElementById('nav-mobile').classList.toggle('open');
+}
+function closeMenu() {
+  document.getElementById('nav-mobile').classList.remove('open');
+}
+// Close menu on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('nav') && !e.target.closest('#nav-mobile')) closeMenu();
+});
+
 // ── TAB SWITCHER ──────────────────────────────────────────
 function showTab(name) {
   document.querySelectorAll('.cmd-tab').forEach(t => t.classList.remove('active'));
