@@ -3,611 +3,914 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RustWire — Rust Discord Bot</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>RustWire — Discord Ops Bot</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --rust:    #CE422B;
-    --orange:  #FF6B35;
-    --bg:      #0B0B0B;
-    --bg2:     #111111;
-    --bg3:     #181818;
-    --border:  rgba(206,66,43,0.18);
-    --text:    #E8E0D8;
-    --muted:   #6B6560;
-    --white:   #F5F0EB;
-  }
+:root {
+  --rust:    #CE422B;
+  --orange:  #E8621A;
+  --yellow:  #F5A623;
+  --bg:      #0A0A0A;
+  --bg2:     #111111;
+  --bg3:     #161616;
+  --border:  rgba(229,98,26,0.15);
+  --text:    #D8D0C8;
+  --muted:   #5A5550;
+  --white:   #F0EBE3;
+}
 
-  html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
+/* ── HAZARD STRIPE ── */
+.hazard {
+  height: 8px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #F5A623 0px, #F5A623 10px,
+    #1a1a1a 10px, #1a1a1a 20px
+  );
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+}
 
-  /* ── NAV ── */
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 40px; height: 60px;
-    background: rgba(11,11,11,0.92);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-logo {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700; font-size: 22px; letter-spacing: 2px;
-    color: var(--white); text-decoration: none;
-  }
-  .nav-logo span { color: var(--rust); }
-  .nav-links { display: flex; gap: 32px; list-style: none; }
-  .nav-links a {
-    color: var(--muted); font-size: 13px; font-weight: 500;
-    text-decoration: none; letter-spacing: 1px; text-transform: uppercase;
-    transition: color 0.2s;
-  }
-  .nav-links a:hover { color: var(--white); }
-  .nav-cta {
-    background: var(--rust); color: var(--white) !important;
-    padding: 8px 20px; border-radius: 3px; font-weight: 600 !important;
-    transition: background 0.2s !important;
-  }
-  .nav-cta:hover { background: var(--orange) !important; color: var(--white) !important; }
+/* ── NAV ── */
+nav {
+  position: fixed; top: 8px; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px; height: 56px;
+  background: rgba(10,10,10,0.97);
+  border-bottom: 1px solid rgba(229,98,26,0.2);
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 12px; text-decoration: none;
+}
+.nav-logo-icon {
+  width: 32px; height: 32px;
+  border: 1px solid var(--orange);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; color: var(--orange);
+}
+.nav-logo-text {
+  display: flex; flex-direction: column; line-height: 1;
+}
+.nav-logo-main {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 20px; font-weight: 700; letter-spacing: 3px;
+  color: var(--white);
+}
+.nav-logo-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: var(--orange);
+}
+.nav-links { display: flex; gap: 28px; list-style: none; align-items: center; }
+.nav-links a {
+  color: var(--muted); font-size: 12px; font-weight: 500;
+  text-decoration: none; letter-spacing: 1.5px; text-transform: uppercase;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  background: var(--orange) !important; color: #000 !important;
+  padding: 8px 18px; font-weight: 700 !important;
+  letter-spacing: 1px !important;
+}
+.nav-cta:hover { background: var(--yellow) !important; }
 
-  /* ── HERO ── */
-  .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    text-align: center; padding: 120px 24px 80px;
-    position: relative; overflow: hidden;
-  }
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: grid; grid-template-columns: 1fr 420px;
+  align-items: center; gap: 60px;
+  padding: 120px 80px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=60');
+  background-size: cover; background-position: center;
+  opacity: 0.08; z-index: 0;
+}
+.hero-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, rgba(10,10,10,0.98) 40%, rgba(10,10,10,0.7));
+}
+.hero-left { position: relative; z-index: 1; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--orange); margin-bottom: 24px;
+}
+.hero-eyebrow::before {
+  content: ''; display: block;
+  width: 8px; height: 8px;
+  background: var(--orange);
+}
+.hero h1 {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 700; line-height: 0.9;
+  letter-spacing: -1px; color: var(--white);
+  margin-bottom: 32px;
+}
+.hero h1 .line-orange { color: var(--orange); }
+.hero-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px; color: var(--muted);
+  line-height: 1.8; max-width: 480px;
+  margin-bottom: 40px;
+}
+.hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--orange); color: #000;
+  padding: 14px 28px;
+  font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  transition: background 0.2s, transform 0.15s;
+  border: none; cursor: pointer;
+}
+.btn-primary:hover { background: var(--yellow); transform: translateY(-1px); }
+.btn-outline {
+  background: transparent; color: var(--text);
+  padding: 14px 28px; border: 1px solid rgba(255,255,255,0.15);
+  font-family: 'Rajdhani', sans-serif; font-size: 14px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-outline:hover { border-color: var(--orange); color: var(--white); }
 
-  /* Pulse radar background */
-  .radar {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px; height: 600px;
-    pointer-events: none;
-  }
-  .radar-ring {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    border: 1px solid rgba(206,66,43,0.15);
-    animation: pulse-ring 3s ease-out infinite;
-  }
-  .radar-ring:nth-child(1) { width: 200px; height: 200px; animation-delay: 0s; }
-  .radar-ring:nth-child(2) { width: 340px; height: 340px; animation-delay: 0.6s; }
-  .radar-ring:nth-child(3) { width: 480px; height: 480px; animation-delay: 1.2s; }
-  .radar-ring:nth-child(4) { width: 620px; height: 620px; animation-delay: 1.8s; }
-  @keyframes pulse-ring {
-    0%   { opacity: 0.6; transform: translate(-50%,-50%) scale(0.8); }
-    100% { opacity: 0;   transform: translate(-50%,-50%) scale(1.1); }
-  }
+/* LIVE FEED */
+.live-feed {
+  position: relative; z-index: 1;
+  background: rgba(17,17,17,0.95);
+  border: 1px solid rgba(229,98,26,0.25);
+  padding: 24px;
+}
+.live-feed-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.live-feed-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: 3px; color: var(--orange);
+}
+.live-dot {
+  display: flex; align-items: center; gap: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: var(--orange);
+}
+.live-dot::before {
+  content: ''; width: 6px; height: 6px;
+  background: var(--orange); border-radius: 50%;
+  animation: blink 1.2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+.feed-item {
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-family: 'Share Tech Mono', monospace;
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-time { font-size: 10px; color: var(--muted); }
+.feed-cmd { font-size: 12px; color: var(--orange); margin: 2px 0; }
+.feed-sub { font-size: 11px; color: #4a4540; padding-left: 12px; }
+.feed-sub::before { content: '└ '; }
 
-  /* Scanline overlay */
-  .hero::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
-  }
+/* HERO STATS */
+.hero-stats {
+  position: relative; z-index: 1;
+  display: flex; gap: 40px; margin-top: 48px; padding-top: 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.hero-stat-num {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px; font-weight: 700; color: var(--orange);
+  line-height: 1;
+}
+.hero-stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: var(--muted);
+  text-transform: uppercase; margin-top: 4px;
+}
 
-  .hero-eyebrow {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--rust); margin-bottom: 20px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .hero-eyebrow::before, .hero-eyebrow::after {
-    content: ''; display: block; width: 32px; height: 1px; background: var(--rust);
-  }
+/* ── SECTIONS ── */
+.section { padding: 96px 80px; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+.section-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 3px; color: var(--orange);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: clamp(28px, 4vw, 48px); font-weight: 700;
+  color: var(--white); line-height: 1.05; margin-bottom: 16px;
+  text-transform: uppercase;
+}
+.section-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; color: var(--muted); max-width: 500px;
+  line-height: 1.8; margin-bottom: 56px;
+}
 
-  .hero h1 {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(56px, 9vw, 110px);
-    font-weight: 700; line-height: 0.92;
-    letter-spacing: -1px;
-    color: var(--white);
-    margin-bottom: 8px;
-    position: relative; z-index: 1;
-  }
-  .hero h1 .accent { color: var(--rust); }
+/* SECTOR LABEL */
+.sector-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 3px; color: var(--muted);
+  margin-bottom: 8px;
+}
 
-  .hero-sub {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(18px, 2.5vw, 28px);
-    font-weight: 500; letter-spacing: 4px; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 28px; position: relative; z-index: 1;
-  }
+/* ── FEATURES ── */
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid rgba(229,98,26,0.15);
+}
+.feature-card {
+  padding: 36px 28px;
+  border-right: 1px solid rgba(229,98,26,0.1);
+  border-bottom: 1px solid rgba(229,98,26,0.1);
+  transition: background 0.2s;
+}
+.feature-card:hover { background: rgba(229,98,26,0.04); }
+.feature-card:nth-child(3n) { border-right: none; }
+.feature-icon {
+  font-size: 20px; margin-bottom: 16px;
+  color: var(--orange);
+}
+.feature-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--white);
+  letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px;
+}
+.feature-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--muted); line-height: 1.8;
+}
 
-  .hero-desc {
-    max-width: 560px;
-    font-size: 15px; color: #8a847e; line-height: 1.7;
-    margin-bottom: 44px; position: relative; z-index: 1;
-  }
+/* QUICK START BOX */
+.quickstart-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+}
+.quickstart-box {
+  background: var(--bg2); border: 1px solid rgba(229,98,26,0.2);
+  padding: 32px;
+}
+.quickstart-header {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; letter-spacing: 3px; color: var(--orange);
+  margin-bottom: 20px;
+}
+.quickstart-line {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.quickstart-line:last-child { border-bottom: none; }
+.ql-cmd { color: var(--orange); }
+.ql-ok { color: #5a9a5a; }
+.ql-ready { color: var(--muted); margin-top: 12px; display: block; }
+.ql-note {
+  margin-top: 16px; padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: var(--orange);
+  display: flex; align-items: center; gap: 8px;
+}
 
-  .hero-buttons {
-    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
-    position: relative; z-index: 1;
-  }
-  .btn-primary {
-    background: var(--rust); color: var(--white);
-    padding: 14px 32px; border-radius: 3px;
-    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
-    transition: background 0.2s, transform 0.15s;
-    border: none; cursor: pointer;
-  }
-  .btn-primary:hover { background: var(--orange); transform: translateY(-1px); }
-  .btn-secondary {
-    background: transparent; color: var(--text);
-    padding: 14px 32px; border-radius: 3px;
-    font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600;
-    letter-spacing: 2px; text-transform: uppercase; text-decoration: none;
-    border: 1px solid rgba(255,255,255,0.12);
-    transition: border-color 0.2s, color 0.2s, transform 0.15s;
-  }
-  .btn-secondary:hover { border-color: var(--rust); color: var(--white); transform: translateY(-1px); }
+/* ── BIG STATS ── */
+.big-stats { background: var(--bg2); }
+.big-stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid rgba(229,98,26,0.15);
+}
+.big-stat {
+  padding: 40px 32px;
+  border-right: 1px solid rgba(229,98,26,0.1);
+}
+.big-stat:last-child { border-right: none; }
+.big-stat-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--orange); margin-bottom: 12px;
+}
+.big-stat-num {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 48px; font-weight: 700; color: var(--white);
+  line-height: 1;
+}
 
-  /* ── STATS BAR ── */
-  .stats-bar {
-    background: var(--bg2);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
-    padding: 32px 40px;
-    display: flex; justify-content: center; gap: 80px; flex-wrap: wrap;
-  }
-  .stat { text-align: center; }
-  .stat-num {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 36px; font-weight: 700; color: var(--white);
-    line-height: 1;
-  }
-  .stat-num span { color: var(--rust); }
-  .stat-label {
-    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--muted); margin-top: 4px;
-  }
+/* ── COMMANDS ── */
+.cmd-tabs {
+  display: flex; border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin-bottom: 0; flex-wrap: wrap;
+}
+.cmd-tab {
+  padding: 12px 22px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; letter-spacing: 1px; color: var(--muted);
+  cursor: pointer; border: none; background: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.cmd-tab.active { color: var(--orange); border-bottom-color: var(--orange); }
+.cmd-tab:hover:not(.active) { color: var(--text); }
+.cmd-panel { display: none; padding: 24px 0; }
+.cmd-panel.active { display: block; }
+.cmd-list { display: flex; flex-direction: column; gap: 2px; }
+.cmd-row {
+  display: grid; grid-template-columns: 280px 1fr;
+  gap: 24px; padding: 14px 16px;
+  background: var(--bg2);
+  border-left: 2px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cmd-row:hover { border-left-color: var(--orange); background: var(--bg3); }
+.cmd-name {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px; color: var(--orange);
+}
+.cmd-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--muted);
+}
 
-  /* ── SECTIONS ── */
-  section { padding: 96px 24px; max-width: 1100px; margin: 0 auto; }
+/* ── CHANGELOG ── */
+.changelog { background: var(--bg); }
+.cl-list { display: flex; flex-direction: column; }
+.cl-entry {
+  display: grid; grid-template-columns: 120px 1fr;
+  gap: 40px; padding: 28px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.cl-entry:first-child { border-top: 1px solid rgba(255,255,255,0.04); }
+.cl-date {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: var(--muted); padding-top: 6px;
+  letter-spacing: 1px;
+}
+.cl-badge {
+  display: inline-block; font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 3px 8px; margin-bottom: 10px;
+}
+.badge-new { background: rgba(206,66,43,0.15); color: var(--rust); }
+.badge-fix { background: rgba(229,98,26,0.12); color: var(--orange); }
+.badge-improve { background: rgba(90,154,90,0.12); color: #6ab06a; }
+.cl-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px; font-weight: 700; color: var(--white);
+  text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px;
+}
+.cl-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--muted); line-height: 1.7;
+}
 
-  .section-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
-    color: var(--rust); margin-bottom: 12px;
-  }
-  .section-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: clamp(32px, 4vw, 52px); font-weight: 700;
-    color: var(--white); line-height: 1.1; margin-bottom: 16px;
-  }
-  .section-desc {
-    font-size: 15px; color: #7a7470; max-width: 520px; line-height: 1.7;
-    margin-bottom: 56px;
-  }
+/* ── SUPPORT ── */
+.support-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+.support-card {
+  background: var(--bg2); border: 1px solid rgba(229,98,26,0.15);
+  padding: 32px 24px; text-decoration: none;
+  transition: border-color 0.2s, transform 0.15s; display: block;
+}
+.support-card:hover { border-color: var(--orange); transform: translateY(-2px); }
+.support-icon { font-size: 24px; margin-bottom: 16px; }
+.support-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px; font-weight: 700; color: var(--white);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+}
+.support-desc {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--muted); line-height: 1.7;
+}
 
-  /* ── FEATURES ── */
-  .features-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1px;
-    background: var(--border); border: 1px solid var(--border);
-  }
-  .feature-card {
-    background: var(--bg2); padding: 36px 32px;
-    transition: background 0.2s;
-  }
-  .feature-card:hover { background: var(--bg3); }
-  .feature-icon {
-    width: 40px; height: 40px; margin-bottom: 20px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-  }
-  .feature-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 20px; font-weight: 600; color: var(--white);
-    margin-bottom: 10px; letter-spacing: 0.5px;
-  }
-  .feature-desc { font-size: 14px; color: #6b6560; line-height: 1.65; }
+/* ── FOOTER ── */
+.hazard-bottom {
+  height: 8px;
+  background: repeating-linear-gradient(
+    -45deg,
+    #F5A623 0px, #F5A623 10px,
+    #1a1a1a 10px, #1a1a1a 20px
+  );
+}
+footer {
+  background: var(--bg);
+  border-top: 1px solid rgba(229,98,26,0.15);
+  padding: 48px 80px;
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 40px;
+}
+.footer-brand { grid-column: span 1; }
+.footer-brand-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 22px; font-weight: 700; letter-spacing: 3px; color: var(--white);
+  margin-bottom: 8px;
+}
+.footer-brand-sub {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px; color: var(--muted); line-height: 1.7;
+}
+.footer-col-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--orange); margin-bottom: 16px;
+  padding-bottom: 8px; border-bottom: 1px solid rgba(229,98,26,0.2);
+}
+.footer-col a {
+  display: block; font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: var(--muted); text-decoration: none;
+  padding: 4px 0; transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--orange); }
+.footer-status {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: #5a9a5a;
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.footer-status::before {
+  content: ''; width: 6px; height: 6px;
+  background: #5a9a5a; border-radius: 50%;
+}
+.footer-copy {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: #2a2520; margin-top: 12px;
+}
 
-  /* ── COMMANDS ── */
-  .commands-tabs {
-    display: flex; gap: 0; margin-bottom: 0;
-    border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
-  }
-  .tab {
-    padding: 12px 24px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px; letter-spacing: 1px;
-    color: var(--muted); cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px; transition: color 0.2s, border-color 0.2s;
-    background: none; border-top: none; border-left: none; border-right: none;
-  }
-  .tab.active { color: var(--rust); border-bottom-color: var(--rust); }
-  .tab:hover:not(.active) { color: var(--text); }
+/* DIVIDER */
+.divider {
+  width: 100%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(229,98,26,0.2), transparent);
+}
 
-  .commands-panel { display: none; padding: 32px 0; }
-  .commands-panel.active { display: block; }
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--orange); }
 
-  .cmd-list { display: flex; flex-direction: column; gap: 2px; }
-  .cmd-row {
-    display: grid; grid-template-columns: 260px 1fr;
-    gap: 24px; padding: 16px 20px;
-    background: var(--bg2); border-left: 2px solid transparent;
-    transition: border-color 0.15s, background 0.15s;
-    align-items: start;
-  }
-  .cmd-row:hover { border-left-color: var(--rust); background: var(--bg3); }
-  .cmd-name {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 13px; color: var(--orange); font-weight: 500;
-  }
-  .cmd-desc { font-size: 13px; color: #7a7470; }
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+  .live-feed { display: none; }
+  .section { padding: 64px 24px; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feature-card { border-right: none; }
+  .quickstart-grid { grid-template-columns: 1fr; }
+  .big-stats-grid { grid-template-columns: 1fr 1fr; }
+  .support-grid { grid-template-columns: 1fr; }
+  footer { grid-template-columns: 1fr 1fr; padding: 40px 24px; }
+  .footer-brand { grid-column: span 2; }
+  .cl-entry { grid-template-columns: 1fr; gap: 8px; }
+}
 
-  /* ── CHANGELOG ── */
-  .changelog-list { display: flex; flex-direction: column; gap: 0; }
-  .changelog-entry {
-    display: grid; grid-template-columns: 140px 1fr;
-    gap: 32px; padding: 28px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-  }
-  .changelog-entry:first-child { border-top: 1px solid rgba(255,255,255,0.04); }
-  .changelog-date {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px; color: var(--muted); padding-top: 4px; letter-spacing: 1px;
-  }
-  .changelog-badge {
-    display: inline-block; font-size: 10px; font-weight: 600;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    padding: 2px 8px; border-radius: 2px; margin-bottom: 10px;
-  }
-  .badge-new { background: rgba(206,66,43,0.15); color: var(--rust); }
-  .badge-fix { background: rgba(255,107,53,0.12); color: var(--orange); }
-  .badge-improve { background: rgba(100,100,255,0.1); color: #8888ff; }
-  .changelog-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 18px; font-weight: 600; color: var(--white); margin-bottom: 8px;
-  }
-  .changelog-desc { font-size: 13px; color: #6b6560; line-height: 1.6; }
-
-  /* ── SUPPORT ── */
-  .support-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;
-  }
-  .support-card {
-    background: var(--bg2); border: 1px solid var(--border);
-    padding: 32px 28px; border-radius: 2px;
-    text-decoration: none; transition: border-color 0.2s, transform 0.15s;
-    display: block;
-  }
-  .support-card:hover { border-color: var(--rust); transform: translateY(-2px); }
-  .support-card-icon { font-size: 28px; margin-bottom: 16px; }
-  .support-card-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 20px; font-weight: 600; color: var(--white); margin-bottom: 8px;
-  }
-  .support-card-desc { font-size: 13px; color: #6b6560; line-height: 1.6; }
-
-  /* ── FOOTER ── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 40px 40px;
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 16px;
-  }
-  .footer-logo {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 700; font-size: 18px; letter-spacing: 2px; color: var(--muted);
-  }
-  .footer-logo span { color: var(--rust); }
-  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
-  .footer-links a {
-    font-size: 12px; color: var(--muted); text-decoration: none; letter-spacing: 1px;
-    transition: color 0.2s;
-  }
-  .footer-links a:hover { color: var(--rust); }
-  .footer-copy { font-size: 12px; color: #3a3530; }
-
-  /* ── DIVIDER ── */
-  .full-divider {
-    width: 100%; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border), transparent);
-  }
-
-  /* ── SCROLLBAR ── */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--rust); border-radius: 2px; }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    nav { padding: 0 20px; }
-    .nav-links { display: none; }
-    .stats-bar { gap: 40px; padding: 24px; }
-    section { padding: 64px 20px; }
-    .changelog-entry { grid-template-columns: 1fr; gap: 8px; }
-    footer { flex-direction: column; text-align: center; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .radar-ring { animation: none; }
-    * { transition: none !important; }
-  }
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
 </style>
 </head>
 <body>
 
+<div class="hazard"></div>
+
 <!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">RUST<span>WIRE</span></a>
+  <a href="#" class="nav-brand">
+    <div class="nav-logo-icon">◎</div>
+    <div class="nav-logo-text">
+      <span class="nav-logo-main">RUSTWIRE</span>
+      <span class="nav-logo-sub">// DISCORD OPS BOT</span>
+    </div>
+  </a>
   <ul class="nav-links">
     <li><a href="#features">Features</a></li>
     <li><a href="#commands">Commands</a></li>
+    <li><a href="#stats">Stats</a></li>
     <li><a href="#changelog">Changelog</a></li>
     <li><a href="#support">Support</a></li>
-    <li><a href="https://discord.gg/Ws44MGuKGq" class="nav-cta">Join Server</a></li>
+    <li><a href="https://discord.gg/Ws44MGuKGq">Discord</a></li>
+    <li><a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="nav-cta">Add Bot →</a></li>
   </ul>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-  <div class="radar">
-    <div class="radar-ring"></div>
-    <div class="radar-ring"></div>
-    <div class="radar-ring"></div>
-    <div class="radar-ring"></div>
+  <div class="hero-bg"></div>
+
+  <div class="hero-left">
+    <div class="hero-eyebrow">All-in-one ops bot // Rust game</div>
+    <h1>
+      SURVIVE.<br>
+      <span class="line-orange">DOMINATE.</span><br>
+      AUTOMATE.
+    </h1>
+    <p class="hero-desc">
+      RUSTWIRE is the meanest Discord bot in the wasteland.<br>
+      Drops, skins, devblogs, commits, ban logs, raid calc,<br>
+      player stats — wired straight into your guild.
+    </p>
+    <div class="hero-btns">
+      <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary">Enlist Free →</a>
+      <a href="#commands" class="btn-outline">View Commands</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">10K+</div>
+        <div class="hero-stat-label">Users</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">100+</div>
+        <div class="hero-stat-label">Servers</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">24/7</div>
+        <div class="hero-stat-label">Uptime</div>
+      </div>
+    </div>
   </div>
 
-  <div class="hero-eyebrow">Live Feed</div>
-  <h1>RUST<span class="accent">WIRE</span></h1>
-  <div class="hero-sub">Rust Discord Bot</div>
-  <p class="hero-desc">
-    Real-time Rust news, Twitch &amp; Kick Drops, skin releases, devblogs, 
-    Facepunch commits, Oxide updates, ban logs and player tools — 
-    delivered automatically to your Discord server.
-  </p>
-  <div class="hero-buttons">
-    <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary">Add to Discord</a>
-    <a href="https://discord.gg/Ws44MGuKGq" class="btn-secondary">Join Community</a>
+  <!-- LIVE FEED -->
+  <div class="live-feed">
+    <div class="live-feed-header">
+      <span class="live-feed-title">// LIVE FEED</span>
+      <span class="live-dot">LIVE</span>
+    </div>
+    <div class="feed-item">
+      <div class="feed-time">[06:14:22]</div>
+      <div class="feed-cmd">/rust drops -- Twitch Drops Active</div>
+      <div class="feed-sub">General Drops campaign live now</div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-time">[06:14:55]</div>
+      <div class="feed-cmd">/rust skins -- New Skin Released</div>
+      <div class="feed-sub">Industrial Crafter Pack — £9.99</div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-time">[06:15:09]</div>
+      <div class="feed-cmd">/rust commits -- Facepunch</div>
+      <div class="feed-sub">Fixed server browser lag spike</div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-time">[06:15:43]</div>
+      <div class="feed-cmd">/rust wipe -- Force Wipe</div>
+      <div class="feed-sub">T-2d 14h 11m remaining</div>
+    </div>
+    <div class="feed-item">
+      <div class="feed-time">[06:16:01]</div>
+      <div class="feed-cmd">/rust oxide -- uMod Update</div>
+      <div class="feed-sub">Oxide 2.0.6312 released</div>
+    </div>
   </div>
 </div>
 
-<!-- STATS -->
-<div class="stats-bar">
-  <div class="stat">
-    <div class="stat-num">10<span>K+</span></div>
-    <div class="stat-label">Discord Users</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">100<span>+</span></div>
-    <div class="stat-label">Servers</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">24<span>/7</span></div>
-    <div class="stat-label">Uptime</div>
-  </div>
-  <div class="stat">
-    <div class="stat-num">15<span>min</span></div>
-    <div class="stat-label">Update Interval</div>
-  </div>
-</div>
+<div class="divider"></div>
 
 <!-- FEATURES -->
-<section id="features">
-  <div class="section-label">// what it does</div>
-  <h2 class="section-title">Everything Rust,<br>in one bot.</h2>
-  <p class="section-desc">Set it up once, forget about it. RustWire watches the Rust ecosystem 24/7 and posts directly to your channels.</p>
+<div class="section" id="features">
+  <div class="section-inner">
+    <div class="sector-tag">// SECTOR 01</div>
+    <h2 class="section-title">Tools forged for<br>the wasteland</h2>
+    <p class="section-desc">One bot. Every Rust data source wired directly into your Discord. Set it up once, forget about it.</p>
 
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🎮</div>
-      <div class="feature-title">Twitch & Kick Drops</div>
-      <div class="feature-desc">Automatically posts active drop campaigns the moment they go live. Never miss a free skin again.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🎨</div>
-      <div class="feature-title">Skins & DLC</div>
-      <div class="feature-desc">New Steam Workshop skins and DLC releases posted instantly with prices in your server's region.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📰</div>
-      <div class="feature-title">Devblogs & News</div>
-      <div class="feature-desc">Facepunch devblogs, community posts and general Rust news delivered the moment they're published.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🛠️</div>
-      <div class="feature-title">Commits & Oxide</div>
-      <div class="feature-desc">Facepunch GitHub commits and Oxide/uMod plugin updates tracked and posted automatically.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🚫</div>
-      <div class="feature-title">Ban Logs</div>
-      <div class="feature-desc">Latest BattleMetrics org bans, plus your own server ban log with full user profile information.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">⚙️</div>
-      <div class="feature-title">Player Tools</div>
-      <div class="feature-desc">Player stats, Steam VAC checks, hours verification with tier roles, raid calculator and more.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔒</div>
-      <div class="feature-title">Content Filter</div>
-      <div class="feature-desc">Automatic detection and removal of CSAM spam links with instant ban. Opt-in per server.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🧹</div>
-      <div class="feature-title">Wipe Schedule</div>
-      <div class="feature-desc">Track forced wipe dates, set custom wipe countdowns, and notify your community automatically.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔍</div>
-      <div class="feature-title">LFG System</div>
-      <div class="feature-desc">Looking-for-group board with team size, playstyle filters and automatic expiry.</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎮</div>
+        <div class="feature-title">Twitch & Kick Drops</div>
+        <div class="feature-desc">Active drop campaigns posted the moment they go live. Never miss a free skin again.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Skins & DLC</div>
+        <div class="feature-desc">New Steam Workshop skins and DLC releases with region-aware pricing. Instant alerts.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📰</div>
+        <div class="feature-title">Devblogs & News</div>
+        <div class="feature-desc">Facepunch devblogs, community posts and general Rust news delivered automatically.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛠️</div>
+        <div class="feature-title">Commits & Oxide</div>
+        <div class="feature-desc">Facepunch GitHub commits and Oxide/uMod plugin updates tracked and posted in real time.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🚫</div>
+        <div class="feature-title">Ban Logs</div>
+        <div class="feature-desc">Latest org bans plus your own server ban log with full user profile, account age and reason.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <div class="feature-title">Player Tools</div>
+        <div class="feature-desc">VAC checks, hours verification, tier roles, raid calculator, recycler, blueprint lookup.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">Content Filter</div>
+        <div class="feature-desc">Auto-detects and removes CSAM spam links with instant ban. Opt-in per server, admin only.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧹</div>
+        <div class="feature-title">Wipe Schedule</div>
+        <div class="feature-desc">Track forced wipes, set custom countdowns, and notify your community automatically.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <div class="feature-title">Rust+ Integration</div>
+        <div class="feature-desc">Live map, team tracker, in-game chat bridge, monument status and event alerts via Rust+.</div>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<div class="full-divider"></div>
+<div class="divider"></div>
+
+<!-- QUICKSTART -->
+<div class="section">
+  <div class="section-inner">
+    <div class="quickstart-grid">
+      <div>
+        <div class="sector-tag">// SECTOR 02</div>
+        <h2 class="section-title">Wire your guild<br>into <span style="color:var(--orange)">Rust.</span></h2>
+        <p class="section-desc">One install. 50+ commands. Zero ads. RustWire plugs into your Discord server and starts feeding intel within seconds.</p>
+        <div class="hero-btns">
+          <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary">Add to Discord</a>
+          <a href="#commands" class="btn-outline">View Commands</a>
+        </div>
+      </div>
+      <div class="quickstart-box">
+        <div class="quickstart-header">// QUICK START</div>
+        <div class="quickstart-line"><span class="ql-cmd">&gt; /wire setupchannels</span></div>
+        <div class="quickstart-line"><span class="ql-ok">✓ feed channels created</span></div>
+        <div class="quickstart-line"><span class="ql-cmd">&gt; /wire setregion GB</span></div>
+        <div class="quickstart-line"><span class="ql-ok">✓ region set to GB</span></div>
+        <div class="quickstart-line"><span class="ql-cmd">&gt; /wire repopulate</span></div>
+        <div class="quickstart-line"><span class="ql-ok">✓ latest content posted</span></div>
+        <div class="quickstart-line"><span class="ql-cmd">&gt; /rust drops</span></div>
+        <div class="quickstart-line"><span class="ql-ok">✓ twitch drops active</span></div>
+        <div class="ql-ready">ready. survive harder.</div>
+        <div class="ql-note">⏱ 60-second deploy</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BIG STATS -->
+<div class="big-stats" id="stats">
+  <div class="section-inner" style="padding: 0 80px;">
+    <div class="big-stats-grid">
+      <div class="big-stat">
+        <div class="big-stat-label">Servers Wired</div>
+        <div class="big-stat-num">100+</div>
+      </div>
+      <div class="big-stat">
+        <div class="big-stat-label">Discord Users</div>
+        <div class="big-stat-num">10,000+</div>
+      </div>
+      <div class="big-stat">
+        <div class="big-stat-label">Commands Available</div>
+        <div class="big-stat-num">50+</div>
+      </div>
+      <div class="big-stat">
+        <div class="big-stat-label">Uptime %</div>
+        <div class="big-stat-num">99.97</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
 
 <!-- COMMANDS -->
-<section id="commands">
-  <div class="section-label">// commands</div>
-  <h2 class="section-title">Every command<br>you need.</h2>
-  <p class="section-desc">All commands are slash-based. No prefix, no confusion.</p>
+<div class="section" id="commands">
+  <div class="section-inner">
+    <div class="section-label">// commands</div>
+    <h2 class="section-title">Every command<br>you need.</h2>
+    <p class="section-desc">All slash-based. No prefix, no confusion. Works in any channel.</p>
 
-  <div class="commands-tabs">
-    <button class="tab active" onclick="showTab('rust')">/ rust</button>
-    <button class="tab" onclick="showTab('wire')">/wire</button>
-    <button class="tab" onclick="showTab('other')">Other</button>
-  </div>
+    <div class="cmd-tabs">
+      <button class="cmd-tab active" onclick="showTab('rust')">/rust</button>
+      <button class="cmd-tab" onclick="showTab('wire')">/wire</button>
+      <button class="cmd-tab" onclick="showTab('tools')">Tools</button>
+      <button class="cmd-tab" onclick="showTab('social')">Social</button>
+      <button class="cmd-tab" onclick="showTab('rustplus')">Rust+</button>
+    </div>
 
-  <div class="commands-panel active" id="tab-rust">
-    <div class="cmd-list">
-      <div class="cmd-row"><span class="cmd-name">/rust drops</span><span class="cmd-desc">Post current Twitch Drop campaigns</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust kick-drops</span><span class="cmd-desc">Post current Kick Drop campaigns</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust skins</span><span class="cmd-desc">Post latest Steam Workshop skin releases</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust dlc</span><span class="cmd-desc">Post available Rust DLC with prices</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust devblogs</span><span class="cmd-desc">Post last 3 Facepunch devblogs</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust commits</span><span class="cmd-desc">Post latest Facepunch GitHub commits</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust oxide</span><span class="cmd-desc">Post latest Oxide/uMod updates</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust bans</span><span class="cmd-desc">Post latest org bans (BattleMetrics API required)</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust bancheck [steamid]</span><span class="cmd-desc">Check Steam VAC, Game and Community bans</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust playtime [steamid]</span><span class="cmd-desc">Show Rust hours + total Steam + top 5 games</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust wipe</span><span class="cmd-desc">Show next forced wipe date</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust filter [on/off]</span><span class="cmd-desc">Enable or disable content filter on this server (admin)</span></div>
-      <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices (e.g. GB, US)</span></div>
+    <div class="cmd-panel active" id="tab-rust">
+      <div class="cmd-list">
+        <div class="cmd-row"><span class="cmd-name">/rust drops</span><span class="cmd-desc">Post current Twitch Drop campaigns</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust kick-drops</span><span class="cmd-desc">Post current Kick Drop campaigns</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust skins</span><span class="cmd-desc">Post latest Steam Workshop skin releases (region-aware)</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust dlc</span><span class="cmd-desc">Post available Rust DLC with prices (region-aware)</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust devblogs</span><span class="cmd-desc">Post last 3 Facepunch devblogs</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust community</span><span class="cmd-desc">Post last 3 Facepunch community posts</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust general</span><span class="cmd-desc">Post last 3 general Rust news posts</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust commits</span><span class="cmd-desc">Post latest Facepunch GitHub commits</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust oxide</span><span class="cmd-desc">Post latest Oxide/uMod updates</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust bans</span><span class="cmd-desc">Post latest org bans (BattleMetrics API required)</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust bancheck [steamid]</span><span class="cmd-desc">Check Steam VAC, Game and Community bans</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust playtime [steamid]</span><span class="cmd-desc">Show Rust hours + total Steam playtime + top 5 games</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust inventory [steamid]</span><span class="cmd-desc">View a player's public Steam inventory</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust wipe</span><span class="cmd-desc">Show next forced wipe date</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust faq</span><span class="cmd-desc">Frequently asked Rust questions</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust roadmap</span><span class="cmd-desc">Show the current Rust development roadmap</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices (e.g. GB, US)</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rust filter [on/off]</span><span class="cmd-desc">Enable or disable content filter — admin only</span></div>
+      </div>
+    </div>
+
+    <div class="cmd-panel" id="tab-wire">
+      <div class="cmd-list">
+        <div class="cmd-row"><span class="cmd-name">/wire setupchannels</span><span class="cmd-desc">Create or link feed channels on this server — admin only</span></div>
+        <div class="cmd-row"><span class="cmd-name">/wire repopulate</span><span class="cmd-desc">Immediately post latest content to all feed channels — admin only</span></div>
+        <div class="cmd-row"><span class="cmd-name">/wire setregion [cc]</span><span class="cmd-desc">Set the store region for this server (e.g. GB, US)</span></div>
+        <div class="cmd-row"><span class="cmd-name">/wire ping</span><span class="cmd-desc">Check if the bot is online and responsive</span></div>
+        <div class="cmd-row"><span class="cmd-name">/wire posthours</span><span class="cmd-desc">Post the Steam hours verification card — admin only</span></div>
+      </div>
+    </div>
+
+    <div class="cmd-panel" id="tab-tools">
+      <div class="cmd-list">
+        <div class="cmd-row"><span class="cmd-name">/raid calculate</span><span class="cmd-desc">Calculate explosives needed to raid any structure</span></div>
+        <div class="cmd-row"><span class="cmd-name">/raid compare</span><span class="cmd-desc">Compare raid cost between two structures</span></div>
+        <div class="cmd-row"><span class="cmd-name">/raid plan</span><span class="cmd-desc">Build a full raid plan with material breakdown</span></div>
+        <div class="cmd-row"><span class="cmd-name">/recycle [item]</span><span class="cmd-desc">Show what you get from recycling an item</span></div>
+        <div class="cmd-row"><span class="cmd-name">/craft [item]</span><span class="cmd-desc">Show crafting recipe and materials needed</span></div>
+        <div class="cmd-row"><span class="cmd-name">/blueprint [item]</span><span class="cmd-desc">Check if an item has a blueprint and its cost</span></div>
+        <div class="cmd-row"><span class="cmd-name">/repair [item]</span><span class="cmd-desc">Show repair cost for any item</span></div>
+        <div class="cmd-row"><span class="cmd-name">/smelt [item]</span><span class="cmd-desc">Show smelting output and fuel cost</span></div>
+        <div class="cmd-row"><span class="cmd-name">/upkeep [item]</span><span class="cmd-desc">Calculate upkeep cost for a structure</span></div>
+        <div class="cmd-row"><span class="cmd-name">/cctv [monument]</span><span class="cmd-desc">Look up CCTV camera codes for any monument</span></div>
+        <div class="cmd-row"><span class="cmd-name">/puzzle [monument]</span><span class="cmd-desc">Show puzzle/loot room guide for a monument</span></div>
+        <div class="cmd-row"><span class="cmd-name">/stats [steamid]</span><span class="cmd-desc">Show detailed Rust player statistics</span></div>
+        <div class="cmd-row"><span class="cmd-name">/wipestats</span><span class="cmd-desc">Show wipe statistics for your server</span></div>
+        <div class="cmd-row"><span class="cmd-name">/wipeschedule setup</span><span class="cmd-desc">Configure wipe countdown for your server</span></div>
+        <div class="cmd-row"><span class="cmd-name">/wipeschedule enable/disable</span><span class="cmd-desc">Toggle wipe notifications</span></div>
+        <div class="cmd-row"><span class="cmd-name">/eventtimers</span><span class="cmd-desc">Show timers for in-game events (CH47, heli, cargo etc.)</span></div>
+        <div class="cmd-row"><span class="cmd-name">/vending alert [item]</span><span class="cmd-desc">Get notified when an item appears in a vending machine</span></div>
+        <div class="cmd-row"><span class="cmd-name">/vending alerts</span><span class="cmd-desc">View your active vending machine alerts</span></div>
+      </div>
+    </div>
+
+    <div class="cmd-panel" id="tab-social">
+      <div class="cmd-list">
+        <div class="cmd-row"><span class="cmd-name">/lfg post</span><span class="cmd-desc">Post a looking-for-group listing</span></div>
+        <div class="cmd-row"><span class="cmd-name">/lfg search</span><span class="cmd-desc">Find players to team up with</span></div>
+        <div class="cmd-row"><span class="cmd-name">/lfg mypost</span><span class="cmd-desc">View or manage your active LFG listing</span></div>
+        <div class="cmd-row"><span class="cmd-name">/lfg profile</span><span class="cmd-desc">View your LFG profile and stats</span></div>
+        <div class="cmd-row"><span class="cmd-name">/lfg rate</span><span class="cmd-desc">Rate a player after teaming up</span></div>
+        <div class="cmd-row"><span class="cmd-name">/leveling rank</span><span class="cmd-desc">Check your XP rank on this server</span></div>
+        <div class="cmd-row"><span class="cmd-name">/leveling leaderboard</span><span class="cmd-desc">View the top players by XP on this server</span></div>
+        <div class="cmd-row"><span class="cmd-name">/leveling profile</span><span class="cmd-desc">View your full leveling profile</span></div>
+        <div class="cmd-row"><span class="cmd-name">/leaderboard</span><span class="cmd-desc">Show the server-wide activity leaderboard</span></div>
+      </div>
+    </div>
+
+    <div class="cmd-panel" id="tab-rustplus">
+      <div class="cmd-list">
+        <div class="cmd-row"><span class="cmd-name">/rustplus setup</span><span class="cmd-desc">Connect your Rust+ server to Discord</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus map</span><span class="cmd-desc">Show the live map of your connected Rust server</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus info</span><span class="cmd-desc">Show server info (population, map size, queue)</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus time</span><span class="cmd-desc">Show current in-game time and day/night cycle</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus team</span><span class="cmd-desc">Show your team members and their online status</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus monuments</span><span class="cmd-desc">List active monuments and their status</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus shops</span><span class="cmd-desc">Browse vending machines on your server</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus events</span><span class="cmd-desc">Show active in-game events</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus chat</span><span class="cmd-desc">Send a message to in-game chat from Discord</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus tracker</span><span class="cmd-desc">Track a player's online/offline status</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus status</span><span class="cmd-desc">Check Rust+ connection status</span></div>
+        <div class="cmd-row"><span class="cmd-name">/rustplus disconnect</span><span class="cmd-desc">Disconnect Rust+ from this server</span></div>
+      </div>
     </div>
   </div>
+</div>
 
-  <div class="commands-panel" id="tab-wire">
-    <div class="cmd-list">
-      <div class="cmd-row"><span class="cmd-name">/wire setupchannels</span><span class="cmd-desc">Create feed channels in this server (admin)</span></div>
-      <div class="cmd-row"><span class="cmd-name">/wire repopulate</span><span class="cmd-desc">Immediately post latest content to all feed channels (admin)</span></div>
-      <div class="cmd-row"><span class="cmd-name">/wire setregion</span><span class="cmd-desc">Set region for this server</span></div>
-    </div>
-  </div>
-
-  <div class="commands-panel" id="tab-other">
-    <div class="cmd-list">
-      <div class="cmd-row"><span class="cmd-name">/lfg post</span><span class="cmd-desc">Post a looking-for-group listing</span></div>
-      <div class="cmd-row"><span class="cmd-name">/lfg search</span><span class="cmd-desc">Find players to team up with</span></div>
-      <div class="cmd-row"><span class="cmd-name">/raid</span><span class="cmd-desc">Calculate raid costs for any structure</span></div>
-      <div class="cmd-row"><span class="cmd-name">/wipeschedule setup</span><span class="cmd-desc">Configure wipe countdown for your server</span></div>
-      <div class="cmd-row"><span class="cmd-name">/wipeschedule enable/disable</span><span class="cmd-desc">Toggle wipe notifications</span></div>
-    </div>
-  </div>
-</section>
-
-<div class="full-divider"></div>
+<div class="divider"></div>
 
 <!-- CHANGELOG -->
-<section id="changelog">
-  <div class="section-label">// changelog</div>
-  <h2 class="section-title">What's new.</h2>
-  <p class="section-desc">Recent updates and improvements to RustWire.</p>
+<div class="section" id="changelog">
+  <div class="section-inner">
+    <div class="section-label">// changelog</div>
+    <h2 class="section-title">What's new.</h2>
+    <p class="section-desc">Recent updates and improvements to RustWire.</p>
 
-  <div class="changelog-list">
-    <div class="changelog-entry">
-      <div class="changelog-date">Jun 2026</div>
-      <div>
-        <div class="changelog-badge badge-new">New</div>
-        <div class="changelog-title">Kick Drops Support</div>
-        <div class="changelog-desc">RustWire now tracks and posts Rust Kick Drop campaigns automatically via kick.facepunch.com — same as Twitch Drops, with a dedicated #kick-drops channel.</div>
+    <div class="cl-list">
+      <div class="cl-entry">
+        <div class="cl-date">Jun 2026</div>
+        <div>
+          <span class="cl-badge badge-new">New</span>
+          <div class="cl-title">Kick Drops Support</div>
+          <div class="cl-desc">RustWire now tracks and posts Rust Kick Drop campaigns automatically — same as Twitch Drops, with a dedicated #kick-drops channel.</div>
+        </div>
       </div>
-    </div>
-    <div class="changelog-entry">
-      <div class="changelog-date">Jun 2026</div>
-      <div>
-        <div class="changelog-badge badge-new">New</div>
-        <div class="changelog-title">Ban Log Channel</div>
-        <div class="changelog-desc">Manual and automatic bans now post a detailed embed with user profile, account age, join date, ban reason and who banned them.</div>
+      <div class="cl-entry">
+        <div class="cl-date">Jun 2026</div>
+        <div>
+          <span class="cl-badge badge-new">New</span>
+          <div class="cl-title">Ban Log Channel</div>
+          <div class="cl-desc">Manual and automatic bans now post a detailed embed with user profile, account age, join date, ban reason and who issued the ban.</div>
+        </div>
       </div>
-    </div>
-    <div class="changelog-entry">
-      <div class="changelog-date">Jun 2026</div>
-      <div>
-        <div class="changelog-badge badge-new">New</div>
-        <div class="changelog-title">Per-Server Content Filter</div>
-        <div class="changelog-desc">Server admins can now enable or disable the content filter independently on their server using /rust filter on/off.</div>
+      <div class="cl-entry">
+        <div class="cl-date">Jun 2026</div>
+        <div>
+          <span class="cl-badge badge-new">New</span>
+          <div class="cl-title">Per-Server Content Filter</div>
+          <div class="cl-desc">Server admins can now enable or disable the content filter independently on their own server using /rust filter on/off.</div>
+        </div>
       </div>
-    </div>
-    <div class="changelog-entry">
-      <div class="changelog-date">Jun 2026</div>
-      <div>
-        <div class="changelog-badge badge-fix">Fix</div>
-        <div class="changelog-title">Autopost Performance</div>
-        <div class="changelog-desc">Shared feeds (commits, oxide, drops) are now fetched once per cycle instead of once per server, eliminating timeout spam on large deployments.</div>
+      <div class="cl-entry">
+        <div class="cl-date">Jun 2026</div>
+        <div>
+          <span class="cl-badge badge-fix">Fix</span>
+          <div class="cl-title">Autopost Performance</div>
+          <div class="cl-desc">Shared feeds (commits, oxide, drops) are now fetched once per cycle instead of once per server, eliminating timeout spam on large deployments.</div>
+        </div>
       </div>
-    </div>
-    <div class="changelog-entry">
-      <div class="changelog-date">May 2026</div>
-      <div>
-        <div class="changelog-badge badge-improve">Improve</div>
-        <div class="changelog-title">10,000 Users Milestone</div>
-        <div class="changelog-desc">RustWire reached 10,000 Discord users across 100+ servers. Privileged intent review submitted to Discord.</div>
+      <div class="cl-entry">
+        <div class="cl-date">May 2026</div>
+        <div>
+          <span class="cl-badge badge-improve">Milestone</span>
+          <div class="cl-title">10,000 Users</div>
+          <div class="cl-desc">RustWire reached 10,000 Discord users across 100+ servers. Privileged intent review submitted to Discord.</div>
+        </div>
       </div>
     </div>
   </div>
-</section>
+</div>
 
-<div class="full-divider"></div>
+<div class="divider"></div>
 
 <!-- SUPPORT -->
-<section id="support">
-  <div class="section-label">// support</div>
-  <h2 class="section-title">Need help?</h2>
-  <p class="section-desc">Got a question, found a bug, or want to suggest a feature? We're here.</p>
+<div class="section" id="support">
+  <div class="section-inner">
+    <div class="section-label">// support</div>
+    <h2 class="section-title">Need help?</h2>
+    <p class="section-desc">Got a question, found a bug, or want to suggest a feature?</p>
 
-  <div class="support-grid">
-    <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
-      <div class="support-card-icon">💬</div>
-      <div class="support-card-title">Discord Server</div>
-      <div class="support-card-desc">Join the RustWire Hub for support, announcements, and to chat with other server owners using the bot.</div>
-    </a>
-    <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
-      <div class="support-card-icon">🐛</div>
-      <div class="support-card-title">Report a Bug</div>
-      <div class="support-card-desc">Found something broken? Head to #bug-reports in our Discord and let us know. We fix things fast.</div>
-    </a>
-    <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
-      <div class="support-card-icon">💡</div>
-      <div class="support-card-title">Feature Requests</div>
-      <div class="support-card-desc">Have an idea for a new feature? Share it in #suggestions and the community can vote on it.</div>
-    </a>
+    <div class="support-grid">
+      <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
+        <div class="support-icon">💬</div>
+        <div class="support-title">Discord Server</div>
+        <div class="support-desc">Join RustWire Hub for support, announcements and to chat with other server owners using the bot.</div>
+      </a>
+      <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
+        <div class="support-icon">🐛</div>
+        <div class="support-title">Report a Bug</div>
+        <div class="support-desc">Found something broken? Head to #bug-reports in our Discord. We fix things fast.</div>
+      </a>
+      <a href="https://discord.gg/Ws44MGuKGq" class="support-card">
+        <div class="support-icon">💡</div>
+        <div class="support-title">Feature Requests</div>
+        <div class="support-desc">Have an idea? Share it in #suggestions and the community can vote on it.</div>
+      </a>
+    </div>
   </div>
-</section>
+</div>
 
 <!-- FOOTER -->
+<div class="hazard-bottom"></div>
 <footer>
-  <div class="footer-logo">RUST<span>WIRE</span></div>
-  <div class="footer-links">
+  <div class="footer-brand">
+    <div class="footer-brand-name">RUSTWIRE</div>
+    <div class="footer-brand-sub">// The all-in-one Discord bot for Rust.<br>Built by survivors, for survivors.</div>
+  </div>
+  <div class="footer-col">
+    <div class="footer-col-title">Product</div>
     <a href="#features">Features</a>
     <a href="#commands">Commands</a>
     <a href="#changelog">Changelog</a>
-    <a href="https://discord.gg/Ws44MGuKGq">Discord</a>
-    <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands">Invite Bot</a>
+    <a href="#stats">Live Stats</a>
   </div>
-  <div class="footer-copy">© 2026 RustWire. Not affiliated with Facepunch Studios.</div>
+  <div class="footer-col">
+    <div class="footer-col-title">Community</div>
+    <a href="https://discord.gg/Ws44MGuKGq">Discord Server</a>
+    <a href="https://discord.gg/Ws44MGuKGq">Bug Reports</a>
+    <a href="https://discord.gg/Ws44MGuKGq">Suggestions</a>
+  </div>
+  <div class="footer-col">
+    <div class="footer-col-title">// Status</div>
+    <div class="footer-status">All systems operational</div>
+    <div class="footer-copy">© 2026 RustWire. Not affiliated with Facepunch Studios.</div>
+  </div>
 </footer>
 
 <script>
 function showTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.commands-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.cmd-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.cmd-panel').forEach(p => p.classList.remove('active'));
   document.querySelector(`[onclick="showTab('${name}')"]`).classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
 }
