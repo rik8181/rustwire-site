@@ -481,6 +481,13 @@ footer {
   * { animation: none !important; transition: none !important; }
 }
 </style>
+<script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "x7vnkotbh6");
+</script>
 </head>
 <body>
 
@@ -895,8 +902,7 @@ function showTab(name) {
 }
 
 // ── LIVE FEED ─────────────────────────────────────────────
-// Uses allorigins.win as CORS proxy to fetch RSS feeds
-const PROXY = 'https://api.allorigins.win/get?url=';
+const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
 function fmtTime(dateStr) {
   const d = dateStr ? new Date(dateStr) : new Date();
@@ -907,53 +913,40 @@ function fmtTime(dateStr) {
 
 function truncate(str, n) {
   if (!str) return '';
-  return str.length > n ? str.substring(0, n) + '...' : str;
+  const clean = str.replace(/<[^>]*>/g, '').trim();
+  return clean.length > n ? clean.substring(0, n) + '...' : clean;
 }
 
-function parseRSS(xml) {
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(xml, 'text/xml');
-  const items = doc.querySelectorAll('item');
-  return Array.from(items).slice(0, 2).map(item => ({
-    title: item.querySelector('title')?.textContent || '',
-    date: item.querySelector('pubDate')?.textContent || '',
-  }));
-}
-
-async function fetchFeed(url) {
+async function fetchRSS(url) {
   try {
-    const res = await fetch(PROXY + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
+    const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
     const json = await res.json();
-    return parseRSS(json.contents);
-  } catch { return []; }
-}
-
-async function fetchOxide() {
-  // Oxide GitHub releases RSS
-  try {
-    const res = await fetch(PROXY + encodeURIComponent('https://github.com/OxideMod/Oxide.Rust/releases.atom'), { signal: AbortSignal.timeout(8000) });
-    const json = await res.json();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(json.contents, 'text/xml');
-    const entries = doc.querySelectorAll('entry');
-    return Array.from(entries).slice(0, 1).map(e => ({
-      title: e.querySelector('title')?.textContent || '',
-      date: e.querySelector('updated')?.textContent || '',
+    if (json.status !== 'ok') return [];
+    return (json.items || []).slice(0, 2).map(item => ({
+      title: item.title || '',
+      date: item.pubDate || item.published || '',
     }));
   } catch { return []; }
 }
 
+async function fetchOxideLatest() {
+  try {
+    // GitHub releases API - no CORS issues, always latest
+    const res = await fetch('https://api.github.com/repos/OxideMod/Oxide.Rust/releases/latest', { signal: AbortSignal.timeout(8000) });
+    const json = await res.json();
+    return [{
+      title: json.tag_name || json.name || 'Latest release',
+      date: json.published_at || '',
+    }];
+  } catch { return []; }
+}
+
 async function fetchNextWipe() {
-  // Calculate next forced wipe (first Thursday of next month)
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  // Find first Thursday of current month
-  let wipe = new Date(year, month, 1);
+  let wipe = new Date(now.getFullYear(), now.getMonth(), 1);
   while (wipe.getDay() !== 4) wipe.setDate(wipe.getDate() + 1);
-  // If wipe already passed, get next month's first Thursday
   if (wipe < now) {
-    wipe = new Date(year, month + 1, 1);
+    wipe = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     while (wipe.getDay() !== 4) wipe.setDate(wipe.getDate() + 1);
   }
   const diff = wipe - now;
@@ -977,34 +970,57 @@ async function loadLiveFeed() {
 
   let items = [];
 
-  // Fetch Facepunch devblog RSS
-  const devblogs = await fetchFeed('https://www.facepunch.com/blog/rust.rss');
+  // Fetch all feeds in parallel
+  const [devblogs, commits, oxide, wipeStr] = await Promise.all([
+    fetchRSS('https://www.facepunch.com/blog/rust.rss'),
+    fetchRSS('https://commits.facepunch.com/?format=rss'),
+    fetchOxideLatest(),
+    fetchNextWipe(),
+  ]);
+
   devblogs.forEach(item => {
-    items.push({ time: fmtTime(item.date), cmd: `/rust devblogs -- ${truncate(item.title, 36)}`, sub: 'New Facepunch post published', date: new Date(item.date) });
+    if (item.title) items.push({
+      time: fmtTime(item.date),
+      cmd: `/rust devblogs -- ${truncate(item.title, 34)}`,
+      sub: 'New Facepunch post published',
+      date: new Date(item.date)
+    });
   });
 
-  // Fetch Oxide/uMod latest release
-  const oxide = await fetchOxide();
-  oxide.forEach(item => {
-    items.push({ time: fmtTime(item.date), cmd: `/rust oxide -- uMod Update`, sub: truncate(item.title, 48), date: new Date(item.date) });
-  });
-
-  // Fetch Facepunch commits RSS
-  const commits = await fetchFeed('https://commits.facepunch.com/?format=rss');
   commits.forEach(item => {
-    items.push({ time: fmtTime(item.date), cmd: `/rust commits -- Facepunch`, sub: truncate(item.title, 48), date: new Date(item.date) });
+    if (item.title) items.push({
+      time: fmtTime(item.date),
+      cmd: `/rust commits -- Facepunch`,
+      sub: truncate(item.title, 46),
+      date: new Date(item.date)
+    });
   });
 
-  // Wipe countdown (always shown)
-  const wipeStr = await fetchNextWipe();
-  items.push({ time: fmtTime(), cmd: `/rust wipe -- Force Wipe`, sub: wipeStr, date: new Date() });
+  oxide.forEach(item => {
+    if (item.title) items.push({
+      time: fmtTime(item.date),
+      cmd: `/rust oxide -- uMod Update`,
+      sub: `Oxide ${item.title} released`,
+      date: new Date(item.date)
+    });
+  });
 
-  // Sort by date descending, take top 5
+  // Wipe countdown always shown
+  items.push({
+    time: fmtTime(),
+    cmd: `/rust wipe -- Force Wipe`,
+    sub: wipeStr,
+    date: new Date(0)
+  });
+
+  // Sort by date desc, take top 5
   items.sort((a, b) => b.date - a.date);
   items = items.slice(0, 5);
 
-  if (items.length === 0) {
-    container.innerHTML = '<div class="feed-item" style="color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:11px;">Feed temporarily unavailable.</div>';
+  if (items.length <= 1) {
+    // If only wipe loaded, show fallback static + wipe
+    container.innerHTML = makeFeedItem(fmtTime(), '/rust drops -- Twitch Drops', 'Check active campaigns') +
+      makeFeedItem(fmtTime(), '/rust wipe -- Force Wipe', wipeStr);
     return;
   }
 
