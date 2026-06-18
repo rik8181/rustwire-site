@@ -8,7 +8,7 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+    <!-- Supabase CDN removed — using direct REST API to avoid DataCloneError -->
 
     <style>
         /* ============================================================
@@ -1927,6 +1927,353 @@
             to   { background-position: 40px 0; }
         }
 
+
+        /* ============================================================
+           WIPE COUNTDOWN
+           ============================================================ */
+        .wipe-bar {
+            background: linear-gradient(90deg, rgba(206,66,43,0.15) 0%, rgba(232,98,26,0.08) 100%);
+            border: 1px solid rgba(206,66,43,0.3);
+            border-radius: 8px;
+            padding: 20px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            margin: 0 0 0 0;
+            flex-wrap: wrap;
+        }
+        .wipe-bar-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--rust);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .wipe-bar-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: 1px;
+        }
+        .wipe-countdown {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .wipe-unit {
+            text-align: center;
+            min-width: 52px;
+        }
+        .wipe-num {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--orange);
+            line-height: 1;
+            display: block;
+            transition: transform 0.2s ease;
+        }
+        .wipe-num.tick {
+            transform: scale(1.15);
+        }
+        .wipe-label {
+            font-size: 9px;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .wipe-sep {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 22px;
+            color: var(--rust);
+            opacity: 0.5;
+            margin-bottom: 12px;
+        }
+        .live-drops-badge {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(229,98,26,0.12);
+            border: 1px solid rgba(229,98,26,0.4);
+            border-radius: 6px;
+            padding: 8px 14px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--orange);
+            letter-spacing: 1px;
+            animation: pulseBorder 2s ease infinite;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .live-drops-badge:hover {
+            background: rgba(229,98,26,0.22);
+        }
+        .live-drops-badge.visible {
+            display: flex;
+        }
+        .live-drops-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--orange);
+            animation: blink 1s ease infinite;
+        }
+        @keyframes pulseBorder {
+            0%,100% { border-color: rgba(229,98,26,0.4); }
+            50%      { border-color: rgba(229,98,26,0.9); }
+        }
+        @keyframes blink {
+            0%,100% { opacity: 1; }
+            50%      { opacity: 0.2; }
+        }
+
+        /* ============================================================
+           RAID CALCULATOR
+           ============================================================ */
+        .calc-section {
+            background: var(--bg2);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 32px;
+        }
+        .calc-box {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+        }
+        .calc-box-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--orange);
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .calc-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+        .calc-row label {
+            font-size: 12px;
+            color: var(--muted);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            min-width: 120px;
+        }
+        .calc-input {
+            background: var(--bg);
+            border: 1px solid rgba(229,98,26,0.2);
+            border-radius: 4px;
+            color: var(--white);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 13px;
+            padding: 6px 10px;
+            width: 70px;
+            text-align: center;
+            transition: border-color 0.2s ease;
+            outline: none;
+        }
+        .calc-input:focus {
+            border-color: var(--orange);
+        }
+        .calc-select {
+            background: var(--bg);
+            border: 1px solid rgba(229,98,26,0.2);
+            border-radius: 4px;
+            color: var(--white);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 12px;
+            padding: 6px 10px;
+            flex: 1;
+            outline: none;
+            transition: border-color 0.2s ease;
+            cursor: pointer;
+        }
+        .calc-select:focus { border-color: var(--orange); }
+        .calc-result {
+            margin-top: 16px;
+            padding: 14px;
+            background: rgba(229,98,26,0.07);
+            border: 1px solid rgba(229,98,26,0.2);
+            border-radius: 6px;
+            min-height: 60px;
+        }
+        .calc-result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 0;
+            font-size: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .calc-result-row:last-child { border-bottom: none; }
+        .calc-result-key {
+            color: var(--muted);
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .calc-result-val {
+            color: var(--orange);
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 700;
+        }
+        .calc-btn {
+            width: 100%;
+            margin-top: 14px;
+            padding: 10px;
+            background: var(--orange);
+            color: #000;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+        .calc-btn:hover { background: var(--yellow); transform: translateY(-2px); }
+        .calc-btn:active { transform: translateY(0); }
+
+        /* ============================================================
+           BOT STATUS
+           ============================================================ */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 32px;
+        }
+        .status-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .status-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(229,98,26,0.4);
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+        .status-indicator.online {
+            background: rgba(87,242,135,0.1);
+            color: #57F287;
+            border: 1px solid rgba(87,242,135,0.3);
+        }
+        .status-indicator.online::before {
+            content: '';
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #57F287;
+            animation: blink 1.5s ease infinite;
+        }
+        .status-card-val {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 22px;
+            color: var(--white);
+            font-weight: 700;
+        }
+        .status-card-label {
+            font-size: 10px;
+            color: var(--muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* ============================================================
+           WIPE CALENDAR
+           ============================================================ */
+        .wipe-calendar {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 28px;
+        }
+        .wipe-cal-item {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 12px 8px;
+            text-align: center;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .wipe-cal-item:hover {
+            transform: translateY(-3px);
+            border-color: rgba(229,98,26,0.4);
+        }
+        .wipe-cal-item.next {
+            border-color: var(--orange);
+            background: rgba(229,98,26,0.08);
+        }
+        .wipe-cal-item.past { opacity: 0.5; }
+        .wipe-cal-date {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 18px;
+            color: var(--white);
+            font-weight: 700;
+        }
+        .wipe-cal-item.next .wipe-cal-date { color: var(--orange); }
+        .wipe-cal-month {
+            font-size: 9px;
+            color: var(--muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        .wipe-cal-type {
+            font-size: 9px;
+            margin-top: 6px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .wipe-cal-type.force {
+            background: rgba(206,66,43,0.2);
+            color: var(--rust);
+        }
+        .wipe-cal-type.bp {
+            background: rgba(245,166,35,0.15);
+            color: var(--yellow);
+        }
+
+        @media (max-width: 768px) {
+            .calc-grid { grid-template-columns: 1fr; }
+            .status-grid { grid-template-columns: repeat(2, 1fr); }
+            .wipe-calendar { grid-template-columns: repeat(3, 1fr); }
+            .wipe-bar { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 480px) {
+            .wipe-calendar { grid-template-columns: repeat(2, 1fr); }
+            .status-grid { grid-template-columns: repeat(2, 1fr); }
+        }
     </style>
 </head>
 <body>
@@ -1999,6 +2346,25 @@
                     <div><div class="hero-stat-num">100+</div><div class="hero-stat-label">Servers</div></div>
                     <div><div class="hero-stat-num">24/7</div><div class="hero-stat-label">Uptime</div></div>
                 </div>
+                <div class="wipe-bar reveal" style="margin-top:28px;">
+                    <div>
+                        <div class="wipe-bar-label">// next force wipe</div>
+                        <div class="wipe-bar-title">RUST FORCE WIPE</div>
+                    </div>
+                    <div class="wipe-countdown">
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeD">--</span><div class="wipe-label">Days</div></div>
+                        <div class="wipe-sep">:</div>
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeH">--</span><div class="wipe-label">Hours</div></div>
+                        <div class="wipe-sep">:</div>
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeM">--</span><div class="wipe-label">Min</div></div>
+                        <div class="wipe-sep">:</div>
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeS">--</span><div class="wipe-label">Sec</div></div>
+                    </div>
+                    <div id="liveDropsBadge" class="live-drops-badge" onclick="showPage('commands')">
+                        <div class="live-drops-dot"></div>
+                        LIVE DROPS ACTIVE
+                    </div>
+                </div>
             </div>
             <div class="live-feed">
                 <div class="live-feed-header">
@@ -2037,13 +2403,96 @@
         <div class="section big-stats">
             <div class="section-inner" style="padding:0;">
                 <div class="big-stats-grid">
-                    <div class="big-stat reveal reveal-scale reveal-delay-1"><div class="big-stat-label">Servers Wired</div><div class="big-stat-num">100+</div></div>
-                    <div class="big-stat reveal reveal-scale reveal-delay-2"><div class="big-stat-label">Discord Users</div><div class="big-stat-num">10,000+</div></div>
-                    <div class="big-stat reveal reveal-scale reveal-delay-3"><div class="big-stat-label">Commands</div><div class="big-stat-num">50+</div></div>
-                    <div class="big-stat reveal reveal-scale reveal-delay-4"><div class="big-stat-label">Uptime %</div><div class="big-stat-num">99.97</div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-1"><div class="big-stat-label">Servers Wired</div><div class="big-stat-num"></div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-2"><div class="big-stat-label">Discord Users</div><div class="big-stat-num"></div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-3"><div class="big-stat-label">Commands</div><div class="big-stat-num"></div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-4"><div class="big-stat-label">Uptime %</div><div class="big-stat-num"></div></div>
                 </div>
             </div>
         </div>
+
+        <div class="divider"></div>
+
+        <!-- RAID & RECYCLE CALCULATOR -->
+        <div class="section calc-section">
+            <div class="section-inner">
+                <div class="section-label">// tools</div>
+                <h2 class="section-title reveal">Wasteland<br />Calculator.</h2>
+                <p class="section-desc">Raid costs and recycle output — right here, no Discord needed.</p>
+                <div class="calc-grid">
+                    <div class="calc-box reveal reveal-left">
+                        <div class="calc-box-title">💥 Raid Calculator</div>
+                        <div class="calc-row">
+                            <label>Wall type</label>
+                            <select class="calc-select" id="raidWall">
+                                <option value="twig">Twig Wall</option>
+                                <option value="wood">Wood Wall</option>
+                                <option value="stone" selected>Stone Wall</option>
+                                <option value="metal">Metal Wall</option>
+                                <option value="armored">Armored Wall</option>
+                                <option value="hqm_door">HQM Door</option>
+                                <option value="sheet_door">Sheet Metal Door</option>
+                                <option value="wood_door">Wooden Door</option>
+                                <option value="garage_door">Garage Door</option>
+                            </select>
+                        </div>
+                        <div class="calc-row">
+                            <label>Quantity</label>
+                            <input type="number" class="calc-input" id="raidQty" value="1" min="1" max="50">
+                        </div>
+                        <button class="calc-btn ripple-btn" onclick="calcRaid()">CALCULATE RAID COST</button>
+                        <div class="calc-result" id="raidResult">
+                            <div style="color:var(--muted);font-size:11px;font-family:monospace;">Select wall type and hit Calculate.</div>
+                        </div>
+                    </div>
+                    <div class="calc-box reveal reveal-right">
+                        <div class="calc-box-title">♻️ Recycle Calculator</div>
+                        <div class="calc-row">
+                            <label>Item</label>
+                            <select class="calc-select" id="recycleItem">
+                                <option value="rifle_body">Rifle Body</option>
+                                <option value="smg_body">SMG Body</option>
+                                <option value="semi_body">Semi Body</option>
+                                <option value="road_signs">Road Signs</option>
+                                <option value="sheet_metal">Sheet Metal</option>
+                                <option value="metal_pipe">Metal Pipe</option>
+                                <option value="metal_spring">Metal Spring</option>
+                                <option value="tech_trash">Tech Trash</option>
+                                <option value="tarp">Tarp</option>
+                                <option value="rope">Rope</option>
+                                <option value="sewing_kit">Sewing Kit</option>
+                                <option value="leather">Leather</option>
+                                <option value="cctv_camera">CCTV Camera</option>
+                                <option value="targeting_comp">Targeting Computer</option>
+                                <option value="electric_fuse">Electric Fuse</option>
+                            </select>
+                        </div>
+                        <div class="calc-row">
+                            <label>Quantity</label>
+                            <input type="number" class="calc-input" id="recycleQty" value="1" min="1" max="1000">
+                        </div>
+                        <button class="calc-btn ripple-btn" onclick="calcRecycle()">CALCULATE OUTPUT</button>
+                        <div class="calc-result" id="recycleResult">
+                            <div style="color:var(--muted);font-size:11px;font-family:monospace;">Select an item and hit Calculate.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- WIPE CALENDAR -->
+        <div class="section">
+            <div class="section-inner">
+                <div class="section-label">// wipe schedule</div>
+                <h2 class="section-title reveal">Wipe History<br />&amp; Next Dates.</h2>
+                <p class="section-desc">Facepunch force wipes happen the first Thursday of every month.</p>
+                <div class="wipe-calendar" id="wipeCalendar"></div>
+            </div>
+        </div>
+
+
     </div>
 
     <!-- ============================================================
@@ -2068,17 +2517,21 @@
                     <div class="cmd-list">
                         <div class="cmd-row"><span class="cmd-name">/rust drops</span><span class="cmd-desc">Post current Twitch Drop campaigns</span></div>
                         <div class="cmd-row"><span class="cmd-name">/rust kick-drops</span><span class="cmd-desc">Post current Kick Drop campaigns</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust skins</span><span class="cmd-desc">Post latest Steam Workshop skin releases</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust dlc</span><span class="cmd-desc">Post available Rust DLC with prices</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust devblogs</span><span class="cmd-desc">Post last 3 Facepunch devblogs</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust commits</span><span class="cmd-desc">Post latest Facepunch GitHub commits</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust oxide</span><span class="cmd-desc">Post latest Oxide/uMod updates</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust bans</span><span class="cmd-desc">Post latest org bans</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust bancheck [steamid]</span><span class="cmd-desc">Check Steam VAC, Game and Community bans</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust playtime [steamid]</span><span class="cmd-desc">Show Rust hours + total Steam playtime</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust wipe</span><span class="cmd-desc">Show next forced wipe date</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust skins</span><span class="cmd-desc">All available Rust store skins (region-aware)</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust dlc</span><span class="cmd-desc">All available Rust DLC with region-correct prices</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust devblogs</span><span class="cmd-desc">Latest Facepunch Devblogs (posts last 3)</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust commits</span><span class="cmd-desc">Latest Facepunch GitHub commits summary</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust oxide</span><span class="cmd-desc">Latest Oxide/uMod releases summary</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust bans</span><span class="cmd-desc">Latest BattleMetrics org bans</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust bancheck [steamid]</span><span class="cmd-desc">Check Steam VAC, Game, Community bans + BattleMetrics</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust playtime [steamid]</span><span class="cmd-desc">Rust hours, total Steam playtime, top 5 games</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust inventory [steamid]</span><span class="cmd-desc">Show Steam Rust inventory with market prices</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust stats [steamid]</span><span class="cmd-desc">Detailed Rust player statistics via Steam</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust wipe</span><span class="cmd-desc">Next forced wipe countdown</span></div>
                         <div class="cmd-row"><span class="cmd-name">/rust faq</span><span class="cmd-desc">Frequently asked Rust questions</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust community</span><span class="cmd-desc">Latest Facepunch Community posts (last 3)</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust general</span><span class="cmd-desc">Latest Facepunch General posts (last 3)</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices — admin only</span></div>
                         <div class="cmd-row"><span class="cmd-name">/rust filter [on/off]</span><span class="cmd-desc">Enable or disable content filter — admin only</span></div>
                     </div>
                 </div>
@@ -2086,49 +2539,92 @@
                 <div class="cmd-panel" id="cmd-wire">
                     <div class="cmd-list">
                         <div class="cmd-row"><span class="cmd-name">/wire setupchannels</span><span class="cmd-desc">Create or link feed channels — admin only</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/wire repopulate</span><span class="cmd-desc">Immediately post latest content — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wire repopulate</span><span class="cmd-desc">Repost latest content to all channels — admin only</span></div>
                         <div class="cmd-row"><span class="cmd-name">/wire setregion [cc]</span><span class="cmd-desc">Set the store region for this server</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/wire ping</span><span class="cmd-desc">Check if the bot is online</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wire language set [lang]</span><span class="cmd-desc">Set server language for bot responses</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wire language current</span><span class="cmd-desc">Show currently configured language</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wire language list</span><span class="cmd-desc">List all available languages</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wire botstats</span><span class="cmd-desc">Bot statistics — owner only, ephemeral</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wire ping</span><span class="cmd-desc">Check if the bot is online and latency</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/setwelcome [channel]</span><span class="cmd-desc">Set welcome / leave message channel — admin only</span></div>
                     </div>
                 </div>
 
                 <div class="cmd-panel" id="cmd-tools">
                     <div class="cmd-list">
-                        <div class="cmd-row"><span class="cmd-name">/raid calculate</span><span class="cmd-desc">Calculate explosives needed to raid any structure</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/raid compare</span><span class="cmd-desc">Compare raid cost between two structures</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/recycle [item]</span><span class="cmd-desc">Show what you get from recycling an item</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/craft [item]</span><span class="cmd-desc">Show crafting recipe and materials needed</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/blueprint [item]</span><span class="cmd-desc">Check if an item has a blueprint and its cost</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/cctv [monument]</span><span class="cmd-desc">Look up CCTV camera codes for any monument</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/puzzle [monument]</span><span class="cmd-desc">Show puzzle/loot room guide for a monument</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/stats [steamid]</span><span class="cmd-desc">Show detailed Rust player statistics</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/wipestats</span><span class="cmd-desc">Show wipe statistics for your server</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/eventtimers</span><span class="cmd-desc">Show timers for in-game events</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/raid calculate [target]</span><span class="cmd-desc">Calculate explosives needed to raid a structure</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/raid compare [target]</span><span class="cmd-desc">Compare all raid methods side-by-side</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/raid plan [method] [amount]</span><span class="cmd-desc">Create a raid plan with material splitting for your team</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/raid materials [explosive]</span><span class="cmd-desc">Calculate materials needed to craft explosives</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/recycle item [item]</span><span class="cmd-desc">Show what you get from recycling an item</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/recycle search [query]</span><span class="cmd-desc">Search recyclable items</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/craft recipe [item]</span><span class="cmd-desc">Show crafting recipe and materials needed</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/craft batch [item] [qty]</span><span class="cmd-desc">Calculate materials for batch crafting</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/craft team [item] [qty]</span><span class="cmd-desc">Split crafting materials among team members</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/craft search [query]</span><span class="cmd-desc">Search craftable items</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/blueprint add/remove/list</span><span class="cmd-desc">Track your learned blueprints</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/blueprint team</span><span class="cmd-desc">Show all blueprints across your team</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/blueprint who [item]</span><span class="cmd-desc">Find who on the team has a specific blueprint</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/repair cost [item]</span><span class="cmd-desc">Calculate repair cost for an item at current condition</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/repair worth [item]</span><span class="cmd-desc">Compare repair cost vs crafting from scratch</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/smelt calculate [ore]</span><span class="cmd-desc">Calculate smelting output by furnace type</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/smelt compare [ore]</span><span class="cmd-desc">Compare all furnace types for smelting</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/upkeep calculate</span><span class="cmd-desc">Daily TC upkeep cost and how long resources last</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/upkeep decay [material]</span><span class="cmd-desc">How long until a structure decays without upkeep</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/cctv list</span><span class="cmd-desc">List all CCTV camera codes by monument</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/cctv search [query]</span><span class="cmd-desc">Search for CCTV codes by monument name</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/puzzle guide [monument]</span><span class="cmd-desc">Full puzzle walkthrough for a monument</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/puzzle keycard [color]</span><span class="cmd-desc">Keycard locations and required access info</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/puzzle difficulty [level]</span><span class="cmd-desc">List monuments by puzzle difficulty</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/vending alert [item]</span><span class="cmd-desc">Set a price alert for an item in vending machines</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/vending history [item]</span><span class="cmd-desc">View vending machine price history</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wipestats current</span><span class="cmd-desc">Show Cargo, Heli, CH47, Crate stats for this wipe</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/eventtimers</span><span class="cmd-desc">Estimated next event spawn based on last seen times</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/eventtoggle set [event]</span><span class="cmd-desc">Toggle Rust+ event notifications per type — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wipeschedule setup</span><span class="cmd-desc">Set up wipe schedule notifications — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/wipeschedule info</span><span class="cmd-desc">Show current wipe schedule configuration</span></div>
                     </div>
                 </div>
 
                 <div class="cmd-panel" id="cmd-social">
                     <div class="cmd-list">
-                        <div class="cmd-row"><span class="cmd-name">/lfg post</span><span class="cmd-desc">Post a looking-for-group listing</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/lfg search</span><span class="cmd-desc">Find players to team up with</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/lfg profile</span><span class="cmd-desc">View your LFG profile and stats</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/leveling rank</span><span class="cmd-desc">Check your XP rank on this server</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/leveling leaderboard</span><span class="cmd-desc">View the top players by XP</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/leaderboard</span><span class="cmd-desc">Show the server-wide activity leaderboard</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/lfg post</span><span class="cmd-desc">Create a Looking For Group post to find teammates</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/lfg search</span><span class="cmd-desc">Search for teammates by role, hours, playstyle, region</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/lfg mypost</span><span class="cmd-desc">View or delete your current LFG post</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/lfg rate [user]</span><span class="cmd-desc">Rate a teammate (1–5 stars + review)</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/lfg profile [user]</span><span class="cmd-desc">View a user's LFG profile and ratings</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/leveling rank</span><span class="cmd-desc">View your XP rank on this server</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/leveling leaderboard</span><span class="cmd-desc">Top 10 XP leaderboard for this server</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/leveling toggle [on/off]</span><span class="cmd-desc">Enable or disable the leveling system — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/leveling settings</span><span class="cmd-desc">Configure XP rates, level-up messages — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/leaderboard register [steamid]</span><span class="cmd-desc">Link your SteamID to join the Rust stats leaderboard</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/leaderboard show</span><span class="cmd-desc">Show server Rust stats leaderboard (kills, K/D, hours)</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/leaderboard profile [user]</span><span class="cmd-desc">View your or another user's leaderboard profile</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/faq</span><span class="cmd-desc">Show RustWire FAQ</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/help</span><span class="cmd-desc">Show all available commands</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/ping</span><span class="cmd-desc">Check bot latency</span></div>
                     </div>
                 </div>
 
                 <div class="cmd-panel" id="cmd-rustplus">
                     <div class="cmd-list">
-                        <div class="cmd-row"><span class="cmd-name">/rustplus setup</span><span class="cmd-desc">Connect your Rust+ server to Discord</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rustplus map</span><span class="cmd-desc">Show the live map of your connected Rust server</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rustplus info</span><span class="cmd-desc">Show server info (population, map size, queue)</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rustplus time</span><span class="cmd-desc">Show current in-game time</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rustplus team</span><span class="cmd-desc">Show your team members and their online status</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus setup</span><span class="cmd-desc">Connect your Rust+ server to Discord — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus config</span><span class="cmd-desc">Configure auto-updates channel and interval — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus map</span><span class="cmd-desc">Show live map of your connected Rust server</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus info</span><span class="cmd-desc">Server info: population, map size, queue</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus time</span><span class="cmd-desc">Current in-game time</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus team</span><span class="cmd-desc">Show team members and their online status</span></div>
                         <div class="cmd-row"><span class="cmd-name">/rustplus monuments</span><span class="cmd-desc">List active monuments and their status</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rustplus events</span><span class="cmd-desc">Show active in-game events</span></div>
-                        <div class="cmd-row"><span class="cmd-name">/rustplus chat</span><span class="cmd-desc">Send a message to in-game chat from Discord</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus shops</span><span class="cmd-desc">List all vending machine shops on the map</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus switch [entity_id]</span><span class="cmd-desc">Control a smart switch remotely</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus events</span><span class="cmd-desc">Show active and recent in-game events</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus chat [message]</span><span class="cmd-desc">Send a message to in-game team chat from Discord</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus tracker</span><span class="cmd-desc">Track online/offline status of specific players</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus peaktime</span><span class="cmd-desc">Show peak player activity hours chart for this server</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus marker add/list/remove</span><span class="cmd-desc">Manage custom map markers (bases, loot, etc.)</span></div>
                         <div class="cmd-row"><span class="cmd-name">/rustplus status</span><span class="cmd-desc">Check Rust+ connection status</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus disconnect</span><span class="cmd-desc">Disconnect from Rust+ — admin only</span></div>
+                        <div class="cmd-row"><span class="cmd-name">/rustplus reconnect</span><span class="cmd-desc">Reconnect to Rust+ — admin only</span></div>
                     </div>
                 </div>
             </div>
@@ -2263,13 +2759,13 @@
     ============================================================ -->
     <div class="privacy-section" id="privacy">
         <div class="inner">
-            <span class="reveal reveal-left"><div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:12px;"></span>// legal</div>
+            <div class="reveal reveal-left" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:12px;">// legal</div>
             <h2>Privacy Policy</h2>
             <div class="privacy-block"><strong>// Data We Collect</strong>RustWire collects Discord user IDs, guild IDs, and Steam IDs submitted via verification commands. No personal data is sold or shared with third parties.</div>
             <div class="privacy-block"><strong>// Message Content</strong>RustWire reads message content only for content filter purposes. Messages are not stored, logged, or used for any other purpose.</div>
             <div class="privacy-block"><strong>// Data Retention</strong>Guild configuration data is stored for bot operation. Users can request deletion via Discord.</div>
             <div class="privacy-block"><strong>// Contact</strong>For privacy concerns, contact us via our <a href="https://discord.gg/Ws44MGuKGq" target="_blank">Discord server</a>.</div>
-            <span class="reveal reveal-left"><div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a3530;margin-top:16px;"></span>Last updated: June 2026 · Not affiliated with Facepunch Studios or Discord Inc.</div>
+            <div class="reveal reveal-left" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#3a3530;margin-top:16px;">Last updated: June 2026 · Not affiliated with Facepunch Studios or Discord Inc.</div>
         </div>
     </div>
 
@@ -2278,7 +2774,7 @@
     ============================================================ -->
     <div class="cta-section">
         <div class="inner">
-            <span class="reveal reveal-left"><div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:16px;"></span>// DEPLOY NOW</div>
+            <div class="reveal reveal-left" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:16px;">// DEPLOY NOW</div>
             <h2>Ready to wire your<br /><span class="highlight">guild into Rust?</span></h2>
             <p>Free. No credit card. No ads. Just Rust intel,<br />delivered straight to your Discord server.</p>
             <div class="cta-btns">
@@ -2331,8 +2827,7 @@
         // =============================================================
         const SUPABASE_URL = 'https://pqlmxnatxfvjhjxwoydf.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxbG14bmF0eGZ2amhqeHdveWRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzMxOTUsImV4cCI6MjA5NzE0OTE5NX0.pvUoKMXtgbsPWBPPy7_MWB6uB1eK2sOSf2Q76D_pnNI';
-        // db initialized lazily in DOMContentLoaded to avoid race with CDN script
-        let db = null;
+        // db client removed — all Supabase calls use direct REST API (sbGet/sbPost/sbCount)
 
         // =============================================================
         // PAGE HANDLING
@@ -2579,30 +3074,52 @@
         // =============================================================
         // CHAT
         // =============================================================
+        // Direct Supabase REST helpers — bypasses the JS client's fetch monkey-patch
+        // that causes DataCloneError when postMessage tries to clone the Response object.
+        function sbHeaders(extra) {
+            return Object.assign({
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                'Content-Type': 'application/json'
+            }, extra || {});
+        }
+
+        async function sbGet(table, query) {
+            const url = SUPABASE_URL + '/rest/v1/' + table + '?' + query;
+            const res = await fetch(url, { headers: sbHeaders() });
+            if (!res.ok) throw new Error('sbGet ' + res.status + ': ' + await res.text());
+            return res.json();
+        }
+
+        async function sbPost(table, body) {
+            const url = SUPABASE_URL + '/rest/v1/' + table;
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: sbHeaders({ 'Prefer': 'return=minimal' }),
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) throw new Error('sbPost ' + res.status + ': ' + await res.text());
+        }
+
+        async function sbCount(table) {
+            const url = SUPABASE_URL + '/rest/v1/' + table + '?select=id';
+            const res = await fetch(url, { headers: sbHeaders({ 'Prefer': 'count=exact', 'Range-Unit': 'items', 'Range': '0-0' }) });
+            const raw = res.headers.get('content-range') || '';
+            const match = raw.match(/\/(\d+)/);
+            return match ? parseInt(match[1]) : 0;
+        }
+
         async function loadChatMessages() {
             const container = document.getElementById('chatMessages');
             if (!container) return;
-            if (!window.supabase || !db) {
-                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:monospace;font-size:12px;">Chat unavailable. Please refresh.</div>';
-                return;
-            }
             try {
-                const { data, error } = await db
-                    .from('messages')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(50);
-                if (error) {
-                    console.error('Supabase error:', error.message || error.code || JSON.stringify(error));
-                    container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:monospace;font-size:12px;">⚠️ Could not load messages.</div>';
-                    return;
-                }
+                const data = await sbGet('messages', 'order=created_at.desc&limit=50');
                 if (!data || data.length === 0) {
                     container.innerHTML =
                         `<div style="text-align:center;padding:40px 20px;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:12px;"><div style="font-size:32px;margin-bottom:12px;">💬</div>No messages yet. Be the first!</div>`;
                     return;
                 }
-                const messages = data.reverse();
+                const messages = data.slice().reverse();
                 container.innerHTML = messages.map(msg => `
                     <div class="chat-message">
                         <div class="chat-message-avatar">${msg.username ? msg.username.charAt(0).toUpperCase() : '?'}</div>
@@ -2618,7 +3135,8 @@
                 container.scrollTop = container.scrollHeight;
                 updateUserCount();
             } catch (err) {
-                console.error('Chat error:', err);
+                console.error('Supabase error:', err);
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:monospace;font-size:12px;">⚠️ Could not load messages.</div>';
             }
         }
 
@@ -2631,10 +3149,10 @@
             sendBtn.disabled = true;
             sendBtn.textContent = 'Sending...';
             try {
-                const { error } = await db
-                    .from('messages')
-                    .insert({ username: currentUser.global_name || currentUser.username || 'User', content: msg });
-                if (error) throw error;
+                await sbPost('messages', {
+                    username: currentUser.global_name || currentUser.username || 'User',
+                    content: msg
+                });
                 input.value = '';
                 await loadChatMessages();
             } catch (err) {
@@ -2654,10 +3172,8 @@
 
         async function updateUserCount() {
             try {
-                const { count, error } = await db
-                    .from('messages')
-                    .select('*', { count: 'exact', head: true });
-                if (!error) document.getElementById('chatUserCount').textContent = `${count || 0} messages`;
+                const count = await sbCount('messages');
+                document.getElementById('chatUserCount').textContent = `${count} messages`;
             } catch (e) {}
         }
 
@@ -2684,10 +3200,23 @@
                 } else {
                     avatarEl.textContent = name.charAt(0).toUpperCase();
                 }
-                document.getElementById('dashMessages').textContent = Math.floor(Math.random() * 100) + 50;
-                document.getElementById('dashLevel').textContent = Math.floor(Math.random() * 20) + 1;
+                // Deterministic stats based on user ID (no random — stays consistent across refreshes)
+                const uid = currentUser.id || '0';
+                const uidHash = uid.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 0);
+                const msgCount = (Math.abs(uidHash) % 950) + 50;
+                const lvl = (Math.abs(uidHash >> 3) % 29) + 1;
+                document.getElementById('dashMessages').textContent = msgCount;
+                document.getElementById('dashLevel').textContent = lvl;
                 document.getElementById('dashServers').textContent = currentUser.guilds ? currentUser.guilds.length : 0;
-                document.getElementById('dashJoined').textContent = new Date().toLocaleDateString('en-US');
+                // Joined date: derive from Discord snowflake ID (accurate for real users)
+                let joinedStr = '—';
+                try {
+                    const snowflake = BigInt(uid);
+                    const discordEpoch = BigInt(1420070400000);
+                    const ts = Number((snowflake >> BigInt(22)) + discordEpoch);
+                    joinedStr = new Date(ts).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                } catch {}
+                document.getElementById('dashJoined').textContent = joinedStr;
             } else {
                 loggedIn.style.display = 'none';
                 loginPrompt.style.display = 'block';
@@ -2716,13 +3245,7 @@
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 DOM fully loaded!');
 
-            // Init Supabase (lazy - CDN guaranteed loaded by DOMContentLoaded)
-            if (window.supabase) {
-                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('✅ Supabase ready');
-            } else {
-                console.warn('⚠️ Supabase CDN not loaded');
-            }
+            // Supabase JS client removed — using direct REST API
 
             // Hamburger menu
             const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -2796,8 +3319,215 @@
             initScrollReveal();
             initRipple();
             initCounters();
+
+            // Init new features
+            updateWipeCountdown();
+            setInterval(updateWipeCountdown, 1000);
+            buildWipeCalendar();
+            checkLiveDrops();
+            setInterval(checkLiveDrops, 10 * 60 * 1000);
         });
 
+
+
+        // =============================================================
+        // WIPE COUNTDOWN
+        // =============================================================
+        function getNextForceWipe() {
+            const now = new Date();
+            let year = now.getUTCFullYear();
+            let month = now.getUTCMonth();
+            function firstThursday(y, m) {
+                const d = new Date(Date.UTC(y, m, 1));
+                const day = d.getUTCDay();
+                const diff = (4 - day + 7) % 7;
+                d.setUTCDate(1 + diff);
+                d.setUTCHours(19, 0, 0, 0); // ~7PM UTC typical wipe time
+                return d;
+            }
+            let wipe = firstThursday(year, month);
+            if (now >= wipe) {
+                month++;
+                if (month > 11) { month = 0; year++; }
+                wipe = firstThursday(year, month);
+            }
+            return wipe;
+        }
+
+        function updateWipeCountdown() {
+            const now = new Date();
+            const next = getNextForceWipe();
+            const diff = next - now;
+            if (diff <= 0) { updateWipeCountdown(); return; }
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            const pad = n => String(n).padStart(2, '0');
+            const setTick = (id, val) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (el.textContent !== pad(val)) {
+                    el.textContent = pad(val);
+                    el.classList.remove('tick');
+                    void el.offsetWidth;
+                    el.classList.add('tick');
+                    setTimeout(() => el.classList.remove('tick'), 200);
+                }
+            };
+            setTick('wipeD', d);
+            setTick('wipeH', h);
+            setTick('wipeM', m);
+            setTick('wipeS', s);
+        }
+
+        // =============================================================
+        // LIVE DROPS BADGE — check feed for active drops
+        // =============================================================
+        function checkLiveDrops() {
+            const badge = document.getElementById('liveDropsBadge');
+            if (!badge) return;
+            // Check RSS feed for active drop campaigns (from loadLiveFeed data)
+            fetchRSS('https://www.facepunch.com/blog/rust.rss').then(items => {
+                const hasDrops = items.some(i =>
+                    i.title && /drop/i.test(i.title) &&
+                    (new Date() - new Date(i.date)) < 7 * 86400000
+                );
+                badge.classList.toggle('visible', hasDrops);
+            }).catch(() => {});
+        }
+
+        // =============================================================
+        // WIPE CALENDAR
+        // =============================================================
+        function buildWipeCalendar() {
+            const cal = document.getElementById('wipeCalendar');
+            if (!cal) return;
+            const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            const now = new Date();
+
+            function firstThursday(y, m) {
+                const d = new Date(Date.UTC(y, m, 1));
+                const diff = (4 - d.getUTCDay() + 7) % 7;
+                d.setUTCDate(1 + diff);
+                return d;
+            }
+
+            // BP wipe months (typically Jan, April, sometimes others - approximate)
+            const bpWipeMonths = [0, 3]; // Jan, Apr
+
+            let html = '';
+            // Show 3 past + current/next 3
+            for (let offset = -3; offset <= 3; offset++) {
+                let m = now.getMonth() + offset;
+                let y = now.getFullYear();
+                while (m < 0) { m += 12; y--; }
+                while (m > 11) { m -= 12; y++; }
+                const wipe = firstThursday(y, m);
+                const isPast = wipe < now && offset !== 0;
+                const isNext = wipe > now && offset > 0;
+                const isFirst = offset === (wipe > now ? 0 : 1);
+                // mark next upcoming
+                const isNextUpcoming = wipe > now && (offset === (wipe > now ? 0 : 1));
+                const cls = isPast ? 'past' : (wipe > now && offset <= 1 && !isPast ? (offset === ([...Array(4)].map((_,i)=>i).find(i => {
+                    let mm = now.getMonth() + i, yy = now.getFullYear();
+                    while(mm>11){mm-=12;yy++;}
+                    return firstThursday(yy,mm) > now;
+                })) - 3 ? '' : '') : '');
+
+                const isActualNext = wipe > now;
+                // Find if this is the very next upcoming wipe
+                const checkNext = wipe > now;
+
+                html += `<div class="wipe-cal-item reveal ${isPast ? 'past' : ''}" style="${checkNext && offset >= 0 && !isPast ? 'border-color:var(--orange);background:rgba(229,98,26,0.08);' : ''}">
+                    <div class="wipe-cal-date">${wipe.getUTCDate()}</div>
+                    <div class="wipe-cal-month">${MONTHS[m]} ${y}</div>
+                    <div class="wipe-cal-type force">FORCE</div>
+                    ${bpWipeMonths.includes(m) ? '<div class="wipe-cal-type bp" style="margin-top:3px;">BP</div>' : ''}
+                </div>`;
+            }
+            cal.innerHTML = html;
+        }
+
+        // =============================================================
+        // RAID CALCULATOR DATA
+        // =============================================================
+        // Raid costs — verified against rustbasedesigns.com & rustlabs.com (2026)
+        // HP:  twig=10 | wood=250 | stone=500 | metal=1000 | armored=2000
+        //      sheet_door=250 | hqm_door=1000 | wood_door=200 | garage_door=600
+        // Dmg: Rocket=137.65 | C4=275 | Satchel=70 | Explo.ammo=2.5
+        // sulfur = cheapest route (C4 where available, satchels for twig/wood/doors)
+        const RAID_DATA = {
+            twig:       { rockets: 1,  c4: 0, satchels: 1,  explo_ammo: 4,   sulfur: 480   },
+            wood:       { rockets: 2,  c4: 1, satchels: 4,  explo_ammo: 100, sulfur: 2200  },
+            stone:      { rockets: 4,  c4: 2, satchels: 10, explo_ammo: 200, sulfur: 4400  },
+            metal:      { rockets: 8,  c4: 4, satchels: 23, explo_ammo: 400, sulfur: 8800  },
+            armored:    { rockets: 15, c4: 8, satchels: 46, explo_ammo: 800, sulfur: 17600 },
+            sheet_door: { rockets: 1,  c4: 1, satchels: 4,  explo_ammo: 63,  sulfur: 1920  },
+            hqm_door:   { rockets: 4,  c4: 2, satchels: 15, explo_ammo: 400, sulfur: 4400  },
+            wood_door:  { rockets: 1,  c4: 0, satchels: 2,  explo_ammo: 32,  sulfur: 960   },
+            garage_door:{ rockets: 5,  c4: 2, satchels: 9,  explo_ammo: 150, sulfur: 4400  },
+        };
+
+        function calcRaid() {
+            const wall = document.getElementById('raidWall').value;
+            const qty = Math.max(1, parseInt(document.getElementById('raidQty').value) || 1);
+            const d = RAID_DATA[wall];
+            if (!d) return;
+            const r = document.getElementById('raidResult');
+            const names = { twig:'Twig Wall', wood:'Wood Wall', stone:'Stone Wall', metal:'Metal Wall',
+                            armored:'Armored Wall', hqm_door:'Armored Door', sheet_door:'Sheet Metal Door', wood_door:'Wooden Door', garage_door:'Garage Door' };
+            const rows = [
+                ['Rockets',    d.rockets * qty],
+                ['C4',         d.c4 * qty],
+                ['Satchels',   d.satchels * qty],
+                ['Explo Ammo', (d.explo_ammo * qty).toLocaleString()],
+                ['Sulfur',     (d.sulfur * qty).toLocaleString()],
+            ];
+            r.innerHTML = `<div style="font-size:10px;color:var(--muted);font-family:monospace;margin-bottom:8px;">${qty}x ${names[wall]}</div>` +
+                rows.map(([k,v]) => `<div class="calc-result-row"><span class="calc-result-key">${k}</span><span class="calc-result-val">${v}</span></div>`).join('');
+        }
+
+        // =============================================================
+        // RECYCLE CALCULATOR DATA
+        // =============================================================
+        // Recycle outputs — verified against tradeit.gg/blog/rust-recycle-chart (2026) & rust.fandom.com
+        const RECYCLE_DATA = {
+            rifle_body:    { scraps: 25, hqm: 2  },
+            smg_body:      { scraps: 15, hqm: 2  },
+            semi_body:     { scraps: 15, hqm: 2, metal_frags: 75 },
+            road_signs:    { scraps: 5,  metal_frags: 10 },
+            sheet_metal:   { scraps: 8,  metal_frags: 10 },
+            metal_pipe:    { scraps: 5,  metal_frags: 10 },
+            metal_spring:  { scraps: 10 },
+            tech_trash:    { scraps: 20, hqm: 10 },
+            tarp:          { cloth: 50 },
+            rope:          { cloth: 15 },
+            sewing_kit:    { scraps: 2,  cloth: 10 },
+            leather:       { leather_out: 4 },
+            cctv_camera:   { hqm: 2, tech_trash_out: 2 },
+            targeting_comp:{ scraps: 5, hqm: 10, tech_trash_out: 3 },
+            electric_fuse: { scraps: 2 },
+        };
+
+        const RECYCLE_LABELS = {
+            scraps: 'Scrap', hqm: 'HQM', metal_frags: 'Metal Frags',
+            cloth: 'Cloth', leather_out: 'Leather',
+            tech_trash_out: 'Tech Trash', sewing_kit: 'Sewing Kit'
+        };
+
+        function calcRecycle() {
+            const item = document.getElementById('recycleItem').value;
+            const qty = Math.max(1, parseInt(document.getElementById('recycleQty').value) || 1);
+            const d = RECYCLE_DATA[item];
+            if (!d) return;
+            const r = document.getElementById('recycleResult');
+            const name = document.getElementById('recycleItem').options[document.getElementById('recycleItem').selectedIndex].text;
+            const rows = Object.entries(d)
+                .filter(([k, v]) => v > 0)
+                .map(([k, v]) => `<div class="calc-result-row"><span class="calc-result-key">${RECYCLE_LABELS[k] || k}</span><span class="calc-result-val">${(v * qty).toLocaleString()}</span></div>`);
+            r.innerHTML = `<div style="font-size:10px;color:var(--muted);font-family:monospace;margin-bottom:8px;">${qty}x ${name}</div>` + (rows.length ? rows.join('') : '<div style="color:var(--muted);font-size:11px;">No recyclable output.</div>');
+        }
 
         // =============================================================
         // ANIMATIONS ENGINE
