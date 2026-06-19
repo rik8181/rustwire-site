@@ -59,8 +59,114 @@
         }
 
         /* ============================================================
-           HAZARD STRIPE
+           LANGUAGE SWITCHER
            ============================================================ */
+        .lang-switcher {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(229,98,26,0.08);
+            border: 1px solid rgba(229,98,26,0.2);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--orange);
+            color: var(--white);
+        }
+
+        .lang-btn .lang-flag { font-size: 14px; line-height: 1; }
+        .lang-btn .lang-chevron { font-size: 8px; opacity: 0.6; transition: transform 0.2s; }
+        .lang-switcher.open .lang-chevron { transform: rotate(180deg); }
+
+        .lang-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: rgba(17,17,17,0.98);
+            border: 1px solid rgba(229,98,26,0.2);
+            border-radius: 6px;
+            min-width: 170px;
+            z-index: 2000;
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            animation: slideDown 0.2s ease;
+        }
+
+        .lang-switcher.open .lang-dropdown { display: block; }
+
+        .lang-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--muted);
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+
+        .lang-option:hover { background: rgba(229,98,26,0.08); color: var(--white); }
+        .lang-option.active { color: var(--orange); }
+        .lang-option .lf { font-size: 16px; }
+        .lang-option .ln { flex: 1; }
+
+        .lang-translating {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: rgba(17,17,17,0.95);
+            border: 1px solid rgba(229,98,26,0.3);
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--orange);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .lang-translating.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .lang-spinner {
+            width: 14px; height: 14px;
+            border: 2px solid rgba(229,98,26,0.2);
+            border-top-color: var(--orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .hazard {
             height: 6px;
             background: repeating-linear-gradient(-45deg, #F5A623 0px, #F5A623 10px, #1a1a1a 10px, #1a1a1a 20px);
@@ -2274,7 +2380,36 @@
             .wipe-calendar { grid-template-columns: repeat(2, 1fr); }
             .status-grid { grid-template-columns: repeat(2, 1fr); }
         }
-    </style>
+    
+        /* ── Changelog badge ── */
+        .cl-badge {
+            display: inline-block;
+            background: var(--rust);
+            color: #fff;
+            font-size: 9px;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 1px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-left: 7px;
+            vertical-align: middle;
+            animation: badgePulse 1.8s ease-in-out infinite;
+        }
+        @keyframes badgePulse {
+            0%,100% { opacity:1; transform:scale(1); }
+            50% { opacity:0.7; transform:scale(0.92); }
+        }
+
+        /* ── Drop timer inline ── */
+        .drop-timer-inline {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px;
+            color: var(--orange);
+            letter-spacing: 1px;
+            margin-left: 8px;
+            opacity: 0.85;
+        }
+</style>
 </head>
 <body>
 
@@ -2294,14 +2429,33 @@
         </button>
 
         <ul class="nav-links">
-            <li><a class="active" onclick="showPage('home')">Home</a></li>
-            <li><a onclick="showPage('commands')">Commands</a></li>
-            <li><a onclick="showPage('changelog')">Changelog</a></li>
-            <li><a onclick="showPage('chat')">Chat</a></li>
-            <li><a onclick="showPage('dashboard')">Dashboard</a></li>
+            <li><a class="active" onclick="showPage('home')" data-i18n="nav_home">Home</a></li>
+            <li><a onclick="showPage('commands')" data-i18n="nav_commands">Commands</a></li>
+            <li><a onclick="showPage('changelog'); clearChangelogBadge()" data-i18n="nav_changelog">Changelog<span id="clBadge" class="cl-badge" style="display:none">NEW</span></a></li>
+            <li><a onclick="showPage('chat')" data-i18n="nav_chat">Chat</a></li>
+            <li><a onclick="showPage('dashboard')" data-i18n="nav_dashboard">Dashboard</a></li>
             <li><a href="https://discord.gg/Ws44MGuKGq" target="_blank">Discord</a></li>
-            <li><a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="nav-cta">Add Bot →</a></li>
+            <li><a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="nav-cta" data-i18n="nav_add_bot">Add Bot →</a></li>
         </ul>
+
+        <div class="lang-switcher" id="langSwitcher">
+            <button class="lang-btn" id="langBtn" onclick="toggleLangDropdown()">
+                <span class="lang-flag" id="langFlag">🌐</span>
+                <span id="langLabel">EN</span>
+                <span class="lang-chevron">▼</span>
+            </button>
+            <div class="lang-dropdown" id="langDropdown">
+                <button class="lang-option active" onclick="setLanguage('en')"><span class="lf">🇬🇧</span><span class="ln">English</span></button>
+                <button class="lang-option" onclick="setLanguage('hu')"><span class="lf">🇭🇺</span><span class="ln">Magyar</span></button>
+                <button class="lang-option" onclick="setLanguage('de')"><span class="lf">🇩🇪</span><span class="ln">Deutsch</span></button>
+                <button class="lang-option" onclick="setLanguage('fr')"><span class="lf">🇫🇷</span><span class="ln">Français</span></button>
+                <button class="lang-option" onclick="setLanguage('es')"><span class="lf">🇪🇸</span><span class="ln">Español</span></button>
+                <button class="lang-option" onclick="setLanguage('ru')"><span class="lf">🇷🇺</span><span class="ln">Русский</span></button>
+                <button class="lang-option" onclick="setLanguage('tr')"><span class="lf">🇹🇷</span><span class="ln">Türkçe</span></button>
+                <button class="lang-option" onclick="setLanguage('pl')"><span class="lf">🇵🇱</span><span class="ln">Polski</span></button>
+                <button class="lang-option" onclick="setLanguage('zh')"><span class="lf">🇨🇳</span><span class="ln">中文</span></button>
+            </div>
+        </div>
 
         <button class="nav-hamburger" id="hamburgerBtn" aria-label="Menu">
             <span></span><span></span><span></span>
@@ -2310,13 +2464,13 @@
 
     <!-- ===== MOBILE MENU ===== -->
     <div class="nav-mobile" id="navMobile">
-        <a onclick="showPage('home')">Home</a>
-        <a onclick="showPage('commands')">Commands</a>
-        <a onclick="showPage('changelog')">Changelog</a>
-        <a onclick="showPage('chat')">Chat</a>
-        <a onclick="showPage('dashboard')">Dashboard</a>
+        <a onclick="showPage('home')" data-i18n="nav_home">Home</a>
+        <a onclick="showPage('commands')" data-i18n="nav_commands">Commands</a>
+        <a onclick="showPage('changelog'); clearChangelogBadge()" data-i18n="nav_changelog">Changelog<span id="clBadgeMob" class="cl-badge" style="display:none">NEW</span></a>
+        <a onclick="showPage('chat')" data-i18n="nav_chat">Chat</a>
+        <a onclick="showPage('dashboard')" data-i18n="nav_dashboard">Dashboard</a>
         <a href="https://discord.gg/Ws44MGuKGq" target="_blank">Discord</a>
-        <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="nav-cta">Add Bot →</a>
+        <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="nav-cta" data-i18n="nav_add_bot">Add Bot →</a>
     </div>
 
     <!-- ============================================================
@@ -2326,43 +2480,44 @@
         <div class="hero">
             <div class="hero-bg"></div>
             <div class="hero-left">
-                <div class="hero-eyebrow">All-in-one ops bot // Rust game</div>
+                <div class="hero-eyebrow" data-i18n="hero_eyebrow">All-in-one ops bot // Rust game</div>
                 <h1>
-                    SURVIVE.<br />
-                    <span class="line-orange">DOMINATE.</span><br />
-                    AUTOMATE.
+                    <span data-i18n="hero_h1_1">SURVIVE.</span><br />
+                    <span class="line-orange" data-i18n="hero_h1_2">DOMINATE.</span><br />
+                    <span data-i18n="hero_h1_3">AUTOMATE.</span>
                 </h1>
-                <p class="hero-desc">
+                <p class="hero-desc" data-i18n="hero_desc">
                     RUSTWIRE is the meanest Discord bot in the wasteland.<br />
                     Drops, skins, devblogs, commits, ban logs, raid calc,<br />
                     player stats — wired straight into your guild.
                 </p>
                 <div class="hero-btns">
-                    <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary ripple-btn">Enlist Free →</a>
-                    <button class="btn-outline ripple-btn" onclick="showPage('commands')">View Commands</button>
+                    <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary ripple-btn" data-i18n="hero_btn_enlist">Enlist Free →</a>
+                    <button class="btn-outline ripple-btn" onclick="showPage('commands')" data-i18n="hero_btn_commands">View Commands</button>
                 </div>
                 <div class="hero-stats">
-                    <div><div class="hero-stat-num">10K+</div><div class="hero-stat-label">Users</div></div>
-                    <div><div class="hero-stat-num">100+</div><div class="hero-stat-label">Servers</div></div>
-                    <div><div class="hero-stat-num">24/7</div><div class="hero-stat-label">Uptime</div></div>
+                    <div><div class="hero-stat-num">10K+</div><div class="hero-stat-label" data-i18n="stat_users">Users</div></div>
+                    <div><div class="hero-stat-num">100+</div><div class="hero-stat-label" data-i18n="stat_servers_label">Servers</div></div>
+                    <div><div class="hero-stat-num">24/7</div><div class="hero-stat-label" data-i18n="stat_uptime">Uptime</div></div>
                 </div>
                 <div class="wipe-bar reveal" style="margin-top:28px;">
                     <div>
-                        <div class="wipe-bar-label">// next force wipe</div>
-                        <div class="wipe-bar-title">RUST FORCE WIPE</div>
+                        <div class="wipe-bar-label" data-i18n="wipe_label">// next force wipe</div>
+                        <div class="wipe-bar-title" data-i18n="wipe_title">RUST FORCE WIPE</div>
                     </div>
                     <div class="wipe-countdown">
-                        <div class="wipe-unit"><span class="wipe-num" id="wipeD">--</span><div class="wipe-label">Days</div></div>
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeD">--</span><div class="wipe-label" data-i18n="wipe_days">Days</div></div>
                         <div class="wipe-sep">:</div>
-                        <div class="wipe-unit"><span class="wipe-num" id="wipeH">--</span><div class="wipe-label">Hours</div></div>
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeH">--</span><div class="wipe-label" data-i18n="wipe_hours">Hours</div></div>
                         <div class="wipe-sep">:</div>
-                        <div class="wipe-unit"><span class="wipe-num" id="wipeM">--</span><div class="wipe-label">Min</div></div>
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeM">--</span><div class="wipe-label" data-i18n="wipe_min">Min</div></div>
                         <div class="wipe-sep">:</div>
-                        <div class="wipe-unit"><span class="wipe-num" id="wipeS">--</span><div class="wipe-label">Sec</div></div>
+                        <div class="wipe-unit"><span class="wipe-num" id="wipeS">--</span><div class="wipe-label" data-i18n="wipe_sec">Sec</div></div>
                     </div>
                     <div id="liveDropsBadge" class="live-drops-badge" onclick="showPage('commands')">
                         <div class="live-drops-dot"></div>
-                        LIVE DROPS ACTIVE
+                        <span data-i18n="wipe_live_drops">LIVE DROPS ACTIVE</span>
+                        <span id="dropTimer" class="drop-timer-inline" style="display:none"></span>
                     </div>
                 </div>
             </div>
@@ -2382,18 +2537,18 @@
         <div class="section">
             <div class="section-inner">
                 <span class="reveal reveal-left"><div style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:12px;"></span>// SECTOR 01</div>
-                <h2 class="section-title reveal">Tools forged for<br />the wasteland</h2>
-                <p class="section-desc">One bot. Every Rust data source wired directly into your Discord.</p>
+                <h2 class="section-title reveal" data-i18n="feat_title">Tools forged for<br />the wasteland</h2>
+                <p class="section-desc" data-i18n="feat_desc">One bot. Every Rust data source wired directly into your Discord.</p>
                 <div class="features-grid">
-                    <div class="feature-card reveal reveal-delay-1"><div class="feature-icon">🎮</div><div class="feature-title">Twitch & Kick Drops</div><div class="feature-desc">Active drop campaigns posted the moment they go live.</div></div>
-                    <div class="feature-card reveal reveal-delay-2"><div class="feature-icon">🎨</div><div class="feature-title">Skins & DLC</div><div class="feature-desc">New Steam Workshop skins and DLC releases with region-aware pricing.</div></div>
-                    <div class="feature-card reveal reveal-delay-3"><div class="feature-icon">📰</div><div class="feature-title">Devblogs & News</div><div class="feature-desc">Facepunch devblogs, community posts and general Rust news.</div></div>
-                    <div class="feature-card reveal reveal-delay-4"><div class="feature-icon">🛠️</div><div class="feature-title">Commits & Oxide</div><div class="feature-desc">Facepunch GitHub commits and Oxide/uMod plugin updates.</div></div>
-                    <div class="feature-card reveal reveal-delay-5"><div class="feature-icon">🚫</div><div class="feature-title">Ban Logs</div><div class="feature-desc">Latest org bans with full user profile, account age and reason.</div></div>
-                    <div class="feature-card reveal reveal-delay-6"><div class="feature-icon">⚙️</div><div class="feature-title">Player Tools</div><div class="feature-desc">VAC checks, hours verification, raid calculator, recycler, blueprint lookup.</div></div>
-                    <div class="feature-card reveal reveal-delay-7"><div class="feature-icon">🔒</div><div class="feature-title">Content Filter</div><div class="feature-desc">Auto-detects and removes CSAM spam links with instant ban.</div></div>
-                    <div class="feature-card reveal reveal-delay-8"><div class="feature-icon">🧹</div><div class="feature-title">Wipe Schedule</div><div class="feature-desc">Track forced wipes, set custom countdowns, auto-notify.</div></div>
-                    <div class="feature-card reveal reveal-delay-9"><div class="feature-icon">🔌</div><div class="feature-title">Rust+ Integration</div><div class="feature-desc">Live map, team tracker, in-game chat bridge, monument status.</div></div>
+                    <div class="feature-card reveal reveal-delay-1"><div class="feature-icon">🎮</div><div class="feature-title" data-i18n="feat_drops_title">Twitch & Kick Drops</div><div class="feature-desc" data-i18n="feat_drops_desc">Active drop campaigns posted the moment they go live.</div></div>
+                    <div class="feature-card reveal reveal-delay-2"><div class="feature-icon">🎨</div><div class="feature-title" data-i18n="feat_skins_title">Skins & DLC</div><div class="feature-desc" data-i18n="feat_skins_desc">New Steam Workshop skins and DLC releases with region-aware pricing.</div></div>
+                    <div class="feature-card reveal reveal-delay-3"><div class="feature-icon">📰</div><div class="feature-title" data-i18n="feat_news_title">Devblogs & News</div><div class="feature-desc" data-i18n="feat_news_desc">Facepunch devblogs, community posts and general Rust news.</div></div>
+                    <div class="feature-card reveal reveal-delay-4"><div class="feature-icon">🛠️</div><div class="feature-title" data-i18n="feat_commits_title">Commits & Oxide</div><div class="feature-desc" data-i18n="feat_commits_desc">Facepunch GitHub commits and Oxide/uMod plugin updates.</div></div>
+                    <div class="feature-card reveal reveal-delay-5"><div class="feature-icon">🚫</div><div class="feature-title" data-i18n="feat_ban_title">Ban Logs</div><div class="feature-desc" data-i18n="feat_ban_desc">Latest org bans with full user profile, account age and reason.</div></div>
+                    <div class="feature-card reveal reveal-delay-6"><div class="feature-icon">⚙️</div><div class="feature-title" data-i18n="feat_tools_title">Player Tools</div><div class="feature-desc" data-i18n="feat_tools_desc">VAC checks, hours verification, raid calculator, recycler, blueprint lookup.</div></div>
+                    <div class="feature-card reveal reveal-delay-7"><div class="feature-icon">🔒</div><div class="feature-title" data-i18n="feat_filter_title">Content Filter</div><div class="feature-desc" data-i18n="feat_filter_desc">Auto-detects and removes CSAM spam links with instant ban.</div></div>
+                    <div class="feature-card reveal reveal-delay-8"><div class="feature-icon">🧹</div><div class="feature-title" data-i18n="feat_wipe_title">Wipe Schedule</div><div class="feature-desc" data-i18n="feat_wipe_desc">Track forced wipes, set custom countdowns, auto-notify.</div></div>
+                    <div class="feature-card reveal reveal-delay-9"><div class="feature-icon">🔌</div><div class="feature-title" data-i18n="feat_rustplus_title">Rust+ Integration</div><div class="feature-desc" data-i18n="feat_rustplus_desc">Live map, team tracker, in-game chat bridge, monument status.</div></div>
                 </div>
             </div>
         </div>
@@ -2403,10 +2558,10 @@
         <div class="section big-stats">
             <div class="section-inner" style="padding:0;">
                 <div class="big-stats-grid">
-                    <div class="big-stat reveal reveal-scale reveal-delay-1"><div class="big-stat-label">Servers Wired</div><div class="big-stat-num"></div></div>
-                    <div class="big-stat reveal reveal-scale reveal-delay-2"><div class="big-stat-label">Discord Users</div><div class="big-stat-num"></div></div>
-                    <div class="big-stat reveal reveal-scale reveal-delay-3"><div class="big-stat-label">Commands</div><div class="big-stat-num"></div></div>
-                    <div class="big-stat reveal reveal-scale reveal-delay-4"><div class="big-stat-label">Uptime %</div><div class="big-stat-num"></div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-1"><div class="big-stat-label" data-i18n="bigstat_servers">Servers Wired</div><div class="big-stat-num"></div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-2"><div class="big-stat-label" data-i18n="bigstat_users">Discord Users</div><div class="big-stat-num"></div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-3"><div class="big-stat-label" data-i18n="bigstat_commands">Commands</div><div class="big-stat-num"></div></div>
+                    <div class="big-stat reveal reveal-scale reveal-delay-4"><div class="big-stat-label" data-i18n="bigstat_uptime">Uptime %</div><div class="big-stat-num"></div></div>
                 </div>
             </div>
         </div>
@@ -2416,14 +2571,14 @@
         <!-- RAID & RECYCLE CALCULATOR -->
         <div class="section calc-section">
             <div class="section-inner">
-                <div class="section-label">// tools</div>
-                <h2 class="section-title reveal">Wasteland<br />Calculator.</h2>
-                <p class="section-desc">Raid costs and recycle output — right here, no Discord needed.</p>
+                <div class="section-label" data-i18n="calc_label">// tools</div>
+                <h2 class="section-title reveal" data-i18n="calc_title">Wasteland<br />Calculator.</h2>
+                <p class="section-desc" data-i18n="calc_desc">Raid costs and recycle output — right here, no Discord needed.</p>
                 <div class="calc-grid">
                     <div class="calc-box reveal reveal-left">
-                        <div class="calc-box-title">💥 Raid Calculator</div>
+                        <div class="calc-box-title" data-i18n="calc_raid_title">💥 Raid Calculator</div>
                         <div class="calc-row">
-                            <label>Wall type</label>
+                            <label data-i18n="calc_wall_type">Wall type</label>
                             <select class="calc-select" id="raidWall">
                                 <option value="twig">Twig Wall</option>
                                 <option value="wood">Wood Wall</option>
@@ -2437,18 +2592,18 @@
                             </select>
                         </div>
                         <div class="calc-row">
-                            <label>Quantity</label>
+                            <label data-i18n="calc_quantity">Quantity</label>
                             <input type="number" class="calc-input" id="raidQty" value="1" min="1" max="50">
                         </div>
-                        <button class="calc-btn ripple-btn" onclick="calcRaid()">CALCULATE RAID COST</button>
+                        <button class="calc-btn ripple-btn" onclick="calcRaid()" data-i18n="calc_raid_btn">CALCULATE RAID COST</button>
                         <div class="calc-result" id="raidResult">
-                            <div style="color:var(--muted);font-size:11px;font-family:monospace;">Select wall type and hit Calculate.</div>
+                            <div style="color:var(--muted);font-size:11px;font-family:monospace;" data-i18n="calc_raid_hint">Select wall type and hit Calculate.</div>
                         </div>
                     </div>
                     <div class="calc-box reveal reveal-right">
-                        <div class="calc-box-title">♻️ Recycle Calculator</div>
+                        <div class="calc-box-title" data-i18n="calc_recycle_title">♻️ Recycle Calculator</div>
                         <div class="calc-row">
-                            <label>Item</label>
+                            <label data-i18n="calc_item">Item</label>
                             <select class="calc-select" id="recycleItem">
                                 <option value="rifle_body">Rifle Body</option>
                                 <option value="smg_body">SMG Body</option>
@@ -2468,12 +2623,12 @@
                             </select>
                         </div>
                         <div class="calc-row">
-                            <label>Quantity</label>
+                            <label data-i18n="calc_quantity">Quantity</label>
                             <input type="number" class="calc-input" id="recycleQty" value="1" min="1" max="1000">
                         </div>
-                        <button class="calc-btn ripple-btn" onclick="calcRecycle()">CALCULATE OUTPUT</button>
+                        <button class="calc-btn ripple-btn" onclick="calcRecycle()" data-i18n="calc_recycle_btn">CALCULATE OUTPUT</button>
                         <div class="calc-result" id="recycleResult">
-                            <div style="color:var(--muted);font-size:11px;font-family:monospace;">Select an item and hit Calculate.</div>
+                            <div style="color:var(--muted);font-size:11px;font-family:monospace;" data-i18n="calc_recycle_hint">Select an item and hit Calculate.</div>
                         </div>
                     </div>
                 </div>
@@ -2485,9 +2640,9 @@
         <!-- WIPE CALENDAR -->
         <div class="section">
             <div class="section-inner">
-                <div class="section-label">// wipe schedule</div>
-                <h2 class="section-title reveal">Wipe History<br />&amp; Next Dates.</h2>
-                <p class="section-desc">Facepunch force wipes happen the first Thursday of every month.</p>
+                <div class="section-label" data-i18n="wipe_sched_label">// wipe schedule</div>
+                <h2 class="section-title reveal" data-i18n="wipe_sched_title">Wipe History<br />&amp; Next Dates.</h2>
+                <p class="section-desc" data-i18n="wipe_sched_desc">Facepunch force wipes happen the first Thursday of every month.</p>
                 <div class="wipe-calendar" id="wipeCalendar"></div>
             </div>
         </div>
@@ -2501,16 +2656,16 @@
     <div class="page" id="page-commands">
         <div class="section" style="padding-top:40px;">
             <div class="section-inner">
-                <div class="section-label">// commands</div>
-                <h2 class="section-title reveal">Every command<br />you need.</h2>
-                <p class="section-desc">All slash-based. No prefix, no confusion.</p>
+                <div class="section-label" data-i18n="cmd_label">// commands</div>
+                <h2 class="section-title reveal" data-i18n="cmd_title">Every command<br />you need.</h2>
+                <p class="section-desc" data-i18n="cmd_desc">All slash-based. No prefix, no confusion.</p>
 
                 <div class="cmd-tabs">
-                    <button class="cmd-tab ripple-btn active" onclick="showCmdTab('rust')">/rust</button>
-                    <button class="cmd-tab" onclick="showCmdTab('wire')">/wire</button>
-                    <button class="cmd-tab" onclick="showCmdTab('tools')">Tools</button>
-                    <button class="cmd-tab" onclick="showCmdTab('social')">Social</button>
-                    <button class="cmd-tab" onclick="showCmdTab('rustplus')">Rust+</button>
+                    <button class="cmd-tab ripple-btn active" onclick="showCmdTab('rust')" data-i18n="cmd_tab_rust">/rust</button>
+                    <button class="cmd-tab" onclick="showCmdTab('wire')" data-i18n="cmd_tab_wire">/wire</button>
+                    <button class="cmd-tab" onclick="showCmdTab('tools')" data-i18n="cmd_tab_tools">Tools</button>
+                    <button class="cmd-tab" onclick="showCmdTab('social')" data-i18n="cmd_tab_social">Social</button>
+                    <button class="cmd-tab" onclick="showCmdTab('rustplus')" data-i18n="cmd_tab_rustplus">Rust+</button>
                 </div>
 
                 <div class="cmd-panel active" id="cmd-rust">
@@ -2637,9 +2792,9 @@
     <div class="page" id="page-changelog">
         <div class="section" style="padding-top:40px;">
             <div class="section-inner">
-                <div class="section-label">// changelog</div>
-                <h2 class="section-title reveal">What's new.</h2>
-                <p class="section-desc">Recent updates and improvements to RustWire.</p>
+                <div class="section-label" data-i18n="cl_label">// changelog</div>
+                <h2 class="section-title reveal" data-i18n="cl_title">What's new.</h2>
+                <p class="section-desc" data-i18n="cl_desc">Recent updates and improvements to RustWire.</p>
                 <div class="cl-list">
                     <div class="cl-entry">
                         <div class="cl-date">Jun 2026</div>
@@ -2684,27 +2839,27 @@
     <div class="page" id="page-chat">
         <div class="section" style="padding-top:40px;">
             <div class="section-inner">
-                <div class="section-label">// community chat</div>
-                <h2 class="section-title reveal">Discuss &amp; connect</h2>
-                <p class="section-desc">Chat with the RustWire community. Login with Discord to start talking.</p>
+                <div class="section-label" data-i18n="chat_label">// community chat</div>
+                <h2 class="section-title reveal" data-i18n="chat_title">Discuss &amp; connect</h2>
+                <p class="section-desc" data-i18n="chat_desc">Chat with the RustWire community. Login with Discord to start talking.</p>
 
                 <div class="chat-container" id="chatContainer">
                     <div class="chat-header">
                         <div class="chat-header-info">
                             <span class="online-dot"></span>
-                            <span class="chat-header-title">#general</span>
+                            <span class="chat-header-title" data-i18n="chat_channel">#general</span>
                         </div>
                         <span class="chat-header-users" id="chatUserCount">0 online</span>
                     </div>
                     <div class="chat-messages" id="chatMessages">
                         <div style="text-align:center;padding:40px 20px;color:var(--muted);font-family:'Share Tech Mono',monospace;font-size:12px;">
                             <div style="font-size:32px;margin-bottom:12px;">💬</div>
-                            No messages yet. Be the first!
+                            <span data-i18n="chat_empty">No messages yet. Be the first!</span>
                         </div>
                     </div>
                     <div class="chat-input-area" id="chatInputArea">
-                        <input type="text" id="chatInput" placeholder="Type a message..." disabled />
-                        <button id="chatSendBtn" disabled>Send</button>
+                        <input type="text" id="chatInput" placeholder="Type a message..." disabled data-i18n-placeholder="chat_placeholder" />
+                        <button id="chatSendBtn" disabled data-i18n="chat_send">Send</button>
                     </div>
                 </div>
             </div>
@@ -2717,17 +2872,17 @@
     <div class="page" id="page-dashboard">
         <div class="section" style="padding-top:40px;">
             <div class="section-inner">
-                <div class="section-label">// dashboard</div>
-                <h2 class="section-title reveal">Your control center</h2>
-                <p class="section-desc">Manage your RustWire experience and view your stats.</p>
+                <div class="section-label" data-i18n="dash_label">// dashboard</div>
+                <h2 class="section-title reveal" data-i18n="dash_title">Your control center</h2>
+                <p class="section-desc" data-i18n="dash_desc">Manage your RustWire experience and view your stats.</p>
 
                 <div id="dashboardContent">
                     <div id="dashboardLoginPrompt" style="text-align:center;padding:60px 20px;background:var(--bg2);border-radius:12px;border:1px solid rgba(229,98,26,0.1);">
                         <div style="font-size:48px;margin-bottom:16px;color:var(--orange);">🔒</div>
-                        <h3 style="font-family:'Rajdhani',sans-serif;font-size:24px;color:var(--white);margin-bottom:8px;">Login required</h3>
-                        <p style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:24px;">Sign in with Discord to access your dashboard.</p>
+                        <h3 style="font-family:'Rajdhani',sans-serif;font-size:24px;color:var(--white);margin-bottom:8px;" data-i18n="dash_login_required">Login required</h3>
+                        <p style="font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--muted);margin-bottom:24px;" data-i18n="dash_login_desc">Sign in with Discord to access your dashboard.</p>
                         <button class="btn-discord" id="dashboardLoginBtn">
-                            <i class="fab fa-discord"></i> Login with Discord
+                            <i class="fab fa-discord"></i> <span data-i18n="dash_login_btn">Login with Discord</span>
                         </button>
                     </div>
 
@@ -2739,14 +2894,14 @@
                                 <div class="sub" id="dashUserId">ID: -</div>
                             </div>
                             <div style="margin-left:auto;">
-                                <button class="btn-outline ripple-btn" onclick="logoutUser()" style="padding:8px 20px;font-size:12px;">Logout</button>
+                                <button class="btn-outline ripple-btn" onclick="logoutUser()" style="padding:8px 20px;font-size:12px;" data-i18n="dash_logout">Logout</button>
                             </div>
                         </div>
                         <div class="dashboard-grid">
-                            <div class="dashboard-card"><div class="icon">📊</div><h4>Messages Sent</h4><p>Total chat messages</p><div class="value" id="dashMessages">0</div></div>
-                            <div class="dashboard-card"><div class="icon">🏆</div><h4>XP Level</h4><p>Your activity level</p><div class="value" id="dashLevel">1</div></div>
-                            <div class="dashboard-card"><div class="icon">👥</div><h4>Servers</h4><p>Shared servers</p><div class="value" id="dashServers">0</div></div>
-                            <div class="dashboard-card"><div class="icon">⏱️</div><h4>Member Since</h4><p>Join date</p><div class="value" id="dashJoined">-</div></div>
+                            <div class="dashboard-card"><div class="icon">📊</div><h4 data-i18n="dash_stat_msgs">Messages Sent</h4><p data-i18n="dash_stat_msgs_sub">Total chat messages</p><div class="value" id="dashMessages">0</div></div>
+                            <div class="dashboard-card"><div class="icon">🏆</div><h4 data-i18n="dash_stat_level">XP Level</h4><p data-i18n="dash_stat_level_sub">Your activity level</p><div class="value" id="dashLevel">1</div></div>
+                            <div class="dashboard-card"><div class="icon">👥</div><h4 data-i18n="dash_stat_servers">Servers</h4><p data-i18n="dash_stat_servers_sub">Shared servers</p><div class="value" id="dashServers">0</div></div>
+                            <div class="dashboard-card"><div class="icon">⏱️</div><h4 data-i18n="dash_stat_joined">Member Since</h4><p data-i18n="dash_stat_joined_sub">Join date</p><div class="value" id="dashJoined">-</div></div>
                         </div>
                     </div>
                 </div>
@@ -2774,14 +2929,14 @@
     ============================================================ -->
     <div class="cta-section">
         <div class="inner">
-            <div class="reveal reveal-left" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:16px;">// DEPLOY NOW</div>
-            <h2>Ready to wire your<br /><span class="highlight">guild into Rust?</span></h2>
-            <p>Free. No credit card. No ads. Just Rust intel,<br />delivered straight to your Discord server.</p>
+            <div class="reveal reveal-left" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--orange);margin-bottom:16px;" data-i18n="cta_label">// DEPLOY NOW</div>
+            <h2 data-i18n="cta_title">Ready to wire your<br /><span class="highlight">guild into Rust?</span></h2>
+            <p data-i18n="cta_desc">Free. No credit card. No ads. Just Rust intel,<br />delivered straight to your Discord server.</p>
             <div class="cta-btns">
-                <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary ripple-btn" style="font-size:16px;padding:18px 40px;">Enlist Free →</a>
-                <a href="https://discord.gg/Ws44MGuKGq" target="_blank" class="btn-outline ripple-btn" style="font-size:16px;padding:18px 40px;">Join Community</a>
+                <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary ripple-btn" style="font-size:16px;padding:18px 40px;" data-i18n="cta_btn_enlist">Enlist Free →</a>
+                <a href="https://discord.gg/Ws44MGuKGq" target="_blank" class="btn-outline ripple-btn" style="font-size:16px;padding:18px 40px;" data-i18n="cta_btn_join">Join Community</a>
             </div>
-            <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-top:24px;">10,000+ users · 100+ servers · 24/7 uptime</p>
+            <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-top:24px;" data-i18n="cta_stats">10,000+ users · 100+ servers · 24/7 uptime</p>
         </div>
     </div>
 
@@ -2792,29 +2947,29 @@
     <footer>
         <div class="footer-brand">
             <div class="footer-brand-name">RUSTWIRE</div>
-            <div class="footer-brand-sub">// The all-in-one Discord bot for Rust.<br />Built by survivors, for survivors.</div>
+            <div class="footer-brand-sub" data-i18n="footer_sub">// The all-in-one Discord bot for Rust.<br />Built by survivors, for survivors.</div>
         </div>
         <div class="footer-col">
-            <div class="footer-col-title">Product</div>
-            <a onclick="showPage('home')">Home</a>
-            <a onclick="showPage('commands')">Commands</a>
-            <a onclick="showPage('changelog')">Changelog</a>
-            <a onclick="showPage('dashboard')">Dashboard</a>
+            <div class="footer-col-title" data-i18n="footer_product">Product</div>
+            <a onclick="showPage('home')" data-i18n="nav_home">Home</a>
+            <a onclick="showPage('commands')" data-i18n="nav_commands">Commands</a>
+            <a onclick="showPage('changelog'); clearChangelogBadge()" data-i18n="nav_changelog">Changelog</a>
+            <a onclick="showPage('dashboard')" data-i18n="nav_dashboard">Dashboard</a>
         </div>
         <div class="footer-col">
-            <div class="footer-col-title">Community</div>
+            <div class="footer-col-title" data-i18n="footer_community">Community</div>
             <a href="https://discord.gg/Ws44MGuKGq" target="_blank">Discord Server</a>
             <a href="https://discord.gg/Ws44MGuKGq" target="_blank">Bug Reports</a>
             <a href="https://discord.gg/Ws44MGuKGq" target="_blank">Suggestions</a>
         </div>
         <div class="footer-col">
-            <div class="footer-col-title">Legal</div>
-            <a href="#privacy">Privacy Policy</a>
+            <div class="footer-col-title" data-i18n="footer_legal">Legal</div>
+            <a href="#privacy" data-i18n="footer_privacy">Privacy Policy</a>
         </div>
         <div class="footer-col">
             <div class="footer-col-title">// Status</div>
-            <div class="footer-status">All systems operational</div>
-            <div class="footer-copy">© 2026 RustWire. Not affiliated with Facepunch Studios.</div>
+            <div class="footer-status" data-i18n="footer_status">All systems operational</div>
+            <div class="footer-copy" data-i18n="footer_copy">© 2026 RustWire. Not affiliated with Facepunch Studios.</div>
         </div>
     </footer>
 
@@ -3326,6 +3481,13 @@
             buildWipeCalendar();
             checkLiveDrops();
             setInterval(checkLiveDrops, 10 * 60 * 1000);
+
+            // Init retention features
+            initChangelogBadge();
+            if (DROP_CAMPAIGN_ACTIVE) {
+                updateDropTimer();
+                setInterval(updateDropTimer, 1000);
+            }
         });
 
 
@@ -3379,6 +3541,55 @@
             setTick('wipeH', h);
             setTick('wipeM', m);
             setTick('wipeS', s);
+        }
+
+        // ── CHANGELOG BADGE ─────────────────────────────────────────
+        // Latest changelog entry date — update this when you add a new entry
+        const LATEST_CHANGELOG_DATE = '2026-06-01';
+
+        function initChangelogBadge() {
+            try {
+                const seen = localStorage.getItem('rw_cl_seen');
+                if (seen !== LATEST_CHANGELOG_DATE) {
+                    document.querySelectorAll('.cl-badge').forEach(b => b.style.display = 'inline-block');
+                }
+            } catch(e) {}
+        }
+
+        function clearChangelogBadge() {
+            try {
+                localStorage.setItem('rw_cl_seen', LATEST_CHANGELOG_DATE);
+                document.querySelectorAll('.cl-badge').forEach(b => b.style.display = 'none');
+            } catch(e) {}
+        }
+
+        // ── DROP TIMER ──────────────────────────────────────────────
+        // Simulated active drop campaign end time (set to next even hour for demo)
+        // In production: fetch from your backend or hardcode the actual campaign end
+        const DROP_CAMPAIGN_END = (() => {
+            const d = new Date();
+            d.setHours(d.getHours() + 1, 59, 59, 0); // demo: ~2hrs from now
+            return d;
+        })();
+        const DROP_CAMPAIGN_ACTIVE = true;
+
+        function updateDropTimer() {
+            const el = document.getElementById('dropTimer');
+            if (!el || !DROP_CAMPAIGN_ACTIVE) return;
+            const now = new Date();
+            const diff = DROP_CAMPAIGN_END - now;
+            if (diff <= 0) {
+                el.style.display = 'none';
+                return;
+            }
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            const pad = n => String(n).padStart(2, '0');
+            el.textContent = h > 0
+                ? `— ends in ${h}h ${pad(m)}m`
+                : `— ends in ${pad(m)}m ${pad(s)}s`;
+            el.style.display = 'inline';
         }
 
         // =============================================================
@@ -3669,8 +3880,648 @@
             draw();
         })();
 
+        // =============================================================
+        // I18N — HARDCODED TRANSLATIONS (offline, no API, no CORS)
+        // =============================================================
+        const LANG_META = {
+            en: { flag: '🇬🇧', label: 'EN', name: 'English'  },
+            hu: { flag: '🇭🇺', label: 'HU', name: 'Magyar'   },
+            de: { flag: '🇩🇪', label: 'DE', name: 'Deutsch'  },
+            fr: { flag: '🇫🇷', label: 'FR', name: 'Français' },
+            es: { flag: '🇪🇸', label: 'ES', name: 'Español'  },
+            ru: { flag: '🇷🇺', label: 'RU', name: 'Русский'  },
+            tr: { flag: '🇹🇷', label: 'TR', name: 'Türkçe'   },
+            pl: { flag: '🇵🇱', label: 'PL', name: 'Polski'   },
+            zh: { flag: '🇨🇳', label: 'ZH', name: '中文'     },
+        };
+
+        const I18N = {
+            en: {
+                nav_home: 'Home', nav_commands: 'Commands', nav_changelog: 'Changelog',
+                nav_chat: 'Chat', nav_dashboard: 'Dashboard', nav_add_bot: 'Add Bot →',
+                hero_eyebrow: 'All-in-one ops bot // Rust game',
+                hero_h1_1: 'SURVIVE.', hero_h1_2: 'DOMINATE.', hero_h1_3: 'AUTOMATE.',
+                hero_desc: 'RUSTWIRE is the meanest Discord bot in the wasteland.\nDrops, skins, devblogs, commits, ban logs, raid calc,\nplayer stats — wired straight into your guild.',
+                hero_btn_enlist: 'Enlist Free →', hero_btn_commands: 'View Commands',
+                feat_title: 'Tools forged for\nthe wasteland',
+                feat_desc: 'One bot. Every Rust data source wired directly into your Discord.',
+                feat_drops_title: 'Twitch & Kick Drops', feat_drops_desc: 'Active drop campaigns posted the moment they go live.',
+                feat_skins_title: 'Skins & DLC', feat_skins_desc: 'New Steam Workshop skins and DLC releases with region-aware pricing.',
+                feat_news_title: 'Devblogs & News', feat_news_desc: 'Facepunch devblogs, community posts and general Rust news.',
+                feat_commits_title: 'Commits & Oxide', feat_commits_desc: 'Facepunch GitHub commits and Oxide/uMod plugin updates.',
+                feat_ban_title: 'Ban Logs', feat_ban_desc: 'Latest org bans with full user profile, account age and reason.',
+                feat_tools_title: 'Player Tools', feat_tools_desc: 'VAC checks, hours verification, raid calculator, recycler, blueprint lookup.',
+                feat_filter_title: 'Content Filter', feat_filter_desc: 'Auto-detects and removes CSAM spam links with instant ban.',
+                feat_wipe_title: 'Wipe Schedule', feat_wipe_desc: 'Track forced wipes, set custom countdowns, auto-notify.',
+                feat_rustplus_title: 'Rust+ Integration', feat_rustplus_desc: 'Live map, team tracker, in-game chat bridge, monument status.',
+                cl_title: "What's new.", cl_desc: 'Recent updates and improvements to RustWire.',
+                chat_title: 'Discuss & connect', chat_desc: 'Chat with the RustWire community. Login with Discord to start talking.',
+                chat_placeholder: 'Type a message...', chat_send: 'Send',
+                dash_title: 'Your control center', dash_desc: 'Manage your RustWire experience and view your stats.',
+                dash_login_required: 'Login required', dash_login_desc: 'Sign in with Discord to access your dashboard.',
+                dash_login_btn: 'Login with Discord', dash_logout: 'Logout',
+                dash_stat_msgs: 'Messages Sent', dash_stat_msgs_sub: 'Total chat messages',
+                dash_stat_level: 'XP Level', dash_stat_level_sub: 'Your activity level',
+                dash_stat_servers: 'Servers', dash_stat_servers_sub: 'Shared servers',
+                dash_stat_joined: 'Member Since', dash_stat_joined_sub: 'Join date',
+                cta_title: 'Ready to wire your\nguild into Rust?',
+                cta_desc: 'Free. No credit card. No ads. Just Rust intel,\ndelivered straight to your Discord server.',
+                cta_btn_enlist: 'Enlist Free →', cta_btn_join: 'Join Community',
+                cta_stats: '10,000+ users · 100+ servers · 24/7 uptime',
+                stat_users: 'Users', stat_servers_label: 'Servers', stat_uptime: 'Uptime',
+                wipe_label: '// next force wipe', wipe_title: 'RUST FORCE WIPE',
+                wipe_days: 'Days', wipe_hours: 'Hours', wipe_min: 'Min', wipe_sec: 'Sec',
+                wipe_live_drops: 'LIVE DROPS ACTIVE',
+                bigstat_servers: 'Servers Wired', bigstat_users: 'Discord Users',
+                bigstat_commands: 'Commands', bigstat_uptime: 'Uptime %',
+                calc_label: '// tools', calc_title: 'Wasteland Calculator.',
+                calc_desc: 'Raid costs and recycle output — right here, no Discord needed.',
+                calc_raid_title: '💥 Raid Calculator', calc_wall_type: 'Wall type',
+                calc_quantity: 'Quantity', calc_raid_btn: 'CALCULATE RAID COST',
+                calc_raid_hint: 'Select wall type and hit Calculate.',
+                calc_recycle_title: '♻️ Recycle Calculator', calc_item: 'Item',
+                calc_recycle_btn: 'CALCULATE OUTPUT', calc_recycle_hint: 'Select an item and hit Calculate.',
+                wipe_sched_label: '// wipe schedule', wipe_sched_title: 'Wipe History & Next Dates.',
+                wipe_sched_desc: 'Facepunch force wipes happen the first Thursday of every month.',
+                cmd_label: '// commands', cmd_title: 'Every command you need.', cmd_desc: 'All slash-based. No prefix, no confusion.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Tools', cmd_tab_social: 'Social', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// changelog',
+                chat_label: '// community chat', chat_channel: '#general', chat_empty: 'No messages yet. Be the first!',
+                dash_label: '// dashboard',
+                cta_label: '// DEPLOY NOW',
+                footer_sub: '// The all-in-one Discord bot for Rust. Built by survivors, for survivors.',
+                footer_product: 'Product', footer_community: 'Community', footer_legal: 'Legal',
+                footer_privacy: 'Privacy Policy', footer_status: 'All systems operational',
+                footer_copy: '© 2026 RustWire. Not affiliated with Facepunch Studios.',
+            },
+            hu: {
+                nav_home: 'Főoldal', nav_commands: 'Parancsok', nav_changelog: 'Változások',
+                nav_chat: 'Chat', nav_dashboard: 'Vezérlőpult', nav_add_bot: 'Bot hozzáadása →',
+                hero_eyebrow: 'Mindent egy botban // Rust játék',
+                hero_h1_1: 'TÚLÉLJ.', hero_h1_2: 'DOMINÁLJ.', hero_h1_3: 'AUTOMATIZÁLJ.',
+                hero_desc: 'A RUSTWIRE a legjobb Discord bot a posztapokaliptikus wastelandben.\nDropok, skinek, devblogok, commitok, banlista, raid kalkulátor,\njátékos statisztikák — egyenesen a szerveredre kötve.',
+                hero_btn_enlist: 'Ingyenes csatlakozás →', hero_btn_commands: 'Parancsok megtekintése',
+                feat_title: 'Eszközök a\nwasteland-hez',
+                feat_desc: 'Egy bot. Minden Rust adatforrás közvetlenül a Discordodba bekötve.',
+                feat_drops_title: 'Twitch & Kick Dropok', feat_drops_desc: 'Aktív drop kampányok azonnal posztolva, amint elindulnak.',
+                feat_skins_title: 'Skinek & DLC', feat_skins_desc: 'Új Steam Workshop skinek és DLC kiadások régió-alapú árakkal.',
+                feat_news_title: 'Devblogok & Hírek', feat_news_desc: 'Facepunch devblogok, közösségi bejegyzések és általános Rust hírek.',
+                feat_commits_title: 'Commitok & Oxide', feat_commits_desc: 'Facepunch GitHub commitok és Oxide/uMod plugin frissítések.',
+                feat_ban_title: 'Ban napló', feat_ban_desc: 'Legújabb org banok teljes felhasználói profillal, fiók korával és okával.',
+                feat_tools_title: 'Játékos eszközök', feat_tools_desc: 'VAC ellenőrzés, óra-hitelesítés, raid kalkulátor, recycler, tervrajz kereső.',
+                feat_filter_title: 'Tartalomszűrő', feat_filter_desc: 'Automatikusan észleli és eltávolítja a spam linkeket azonnali bannal.',
+                feat_wipe_title: 'Wipe ütemező', feat_wipe_desc: 'Kényszertörlések követése, egyéni visszaszámlálók, automatikus értesítés.',
+                feat_rustplus_title: 'Rust+ integráció', feat_rustplus_desc: 'Élő térkép, csapat követő, játékon belüli chat híd, monument állapot.',
+                cl_title: 'Mi az újdonság.', cl_desc: 'Legutóbbi frissítések és fejlesztések a RustWire-hez.',
+                chat_title: 'Vitázz & kapcsolódj', chat_desc: 'Chatelj a RustWire közösséggel. Lépj be Discorddal a beszélgetéshez.',
+                chat_placeholder: 'Írj üzenetet...', chat_send: 'Küldés',
+                dash_title: 'Vezérlőközpont', dash_desc: 'Kezeld a RustWire élményed és tekintsd meg a statjaid.',
+                dash_login_required: 'Bejelentkezés szükséges', dash_login_desc: 'Jelentkezz be Discorddal az irányítópulthoz.',
+                dash_login_btn: 'Bejelentkezés Discorddal', dash_logout: 'Kijelentkezés',
+                dash_stat_msgs: 'Küldött üzenetek', dash_stat_msgs_sub: 'Összes chat üzenet',
+                dash_stat_level: 'XP szint', dash_stat_level_sub: 'Aktivitási szinted',
+                dash_stat_servers: 'Szerverek', dash_stat_servers_sub: 'Közös szerverek',
+                dash_stat_joined: 'Tag azóta', dash_stat_joined_sub: 'Csatlakozás dátuma',
+                cta_title: 'Készen állsz a\nguildöd bekötésére?',
+                cta_desc: 'Ingyenes. Nincs bankkártya. Nincs hirdetés. Csak Rust intel,\negyenesen a Discord szerveredre.',
+                cta_btn_enlist: 'Ingyenes csatlakozás →', cta_btn_join: 'Csatlakozz a közösséghez',
+                cta_stats: '10 000+ felhasználó · 100+ szerver · 24/7 üzemidő',
+                stat_users: 'Felhasználók', stat_servers_label: 'Szerverek', stat_uptime: 'Üzemidő',
+                wipe_label: '// következő kényszertörlés', wipe_title: 'RUST KÉNYSZERTÖRLÉS',
+                wipe_days: 'Nap', wipe_hours: 'Óra', wipe_min: 'Perc', wipe_sec: 'Mp',
+                wipe_live_drops: 'ÉLŐ DROPOK AKTÍVAK',
+                bigstat_servers: 'Bekötött szerverek', bigstat_users: 'Discord felhasználók',
+                bigstat_commands: 'Parancsok', bigstat_uptime: 'Üzemidő %',
+                calc_label: '// eszközök', calc_title: 'Wasteland kalkulátor.',
+                calc_desc: 'Raid költségek és recycle output — itt, Discord nélkül.',
+                calc_raid_title: '💥 Raid kalkulátor', calc_wall_type: 'Fal típusa',
+                calc_quantity: 'Mennyiség', calc_raid_btn: 'RAID COST SZÁMÍTÁSA',
+                calc_raid_hint: 'Válassz fal típust és nyomj Számítás.',
+                calc_recycle_title: '♻️ Recycle kalkulátor', calc_item: 'Tárgy',
+                calc_recycle_btn: 'OUTPUT SZÁMÍTÁSA', calc_recycle_hint: 'Válassz tárgyat és nyomj Számítás.',
+                wipe_sched_label: '// wipe ütemező', wipe_sched_title: 'Wipe előzmények & következő dátumok.',
+                wipe_sched_desc: 'A Facepunch kényszertörlések minden hónap első csütörtökén vannak.',
+                cmd_label: '// parancsok', cmd_title: 'Minden szükséges parancs.', cmd_desc: 'Teljes slash alapú. Nincs prefix, nincs zavar.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Eszközök', cmd_tab_social: 'Közösség', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// változások',
+                chat_label: '// közösségi chat', chat_channel: '#általános', chat_empty: 'Még nincs üzenet. Légy az első!',
+                dash_label: '// vezérlőpult',
+                cta_label: '// TELEPÍTÉS MOST',
+                footer_sub: '// Az egyetlen Discord bot Rusthoz. Túlélők által, túlélőknek.',
+                footer_product: 'Termék', footer_community: 'Közösség', footer_legal: 'Jogi',
+                footer_privacy: 'Adatvédelmi irányelvek', footer_status: 'Minden rendszer működik',
+                footer_copy: '© 2026 RustWire. Nem kapcsolódik a Facepunch Studios-hoz.',
+            },
+            de: {
+                nav_home: 'Start', nav_commands: 'Befehle', nav_changelog: 'Änderungen',
+                nav_chat: 'Chat', nav_dashboard: 'Dashboard', nav_add_bot: 'Bot hinzufügen →',
+                hero_eyebrow: 'All-in-one Ops Bot // Rust Spiel',
+                hero_h1_1: 'ÜBERLEBEN.', hero_h1_2: 'DOMINIEREN.', hero_h1_3: 'AUTOMATISIEREN.',
+                hero_desc: 'RUSTWIRE ist der härteste Discord Bot im Ödland.\nDrops, Skins, Devblogs, Commits, Banlogs, Raid-Kalkulator,\nSpielerstatistiken — direkt in deinen Server verdrahtet.',
+                hero_btn_enlist: 'Kostenlos einsteigen →', hero_btn_commands: 'Befehle ansehen',
+                feat_title: 'Werkzeuge für\ndas Ödland',
+                feat_desc: 'Ein Bot. Jede Rust-Datenquelle direkt in deinen Discord eingebunden.',
+                feat_drops_title: 'Twitch & Kick Drops', feat_drops_desc: 'Aktive Drop-Kampagnen werden sofort gepostet, wenn sie live gehen.',
+                feat_skins_title: 'Skins & DLC', feat_skins_desc: 'Neue Steam-Workshop-Skins und DLC-Releases mit regionalen Preisen.',
+                feat_news_title: 'Devblogs & Neuigkeiten', feat_news_desc: 'Facepunch Devblogs, Community-Posts und allgemeine Rust-News.',
+                feat_commits_title: 'Commits & Oxide', feat_commits_desc: 'Facepunch GitHub-Commits und Oxide/uMod-Plugin-Updates.',
+                feat_ban_title: 'Ban-Protokoll', feat_ban_desc: 'Neueste Org-Bans mit vollständigem Benutzerprofil, Kontoalter und Grund.',
+                feat_tools_title: 'Spieler-Tools', feat_tools_desc: 'VAC-Prüfung, Stundenverifizierung, Raid-Kalkulator, Recycler, Bauplan-Suche.',
+                feat_filter_title: 'Inhaltsfilter', feat_filter_desc: 'Erkennt und entfernt automatisch Spam-Links mit sofortigem Bann.',
+                feat_wipe_title: 'Wipe-Zeitplan', feat_wipe_desc: 'Erzwungene Wipes verfolgen, eigene Countdowns setzen, automatisch benachrichtigen.',
+                feat_rustplus_title: 'Rust+ Integration', feat_rustplus_desc: 'Live-Karte, Team-Tracker, In-Game-Chat-Brücke, Monument-Status.',
+                cl_title: 'Was ist neu.', cl_desc: 'Aktuelle Updates und Verbesserungen für RustWire.',
+                chat_title: 'Diskutiere & vernetze dich', chat_desc: 'Chatte mit der RustWire-Community. Melde dich mit Discord an.',
+                chat_placeholder: 'Nachricht eingeben...', chat_send: 'Senden',
+                dash_title: 'Deine Schaltzentrale', dash_desc: 'Verwalte dein RustWire-Erlebnis und zeige deine Stats an.',
+                dash_login_required: 'Anmeldung erforderlich', dash_login_desc: 'Melde dich mit Discord an, um auf dein Dashboard zuzugreifen.',
+                dash_login_btn: 'Mit Discord anmelden', dash_logout: 'Abmelden',
+                dash_stat_msgs: 'Gesendete Nachrichten', dash_stat_msgs_sub: 'Gesamte Chat-Nachrichten',
+                dash_stat_level: 'XP-Level', dash_stat_level_sub: 'Dein Aktivitätslevel',
+                dash_stat_servers: 'Server', dash_stat_servers_sub: 'Gemeinsame Server',
+                dash_stat_joined: 'Mitglied seit', dash_stat_joined_sub: 'Beitrittsdatum',
+                cta_title: 'Bereit, deine\nGilde mit Rust zu verdrahten?',
+                cta_desc: 'Kostenlos. Keine Kreditkarte. Keine Werbung. Nur Rust-Intel,\ndirekt an deinen Discord-Server geliefert.',
+                cta_btn_enlist: 'Kostenlos einsteigen →', cta_btn_join: 'Community beitreten',
+                cta_stats: '10.000+ Nutzer · 100+ Server · 24/7 Verfügbarkeit',
+                stat_users: 'Nutzer', stat_servers_label: 'Server', stat_uptime: 'Verfügbarkeit',
+                wipe_label: '// nächster Zwangswipe', wipe_title: 'RUST ZWANGSWIPE',
+                wipe_days: 'Tage', wipe_hours: 'Std', wipe_min: 'Min', wipe_sec: 'Sek',
+                wipe_live_drops: 'LIVE DROPS AKTIV',
+                bigstat_servers: 'Verbundene Server', bigstat_users: 'Discord Nutzer',
+                bigstat_commands: 'Befehle', bigstat_uptime: 'Verfügbarkeit %',
+                calc_label: '// werkzeuge', calc_title: 'Ödland-Rechner.',
+                calc_desc: 'Raid-Kosten und Recycle-Output — hier, ohne Discord.',
+                calc_raid_title: '💥 Raid-Rechner', calc_wall_type: 'Wandtyp',
+                calc_quantity: 'Menge', calc_raid_btn: 'RAID-KOSTEN BERECHNEN',
+                calc_raid_hint: 'Wandtyp wählen und Berechnen drücken.',
+                calc_recycle_title: '♻️ Recycle-Rechner', calc_item: 'Gegenstand',
+                calc_recycle_btn: 'OUTPUT BERECHNEN', calc_recycle_hint: 'Gegenstand wählen und Berechnen drücken.',
+                wipe_sched_label: '// wipe-zeitplan', wipe_sched_title: 'Wipe-Verlauf & nächste Termine.',
+                wipe_sched_desc: 'Facepunch Zwangswipes finden am ersten Donnerstag jedes Monats statt.',
+                cmd_label: '// befehle', cmd_title: 'Alle Befehle die du brauchst.', cmd_desc: 'Alles slash-basiert. Kein Präfix, keine Verwirrung.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Tools', cmd_tab_social: 'Sozial', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// änderungen',
+                chat_label: '// community chat', chat_channel: '#allgemein', chat_empty: 'Noch keine Nachrichten. Sei der Erste!',
+                dash_label: '// dashboard',
+                cta_label: '// JETZT EINSETZEN',
+                footer_sub: '// Der All-in-One Discord Bot für Rust. Von Überlebenden, für Überlebende.',
+                footer_product: 'Produkt', footer_community: 'Community', footer_legal: 'Rechtliches',
+                footer_privacy: 'Datenschutzrichtlinie', footer_status: 'Alle Systeme betriebsbereit',
+                footer_copy: '© 2026 RustWire. Nicht verbunden mit Facepunch Studios.',
+            },
+            fr: {
+                nav_home: 'Accueil', nav_commands: 'Commandes', nav_changelog: 'Changelog',
+                nav_chat: 'Chat', nav_dashboard: 'Tableau de bord', nav_add_bot: 'Ajouter le bot →',
+                hero_eyebrow: 'Bot ops tout-en-un // Jeu Rust',
+                hero_h1_1: 'SURVIVRE.', hero_h1_2: 'DOMINER.', hero_h1_3: 'AUTOMATISER.',
+                hero_desc: 'RUSTWIRE est le bot Discord le plus redoutable des terres désolées.\nDrops, skins, devblogs, commits, banlogs, calculateur de raid,\nstatistiques de joueurs — câblé directement dans votre guilde.',
+                hero_btn_enlist: 'Rejoindre gratuitement →', hero_btn_commands: 'Voir les commandes',
+                feat_title: 'Outils forgés pour\nles terres désolées',
+                feat_desc: 'Un seul bot. Chaque source de données Rust câblée directement dans votre Discord.',
+                feat_drops_title: 'Drops Twitch & Kick', feat_drops_desc: 'Campagnes de drops actives postées dès leur lancement.',
+                feat_skins_title: 'Skins & DLC', feat_skins_desc: 'Nouveaux skins Steam Workshop et sorties DLC avec tarification régionale.',
+                feat_news_title: 'Devblogs & Actualités', feat_news_desc: 'Devblogs Facepunch, posts communautaires et actualités Rust.',
+                feat_commits_title: 'Commits & Oxide', feat_commits_desc: 'Commits GitHub Facepunch et mises à jour plugins Oxide/uMod.',
+                feat_ban_title: 'Journaux de bans', feat_ban_desc: 'Derniers bans org avec profil complet, âge du compte et raison.',
+                feat_tools_title: 'Outils joueur', feat_tools_desc: 'Vérifications VAC, validation des heures, calculateur de raid, recycleur, recherche de plans.',
+                feat_filter_title: 'Filtre de contenu', feat_filter_desc: 'Détecte et supprime automatiquement les liens spam avec ban immédiat.',
+                feat_wipe_title: 'Planning de wipe', feat_wipe_desc: 'Suivez les wipes forcés, définissez des comptes à rebours personnalisés, notification auto.',
+                feat_rustplus_title: 'Intégration Rust+', feat_rustplus_desc: 'Carte en direct, tracker d\'équipe, pont de chat en jeu, statut des monuments.',
+                cl_title: 'Quoi de neuf.', cl_desc: 'Mises à jour récentes et améliorations de RustWire.',
+                chat_title: 'Discuter & se connecter', chat_desc: 'Chattez avec la communauté RustWire. Connectez-vous avec Discord.',
+                chat_placeholder: 'Tapez un message...', chat_send: 'Envoyer',
+                dash_title: 'Votre centre de contrôle', dash_desc: 'Gérez votre expérience RustWire et consultez vos stats.',
+                dash_login_required: 'Connexion requise', dash_login_desc: 'Connectez-vous avec Discord pour accéder à votre tableau de bord.',
+                dash_login_btn: 'Se connecter avec Discord', dash_logout: 'Déconnexion',
+                dash_stat_msgs: 'Messages envoyés', dash_stat_msgs_sub: 'Total des messages chat',
+                dash_stat_level: 'Niveau XP', dash_stat_level_sub: 'Votre niveau d\'activité',
+                dash_stat_servers: 'Serveurs', dash_stat_servers_sub: 'Serveurs partagés',
+                dash_stat_joined: 'Membre depuis', dash_stat_joined_sub: 'Date d\'adhésion',
+                cta_title: 'Prêt à connecter\nvotre guilde à Rust?',
+                cta_desc: 'Gratuit. Pas de carte bancaire. Pas de publicité. Juste du renseignement Rust,\nlivré directement sur votre serveur Discord.',
+                cta_btn_enlist: 'Rejoindre gratuitement →', cta_btn_join: 'Rejoindre la communauté',
+                cta_stats: '10 000+ utilisateurs · 100+ serveurs · Disponibilité 24/7',
+                stat_users: 'Utilisateurs', stat_servers_label: 'Serveurs', stat_uptime: 'Disponibilité',
+                wipe_label: '// prochain wipe forcé', wipe_title: 'RUST WIPE FORCÉ',
+                wipe_days: 'Jours', wipe_hours: 'Heures', wipe_min: 'Min', wipe_sec: 'Sec',
+                wipe_live_drops: 'DROPS EN DIRECT ACTIFS',
+                bigstat_servers: 'Serveurs connectés', bigstat_users: 'Utilisateurs Discord',
+                bigstat_commands: 'Commandes', bigstat_uptime: 'Disponibilité %',
+                calc_label: '// outils', calc_title: 'Calculateur des terres désolées.',
+                calc_desc: 'Coûts de raid et output de recyclage — ici, sans Discord.',
+                calc_raid_title: '💥 Calculateur de raid', calc_wall_type: 'Type de mur',
+                calc_quantity: 'Quantité', calc_raid_btn: 'CALCULER LE COÛT DE RAID',
+                calc_raid_hint: 'Sélectionnez le type de mur et appuyez sur Calculer.',
+                calc_recycle_title: '♻️ Calculateur de recyclage', calc_item: 'Objet',
+                calc_recycle_btn: "CALCULER L'OUTPUT", calc_recycle_hint: "Sélectionnez un objet et appuyez sur Calculer.",
+                wipe_sched_label: '// planning de wipe', wipe_sched_title: 'Historique des wipes & prochaines dates.',
+                wipe_sched_desc: 'Les wipes forcés Facepunch ont lieu le premier jeudi de chaque mois.',
+                cmd_label: '// commandes', cmd_title: 'Toutes les commandes dont vous avez besoin.', cmd_desc: 'Tout slash. Pas de préfixe, pas de confusion.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Outils', cmd_tab_social: 'Social', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// changelog',
+                chat_label: '// chat communautaire', chat_channel: '#général', chat_empty: 'Pas encore de messages. Soyez le premier !',
+                dash_label: '// tableau de bord',
+                cta_label: '// DÉPLOYEZ MAINTENANT',
+                footer_sub: '// Le bot Discord tout-en-un pour Rust. Construit par des survivants, pour des survivants.',
+                footer_product: 'Produit', footer_community: 'Communauté', footer_legal: 'Légal',
+                footer_privacy: 'Politique de confidentialité', footer_status: 'Tous les systèmes opérationnels',
+                footer_copy: '© 2026 RustWire. Non affilié à Facepunch Studios.',
+            },
+            es: {
+                nav_home: 'Inicio', nav_commands: 'Comandos', nav_changelog: 'Registro',
+                nav_chat: 'Chat', nav_dashboard: 'Panel', nav_add_bot: 'Añadir Bot →',
+                hero_eyebrow: 'Bot ops todo en uno // Juego Rust',
+                hero_h1_1: 'SOBREVIVE.', hero_h1_2: 'DOMINA.', hero_h1_3: 'AUTOMATIZA.',
+                hero_desc: 'RUSTWIRE es el bot de Discord más temible del yermo.\nDrops, skins, devblogs, commits, registros de ban, calculadora de asalto,\nestadísticas de jugadores — conectado directamente a tu guild.',
+                hero_btn_enlist: 'Unirse gratis →', hero_btn_commands: 'Ver comandos',
+                feat_title: 'Herramientas forjadas\npara el yermo',
+                feat_desc: 'Un bot. Cada fuente de datos de Rust conectada directamente a tu Discord.',
+                feat_drops_title: 'Drops Twitch & Kick', feat_drops_desc: 'Campañas de drops activas publicadas en el momento en que se activan.',
+                feat_skins_title: 'Skins & DLC', feat_skins_desc: 'Nuevos skins de Steam Workshop y lanzamientos de DLC con precios regionales.',
+                feat_news_title: 'Devblogs & Noticias', feat_news_desc: 'Devblogs de Facepunch, publicaciones de la comunidad y noticias de Rust.',
+                feat_commits_title: 'Commits & Oxide', feat_commits_desc: 'Commits de GitHub de Facepunch y actualizaciones de plugins Oxide/uMod.',
+                feat_ban_title: 'Registros de ban', feat_ban_desc: 'Últimos bans de organización con perfil completo, antigüedad de cuenta y razón.',
+                feat_tools_title: 'Herramientas de jugador', feat_tools_desc: 'Verificaciones VAC, verificación de horas, calculadora de asalto, recicladora, búsqueda de planos.',
+                feat_filter_title: 'Filtro de contenido', feat_filter_desc: 'Detecta y elimina automáticamente enlaces spam con ban instantáneo.',
+                feat_wipe_title: 'Calendario de wipe', feat_wipe_desc: 'Sigue los wipes forzados, establece cuentas regresivas, notificación automática.',
+                feat_rustplus_title: 'Integración Rust+', feat_rustplus_desc: 'Mapa en vivo, rastreador de equipo, puente de chat en juego, estado de monumentos.',
+                cl_title: 'Qué hay de nuevo.', cl_desc: 'Actualizaciones recientes y mejoras de RustWire.',
+                chat_title: 'Discutir & conectar', chat_desc: 'Chatea con la comunidad RustWire. Inicia sesión con Discord.',
+                chat_placeholder: 'Escribe un mensaje...', chat_send: 'Enviar',
+                dash_title: 'Tu centro de control', dash_desc: 'Gestiona tu experiencia RustWire y consulta tus estadísticas.',
+                dash_login_required: 'Inicio de sesión requerido', dash_login_desc: 'Inicia sesión con Discord para acceder a tu panel.',
+                dash_login_btn: 'Iniciar sesión con Discord', dash_logout: 'Cerrar sesión',
+                dash_stat_msgs: 'Mensajes enviados', dash_stat_msgs_sub: 'Total de mensajes de chat',
+                dash_stat_level: 'Nivel XP', dash_stat_level_sub: 'Tu nivel de actividad',
+                dash_stat_servers: 'Servidores', dash_stat_servers_sub: 'Servidores compartidos',
+                dash_stat_joined: 'Miembro desde', dash_stat_joined_sub: 'Fecha de ingreso',
+                cta_title: 'Listo para conectar\ntu guild a Rust?',
+                cta_desc: 'Gratis. Sin tarjeta. Sin anuncios. Solo inteligencia de Rust,\nentregada directamente a tu servidor de Discord.',
+                cta_btn_enlist: 'Unirse gratis →', cta_btn_join: 'Unirse a la comunidad',
+                cta_stats: '10.000+ usuarios · 100+ servidores · Disponibilidad 24/7',
+                stat_users: 'Usuarios', stat_servers_label: 'Servidores', stat_uptime: 'Disponibilidad',
+                wipe_label: '// próximo wipe forzado', wipe_title: 'RUST WIPE FORZADO',
+                wipe_days: 'Días', wipe_hours: 'Horas', wipe_min: 'Min', wipe_sec: 'Seg',
+                wipe_live_drops: 'DROPS EN VIVO ACTIVOS',
+                bigstat_servers: 'Servidores conectados', bigstat_users: 'Usuarios Discord',
+                bigstat_commands: 'Comandos', bigstat_uptime: 'Disponibilidad %',
+                calc_label: '// herramientas', calc_title: 'Calculadora del yermo.',
+                calc_desc: 'Costos de asalto y output de reciclaje — aquí, sin Discord.',
+                calc_raid_title: '💥 Calculadora de asalto', calc_wall_type: 'Tipo de muro',
+                calc_quantity: 'Cantidad', calc_raid_btn: 'CALCULAR COSTO DE ASALTO',
+                calc_raid_hint: 'Selecciona el tipo de muro y pulsa Calcular.',
+                calc_recycle_title: '♻️ Calculadora de reciclaje', calc_item: 'Objeto',
+                calc_recycle_btn: 'CALCULAR OUTPUT', calc_recycle_hint: 'Selecciona un objeto y pulsa Calcular.',
+                wipe_sched_label: '// calendario de wipe', wipe_sched_title: 'Historial de wipes & próximas fechas.',
+                wipe_sched_desc: 'Los wipes forzados de Facepunch ocurren el primer jueves de cada mes.',
+                cmd_label: '// comandos', cmd_title: 'Todos los comandos que necesitas.', cmd_desc: 'Todo slash. Sin prefijo, sin confusión.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Herramientas', cmd_tab_social: 'Social', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// registro',
+                chat_label: '// chat comunitario', chat_channel: '#general', chat_empty: 'Aún no hay mensajes. ¡Sé el primero!',
+                dash_label: '// panel',
+                cta_label: '// DESPLIEGA AHORA',
+                footer_sub: '// El bot Discord todo en uno para Rust. Construido por supervivientes, para supervivientes.',
+                footer_product: 'Producto', footer_community: 'Comunidad', footer_legal: 'Legal',
+                footer_privacy: 'Política de privacidad', footer_status: 'Todos los sistemas operativos',
+                footer_copy: '© 2026 RustWire. No afiliado con Facepunch Studios.',
+            },
+            ru: {
+                nav_home: 'Главная', nav_commands: 'Команды', nav_changelog: 'Changelog',
+                nav_chat: 'Чат', nav_dashboard: 'Панель', nav_add_bot: 'Добавить бота →',
+                hero_eyebrow: 'Универсальный бот // Игра Rust',
+                hero_h1_1: 'ВЫЖИВИ.', hero_h1_2: 'ДОМИНИРУЙ.', hero_h1_3: 'АВТОМАТИЗИРУЙ.',
+                hero_desc: 'RUSTWIRE — самый мощный Discord-бот в пустоши.\nДропы, скины, девблоги, коммиты, логи банов, калькулятор рейда,\nстатистика игроков — напрямую в твой сервер.',
+                hero_btn_enlist: 'Присоединиться бесплатно →', hero_btn_commands: 'Смотреть команды',
+                feat_title: 'Инструменты для\nпустоши',
+                feat_desc: 'Один бот. Каждый источник данных Rust подключён прямо в твой Discord.',
+                feat_drops_title: 'Дропы Twitch & Kick', feat_drops_desc: 'Активные кампании дропов публикуются в момент запуска.',
+                feat_skins_title: 'Скины & DLC', feat_skins_desc: 'Новые скины Steam Workshop и релизы DLC с региональными ценами.',
+                feat_news_title: 'Девблоги & Новости', feat_news_desc: 'Девблоги Facepunch, посты сообщества и общие новости Rust.',
+                feat_commits_title: 'Коммиты & Oxide', feat_commits_desc: 'Коммиты GitHub Facepunch и обновления плагинов Oxide/uMod.',
+                feat_ban_title: 'Лог банов', feat_ban_desc: 'Последние баны организаций с полным профилем, возрастом аккаунта и причиной.',
+                feat_tools_title: 'Инструменты игрока', feat_tools_desc: 'Проверка VAC, верификация часов, калькулятор рейда, ресайклер, поиск чертежей.',
+                feat_filter_title: 'Фильтр контента', feat_filter_desc: 'Автоматически обнаруживает и удаляет спам-ссылки с мгновенным баном.',
+                feat_wipe_title: 'Расписание вайпов', feat_wipe_desc: 'Отслеживание принудительных вайпов, настройка таймеров, авто-уведомления.',
+                feat_rustplus_title: 'Интеграция Rust+', feat_rustplus_desc: 'Карта в реальном времени, трекер команды, мост чата, статус монументов.',
+                cl_title: 'Что нового.', cl_desc: 'Последние обновления и улучшения RustWire.',
+                chat_title: 'Общайся & подключайся', chat_desc: 'Чатись с сообществом RustWire. Войди через Discord.',
+                chat_placeholder: 'Напишите сообщение...', chat_send: 'Отправить',
+                dash_title: 'Твой центр управления', dash_desc: 'Управляй своим опытом RustWire и просматривай статистику.',
+                dash_login_required: 'Требуется вход', dash_login_desc: 'Войди через Discord для доступа к панели.',
+                dash_login_btn: 'Войти через Discord', dash_logout: 'Выйти',
+                dash_stat_msgs: 'Отправленные сообщения', dash_stat_msgs_sub: 'Всего сообщений в чате',
+                dash_stat_level: 'Уровень XP', dash_stat_level_sub: 'Твой уровень активности',
+                dash_stat_servers: 'Серверы', dash_stat_servers_sub: 'Общие серверы',
+                dash_stat_joined: 'Участник с', dash_stat_joined_sub: 'Дата вступления',
+                cta_title: 'Готов подключить\nгильдию к Rust?',
+                cta_desc: 'Бесплатно. Без карты. Без рекламы. Только разведданные Rust,\nдоставленные прямо на твой Discord-сервер.',
+                cta_btn_enlist: 'Присоединиться бесплатно →', cta_btn_join: 'Присоединиться к сообществу',
+                cta_stats: '10 000+ пользователей · 100+ серверов · Аптайм 24/7',
+                stat_users: 'Пользователи', stat_servers_label: 'Серверы', stat_uptime: 'Аптайм',
+                wipe_label: '// следующий принудительный вайп', wipe_title: 'ПРИНУДИТЕЛЬНЫЙ ВАЙП RUST',
+                wipe_days: 'Дней', wipe_hours: 'Часов', wipe_min: 'Мин', wipe_sec: 'Сек',
+                wipe_live_drops: 'ЖИВЫЕ ДРОПЫ АКТИВНЫ',
+                bigstat_servers: 'ПодключÑённых серверов', bigstat_users: 'Пользователей Discord',
+                bigstat_commands: 'Команд', bigstat_uptime: 'Аптайм %',
+                calc_label: '// инструменты', calc_title: 'Калькулятор пустоши.',
+                calc_desc: 'Стоимость рейда и выход при переработке — здесь, без Discord.',
+                calc_raid_title: '💥 Калькулятор рейда', calc_wall_type: 'Тип стены',
+                calc_quantity: 'Количество', calc_raid_btn: 'РАССЧИТАТЬ СТОИМОСТЬ РЕЙДА',
+                calc_raid_hint: 'Выберите тип стены и нажмите Рассчитать.',
+                calc_recycle_title: '♻️ Калькулятор переработки', calc_item: 'Предмет',
+                calc_recycle_btn: 'РАССЧИТАТЬ ВЫХОД', calc_recycle_hint: 'Выберите предмет и нажмите Рассчитать.',
+                wipe_sched_label: '// расписание вайпов', wipe_sched_title: 'История вайпов & следующие даты.',
+                wipe_sched_desc: 'Принудительные вайпы Facepunch проходят в первый четверг каждого месяца.',
+                cmd_label: '// команды', cmd_title: 'Все нужные команды.', cmd_desc: 'Полностью slash. Без префиксов, без путаницы.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Инструменты', cmd_tab_social: 'Социальное', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// изменения',
+                chat_label: '// чат сообщества', chat_channel: '#общий', chat_empty: 'Сообщений пока нет. Будь первым!',
+                dash_label: '// панель управления',
+                cta_label: '// РАЗВЕРНУТЬ СЕЙЧАС',
+                footer_sub: '// Универсальный Discord бот для Rust. Создан выжившими, для выживших.',
+                footer_product: 'Продукт', footer_community: 'Сообщество', footer_legal: 'Правовое',
+                footer_privacy: 'Политика конфиденциальности', footer_status: 'Все системы работают',
+                footer_copy: '© 2026 RustWire. Не связан с Facepunch Studios.',
+            },
+            tr: {
+                nav_home: 'Ana Sayfa', nav_commands: 'Komutlar', nav_changelog: 'Değişiklikler',
+                nav_chat: 'Sohbet', nav_dashboard: 'Kontrol Paneli', nav_add_bot: 'Bot Ekle →',
+                hero_eyebrow: 'Hepsi bir arada ops botu // Rust oyunu',
+                hero_h1_1: 'HAYATTA KAL.', hero_h1_2: 'DOMINE ET.', hero_h1_3: 'OTOMATİKLEŞTİR.',
+                hero_desc: 'RUSTWIRE, çöllerin en güçlü Discord botudur.\nDrop\'lar, skinler, devbloglar, commitler, ban kayıtları, baskın hesaplayıcı,\noyuncu istatistikleri — doğrudan sunucunuza bağlı.',
+                hero_btn_enlist: 'Ücretsiz Katıl →', hero_btn_commands: 'Komutları Gör',
+                feat_title: 'Çöl için dövülmüş\naraçlar',
+                feat_desc: 'Tek bot. Her Rust veri kaynağı doğrudan Discord\'unuza bağlı.',
+                feat_drops_title: 'Twitch & Kick Dropları', feat_drops_desc: 'Aktif drop kampanyaları yayına girdiği anda paylaşılır.',
+                feat_skins_title: 'Skinler & DLC', feat_skins_desc: 'Yeni Steam Workshop skinleri ve bölgeye göre fiyatlı DLC yayınları.',
+                feat_news_title: 'Devbloglar & Haberler', feat_news_desc: 'Facepunch devblogları, topluluk gönderileri ve genel Rust haberleri.',
+                feat_commits_title: 'Commitler & Oxide', feat_commits_desc: 'Facepunch GitHub commitleri ve Oxide/uMod eklenti güncellemeleri.',
+                feat_ban_title: 'Ban Kayıtları', feat_ban_desc: 'Son org banları tam kullanıcı profili, hesap yaşı ve nedeniyle.',
+                feat_tools_title: 'Oyuncu Araçları', feat_tools_desc: 'VAC kontrolleri, saat doğrulama, baskın hesaplayıcı, geri dönüştürücü, plan arama.',
+                feat_filter_title: 'İçerik Filtresi', feat_filter_desc: 'Spam bağlantılarını otomatik algılar ve anında banla kaldırır.',
+                feat_wipe_title: 'Wipe Takvimi', feat_wipe_desc: 'Zorunlu silmeleri takip et, özel geri sayım ayarla, otomatik bildir.',
+                feat_rustplus_title: 'Rust+ Entegrasyonu', feat_rustplus_desc: 'Canlı harita, takım takibi, oyun içi sohbet köprüsü, anıt durumu.',
+                cl_title: 'Neler yeni.', cl_desc: 'RustWire\'ın son güncellemeleri ve iyileştirmeleri.',
+                chat_title: 'Tartış & bağlan', chat_desc: 'RustWire topluluğuyla sohbet et. Discord ile giriş yap.',
+                chat_placeholder: 'Mesaj yaz...', chat_send: 'Gönder',
+                dash_title: 'Kontrol merkeziniz', dash_desc: 'RustWire deneyiminizi yönetin ve istatistiklerinizi görüntüleyin.',
+                dash_login_required: 'Giriş gerekli', dash_login_desc: 'Kontrol paneline erişmek için Discord ile giriş yapın.',
+                dash_login_btn: 'Discord ile Giriş Yap', dash_logout: 'Çıkış Yap',
+                dash_stat_msgs: 'Gönderilen Mesajlar', dash_stat_msgs_sub: 'Toplam sohbet mesajları',
+                dash_stat_level: 'XP Seviyesi', dash_stat_level_sub: 'Aktivite seviyeniz',
+                dash_stat_servers: 'Sunucular', dash_stat_servers_sub: 'Ortak sunucular',
+                dash_stat_joined: 'Üye Tarihi', dash_stat_joined_sub: 'Katılım tarihi',
+                cta_title: 'Loncanızı Rust\'a\nbağlamaya hazır mısınız?',
+                cta_desc: 'Ücretsiz. Kredi kartı yok. Reklam yok. Sadece Rust istihbaratı,\nDoğrudan Discord sunucunuza teslim edilir.',
+                cta_btn_enlist: 'Ücretsiz Katıl →', cta_btn_join: 'Topluluğa Katıl',
+                cta_stats: '10.000+ kullanıcı · 100+ sunucu · 7/24 çalışma süresi',
+                stat_users: 'Kullanıcılar', stat_servers_label: 'Sunucular', stat_uptime: 'Çalışma Süresi',
+                wipe_label: '// sonraki zorla silme', wipe_title: 'RUST ZORLA SİLME',
+                wipe_days: 'Gün', wipe_hours: 'Saat', wipe_min: 'Dak', wipe_sec: 'Sn',
+                wipe_live_drops: 'CANLI DROPLAR AKTİF',
+                bigstat_servers: 'Bağlı Sunucular', bigstat_users: 'Discord Kullanıcıları',
+                bigstat_commands: 'Komutlar', bigstat_uptime: 'Çalışma Süresi %',
+                calc_label: '// araçlar', calc_title: 'Çöl Hesaplayıcı.',
+                calc_desc: 'Baskın maliyetleri ve geri dönüşüm çıktısı — burada, Discord gerekmez.',
+                calc_raid_title: '💥 Baskın Hesaplayıcı', calc_wall_type: 'Duvar tipi',
+                calc_quantity: 'Miktar', calc_raid_btn: 'BASKIN MALİYETİ HESAPLA',
+                calc_raid_hint: 'Duvar tipini seç ve Hesapla tuşuna bas.',
+                calc_recycle_title: '♻️ Geri Dönüşüm Hesaplayıcı', calc_item: 'Öğe',
+                calc_recycle_btn: 'ÇIKTI HESAPLA', calc_recycle_hint: 'Bir öğe seç ve Hesapla tuşuna bas.',
+                wipe_sched_label: '// silme takvimi', wipe_sched_title: 'Silme Geçmişi & Sonraki Tarihler.',
+                wipe_sched_desc: 'Facepunch zorla silmeleri her ayın ilk Perşembesi gerçekleşir.',
+                cmd_label: '// komutlar', cmd_title: 'İhtiyacınız olan her komut.', cmd_desc: 'Tamamen slash tabanlı. Önek yok, karışıklık yok.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Araçlar', cmd_tab_social: 'Sosyal', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// değişiklikler',
+                chat_label: '// topluluk sohbeti', chat_channel: '#genel', chat_empty: 'Henüz mesaj yok. İlk sen ol!',
+                dash_label: '// kontrol paneli',
+                cta_label: '// ŞİMDİ KONUŞLANDIR',
+                footer_sub: '// Rust için hepsi bir arada Discord botu. Hayatta kalanlar tarafından, hayatta kalanlar için.',
+                footer_product: 'Ürün', footer_community: 'Topluluk', footer_legal: 'Yasal',
+                footer_privacy: 'Gizlilik Politikası', footer_status: 'Tüm sistemler çalışıyor',
+                footer_copy: '© 2026 RustWire. Facepunch Studios ile bağlantısı yoktur.',
+            },
+            pl: {
+                nav_home: 'Strona główna', nav_commands: 'Komendy', nav_changelog: 'Zmiany',
+                nav_chat: 'Chat', nav_dashboard: 'Panel', nav_add_bot: 'Dodaj bota →',
+                hero_eyebrow: 'Bot ops all-in-one // Gra Rust',
+                hero_h1_1: 'PRZEŻYJ.', hero_h1_2: 'ZDOMINUJ.', hero_h1_3: 'ZAUTOMATYZUJ.',
+                hero_desc: 'RUSTWIRE to najgroźniejszy bot Discord w pustkowiu.\nDropy, skiny, devblogi, commity, logi banów, kalkulator rajdu,\nstatystyki gracza — podłączone prosto do twojego serwera.',
+                hero_btn_enlist: 'Dołącz za darmo →', hero_btn_commands: 'Zobacz komendy',
+                feat_title: 'Narzędzia wykute\ndla pustkowia',
+                feat_desc: 'Jeden bot. Każde źródło danych Rust podłączone bezpośrednio do twojego Discorda.',
+                feat_drops_title: 'Dropy Twitch & Kick', feat_drops_desc: 'Aktywne kampanie dropów publikowane w momencie uruchomienia.',
+                feat_skins_title: 'Skiny & DLC', feat_skins_desc: 'Nowe skiny Steam Workshop i wydania DLC z cenami regionalnymi.',
+                feat_news_title: 'Devblogi & Aktualności', feat_news_desc: 'Devblogi Facepunch, posty społeczności i ogólne aktualności Rust.',
+                feat_commits_title: 'Commity & Oxide', feat_commits_desc: 'Commity GitHub Facepunch i aktualizacje wtyczek Oxide/uMod.',
+                feat_ban_title: 'Logi banów', feat_ban_desc: 'Najnowsze bany org z pełnym profilem, wiekiem konta i powodem.',
+                feat_tools_title: 'Narzędzia gracza', feat_tools_desc: 'Sprawdzenie VAC, weryfikacja godzin, kalkulator rajdu, recykler, wyszukiwanie planów.',
+                feat_filter_title: 'Filtr treści', feat_filter_desc: 'Automatycznie wykrywa i usuwa linki spam z natychmiastowym banem.',
+                feat_wipe_title: 'Harmonogram wipe\'ów', feat_wipe_desc: 'Śledź wymuszone wipe\'y, ustaw niestandardowe odliczanie, automatyczne powiadomienia.',
+                feat_rustplus_title: 'Integracja Rust+', feat_rustplus_desc: 'Mapa na żywo, tracker drużyny, most czatu w grze, status monumentów.',
+                cl_title: 'Co nowego.', cl_desc: 'Ostatnie aktualizacje i ulepszenia RustWire.',
+                chat_title: 'Dyskutuj & łącz się', chat_desc: 'Chatuj ze społecznością RustWire. Zaloguj się przez Discord.',
+                chat_placeholder: 'Napisz wiadomość...', chat_send: 'Wyślij',
+                dash_title: 'Twoje centrum kontroli', dash_desc: 'Zarządzaj doświadczeniem RustWire i przeglądaj swoje statystyki.',
+                dash_login_required: 'Wymagane logowanie', dash_login_desc: 'Zaloguj się przez Discord, aby uzyskać dostęp do panelu.',
+                dash_login_btn: 'Zaloguj przez Discord', dash_logout: 'Wyloguj',
+                dash_stat_msgs: 'Wysłane wiadomości', dash_stat_msgs_sub: 'Łączna liczba wiadomości',
+                dash_stat_level: 'Poziom XP', dash_stat_level_sub: 'Twój poziom aktywności',
+                dash_stat_servers: 'Serwery', dash_stat_servers_sub: 'Wspólne serwery',
+                dash_stat_joined: 'Członek od', dash_stat_joined_sub: 'Data dołączenia',
+                cta_title: 'Gotowy podłączyć\ngildię do Rust?',
+                cta_desc: 'Bezpłatnie. Bez karty. Bez reklam. Tylko wywiad Rust,\ndostarczany prosto na twój serwer Discord.',
+                cta_btn_enlist: 'Dołącz za darmo →', cta_btn_join: 'Dołącz do społeczności',
+                cta_stats: '10 000+ użytkowników · 100+ serwerów · Dostępność 24/7',
+                stat_users: 'Użytkownicy', stat_servers_label: 'Serwery', stat_uptime: 'Dostępność',
+                wipe_label: '// następny wymuszony wipe', wipe_title: 'RUST WYMUSZONY WIPE',
+                wipe_days: 'Dni', wipe_hours: 'Godz', wipe_min: 'Min', wipe_sec: 'Sek',
+                wipe_live_drops: 'LIVE DROPY AKTYWNE',
+                bigstat_servers: 'Podłączone serwery', bigstat_users: 'Użytkownicy Discord',
+                bigstat_commands: 'Komendy', bigstat_uptime: 'Dostępność %',
+                calc_label: '// narzędzia', calc_title: 'Kalkulator pustkowia.',
+                calc_desc: 'Koszty rajdu i output z recyklingu — tutaj, bez Discorda.',
+                calc_raid_title: '💥 Kalkulator rajdu', calc_wall_type: 'Typ ściany',
+                calc_quantity: 'Ilość', calc_raid_btn: 'OBLICZ KOSZT RAJDU',
+                calc_raid_hint: 'Wybierz typ ściany i naciśnij Oblicz.',
+                calc_recycle_title: '♻️ Kalkulator recyklingu', calc_item: 'Przedmiot',
+                calc_recycle_btn: 'OBLICZ OUTPUT', calc_recycle_hint: 'Wybierz przedmiot i naciśnij Oblicz.',
+                wipe_sched_label: "// harmonogram wipe'ów", wipe_sched_title: "Historia wipe'ów & następne daty.",
+                wipe_sched_desc: "Wymuszone wipe'y Facepunch odbywają się w pierwszy czwartek każdego miesiąca.",
+                cmd_label: '// komendy', cmd_title: 'Wszystkie potrzebne komendy.', cmd_desc: 'W pełni slash. Bez prefiksu, bez zamieszania.',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: 'Narzędzia', cmd_tab_social: 'Społeczność', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// zmiany',
+                chat_label: '// czat społeczności', chat_channel: '#ogólny', chat_empty: 'Brak wiadomości. Bądź pierwszy!',
+                dash_label: '// panel',
+                cta_label: '// WDRÓŻ TERAZ',
+                footer_sub: '// Bot Discord all-in-one dla Rust. Stworzony przez ocalałych, dla ocalałych.',
+                footer_product: 'Produkt', footer_community: 'Społeczność', footer_legal: 'Prawne',
+                footer_privacy: 'Polityka prywatności', footer_status: 'Wszystkie systemy działają',
+                footer_copy: '© 2026 RustWire. Nie powiązany z Facepunch Studios.',
+            },
+            zh: {
+                nav_home: '首页', nav_commands: '命令', nav_changelog: '更新日志',
+                nav_chat: '聊天', nav_dashboard: '控制台', nav_add_bot: '添加机器人 →',
+                hero_eyebrow: '全能运营机器人 // Rust 游戏',
+                hero_h1_1: '生存。', hero_h1_2: '主宰。', hero_h1_3: '自动化。',
+                hero_desc: 'RUSTWIRE 是荒野中最强大的 Discord 机器人。\nDrop、皮肤、开发博客、提交、封禁记录、突袭计算器、\n玩家统计——直接连接到您的服务器。',
+                hero_btn_enlist: '免费加入 →', hero_btn_commands: '查看命令',
+                feat_title: '为荒野锻造的\n工具',
+                feat_desc: '一个机器人。每个 Rust 数据源直接连接到您的 Discord。',
+                feat_drops_title: 'Twitch & Kick 掉落', feat_drops_desc: '活跃掉落活动在上线时立即发布。',
+                feat_skins_title: '皮肤 & DLC', feat_skins_desc: '新的 Steam 创意工坊皮肤和 DLC 发布，带区域定价。',
+                feat_news_title: '开发博客 & 新闻', feat_news_desc: 'Facepunch 开发博客、社区帖子和一般 Rust 新闻。',
+                feat_commits_title: '提交 & Oxide', feat_commits_desc: 'Facepunch GitHub 提交和 Oxide/uMod 插件更新。',
+                feat_ban_title: '封禁记录', feat_ban_desc: '最新组织封禁，包含完整用户资料、账号年龄和原因。',
+                feat_tools_title: '玩家工具', feat_tools_desc: 'VAC 检查、游戏时长验证、突袭计算器、回收机、蓝图查询。',
+                feat_filter_title: '内容过滤', feat_filter_desc: '自动检测并删除垃圾链接，立即封禁。',
+                feat_wipe_title: '清档计划', feat_wipe_desc: '跟踪强制清档，设置自定义倒计时，自动通知。',
+                feat_rustplus_title: 'Rust+ 集成', feat_rustplus_desc: '实时地图、团队追踪器、游戏内聊天桥接、纪念碑状态。',
+                cl_title: '最新动态。', cl_desc: 'RustWire 的最新更新和改进。',
+                chat_title: '讨论 & 连接', chat_desc: '与 RustWire 社区聊天。使用 Discord 登录开始交流。',
+                chat_placeholder: '输入消息...', chat_send: '发送',
+                dash_title: '您的控制中心', dash_desc: '管理您的 RustWire 体验并查看您的统计数据。',
+                dash_login_required: '需要登录', dash_login_desc: '使用 Discord 登录以访问您的控制台。',
+                dash_login_btn: '使用 Discord 登录', dash_logout: '登出',
+                dash_stat_msgs: '发送的消息', dash_stat_msgs_sub: '聊天消息总数',
+                dash_stat_level: 'XP 等级', dash_stat_level_sub: '您的活动等级',
+                dash_stat_servers: '服务器', dash_stat_servers_sub: '共享服务器',
+                dash_stat_joined: '加入时间', dash_stat_joined_sub: '加入日期',
+                cta_title: '准备好将\n公会连接到 Rust 了吗？',
+                cta_desc: '免费。无需信用卡。无广告。只有 Rust 情报，\n直接发送到您的 Discord 服务器。',
+                cta_btn_enlist: '免费加入 →', cta_btn_join: '加入社区',
+                cta_stats: '10,000+ 用户 · 100+ 服务器 · 24/7 在线',
+                stat_users: '用户', stat_servers_label: '服务器', stat_uptime: '在线率',
+                wipe_label: '// 下次强制清档', wipe_title: 'RUST 强制清档',
+                wipe_days: '天', wipe_hours: '时', wipe_min: '分', wipe_sec: '秒',
+                wipe_live_drops: '直播掉落活跃中',
+                bigstat_servers: '已接入服务器', bigstat_users: 'Discord 用户',
+                bigstat_commands: '命令', bigstat_uptime: '在线率 %',
+                calc_label: '// 工具', calc_title: '荒野计算器。',
+                calc_desc: '突袭费用和回收产出——在这里，无需 Discord。',
+                calc_raid_title: '💥 突袭计算器', calc_wall_type: '墙体类型',
+                calc_quantity: '数量', calc_raid_btn: '计算突袭费用',
+                calc_raid_hint: '选择墙体类型并点击计算。',
+                calc_recycle_title: '♻️ 回收计算器', calc_item: '物品',
+                calc_recycle_btn: '计算产出', calc_recycle_hint: '选择物品并点击计算。',
+                wipe_sched_label: '// 清档计划', wipe_sched_title: '清档历史 & 下次日期。',
+                wipe_sched_desc: 'Facepunch 强制清档在每月第一个星期四进行。',
+                cmd_label: '// 命令', cmd_title: '您需要的所有命令。', cmd_desc: '全断杠命令。无前缀，无混乱。',
+                cmd_tab_rust: '/rust', cmd_tab_wire: '/wire', cmd_tab_tools: '工具', cmd_tab_social: '社交', cmd_tab_rustplus: 'Rust+',
+                cl_label: '// 更新日志',
+                chat_label: '// 社区聊天', chat_channel: '#综合', chat_empty: '还没有消息，来第一个发言吧！',
+                dash_label: '// 控制台',
+                cta_label: '// 立即部署',
+                footer_sub: '// Rust 全能 Discord 机器人。由幸存者构建，为幸存者服务。',
+                footer_product: '产品', footer_community: '社区', footer_legal: '法律',
+                footer_privacy: '隐私政策', footer_status: '所有系统正常运行',
+                footer_copy: '© 2026 RustWire. 与 Facepunch Studios 无关。',
+            },
+        };
+
+        let _currentLang = 'en';
+        let _origStrings = null;
+
+        function collectOrigStrings() {
+            const result = {};
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (result[key]) return;
+                const kids = [...el.children];
+                // If all children have own keys, skip (they collect themselves)
+                if (kids.length > 0 && kids.every(c => c.hasAttribute('data-i18n'))) return;
+                // Normalize: store as \n-separated plain text (strip HTML for EN fallback)
+                result[key] = el.innerHTML;
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (!result[key]) result[key] = el.placeholder || '';
+            });
+            return result;
+        }
+
+        function applyTranslations(translations) {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (!translations[key]) return;
+                // Skip if all children have their own data-i18n keys (e.g. h1 with spans)
+                const kids = [...el.children];
+                if (kids.length > 0 && kids.every(c => c.hasAttribute('data-i18n'))) return;
+                let val = translations[key];
+                // Convert \n to <br />
+                val = val.replace(/\n/g, '<br />');
+                // cta_title special: wrap last part in highlight span
+                if (key === 'cta_title') {
+                    const parts = val.split('<br />');
+                    if (parts.length >= 2) {
+                        val = parts[0] + '<br /><span class="highlight">' + parts.slice(1).join('<br />') + '</span>';
+                    }
+                }
+                el.innerHTML = val;
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[key]) el.placeholder = translations[key];
+            });
+        }
+
+        function updateLangUI(lang) {
+            const meta = LANG_META[lang] || LANG_META.en;
+            document.getElementById('langFlag').textContent = meta.flag;
+            document.getElementById('langLabel').textContent = meta.label;
+            document.querySelectorAll('.lang-option').forEach(btn => {
+                const btnLang = btn.getAttribute('onclick').match(/'(\w+)'/)?.[1];
+                btn.classList.toggle('active', btnLang === lang);
+            });
+            closeLangDropdown();
+        }
+
+        function setLanguage(lang) {
+            if (lang === _currentLang) { closeLangDropdown(); return; }
+
+            if (lang === 'en') {
+                applyTranslations(I18N['en']);
+            } else {
+                const translations = I18N[lang];
+                if (!translations) { closeLangDropdown(); return; }
+                applyTranslations(translations);
+            }
+
+            _currentLang = lang;
+            updateLangUI(lang);
+            try { localStorage.setItem('rw_lang', lang); } catch(e) {}
+        }
+
+        function toggleLangDropdown() {
+            document.getElementById('langSwitcher').classList.toggle('open');
+        }
+
+        function closeLangDropdown() {
+            document.getElementById('langSwitcher').classList.remove('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#langSwitcher')) closeLangDropdown();
+        }, true);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const saved = localStorage.getItem('rw_lang');
+                if (saved && I18N[saved]) {
+                    setTimeout(() => setLanguage(saved), 50);
+                }
+            } catch(e) {}
+        });
+
         console.log('🔥 RustWire loaded');
     </script>
+    <!-- Language translate toast -->
+    <div class="lang-translating" id="langToast">
+        <div class="lang-spinner"></div>
+        <span id="langToastMsg">Translating...</span>
+    </div>
+
 
 </body>
 </html>
