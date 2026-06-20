@@ -2410,6 +2410,7 @@
             opacity: 0.85;
         }
 </style>
+    <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -3001,12 +3002,13 @@
 
             // Show selected page
             const target = document.getElementById('page-' + page);
-            if (target) {
-                target.classList.add('active');
-                console.log('✓ Page shown:', page);
-            } else {
-                console.error('✗ Page not found:', page);
-            }
+            if (target) target.classList.add('active');
+
+            // Update URL for analytics (Clarity dead click fix)
+            try {
+                const url = page === 'home' ? '/' : '/' + page;
+                if (window.location.pathname !== url) history.pushState({ page }, '', url);
+            } catch(e) { /* iframe/srcdoc environments */ }
 
             // Update nav links
             document.querySelectorAll('.nav-links a[onclick*="showPage"]').forEach(a => {
@@ -3030,6 +3032,19 @@
             closeMobileMenu();
             setTimeout(initScrollReveal, 60);
             setTimeout(initRipple, 60);
+        }
+
+        // Handle browser back/forward
+        window.addEventListener('popstate', function(e) {
+            const page = e.state && e.state.page ? e.state.page : 'home';
+            showPage(page);
+        });
+
+        function initPageFromURL() {
+            const path = window.location.pathname.replace(/^\//, '').trim();
+            const validPages = ['home', 'commands', 'changelog', 'chat', 'dashboard'];
+            const page = validPages.includes(path) ? path : 'home';
+            showPage(page);
         }
 
         // =============================================================
@@ -3484,6 +3499,7 @@
 
             // Init retention features
             initChangelogBadge();
+            initPageFromURL();
             if (DROP_CAMPAIGN_ACTIVE) {
                 updateDropTimer();
                 setInterval(updateDropTimer, 1000);
@@ -3499,7 +3515,7 @@
             const now = new Date();
             let year = now.getUTCFullYear();
             let month = now.getUTCMonth();
-                let wipe = firstThursday(year, month);
+            let wipe = firstThursday(year, month);
             if (now >= wipe) {
                 month++;
                 if (month > 11) { month = 0; year++; }
@@ -3603,18 +3619,20 @@
         // =============================================================
         // WIPE CALENDAR
         // =============================================================
+        function firstThursday(y, m) {
+                const d = new Date(Date.UTC(y, m, 1));
+                const diff = (4 - d.getUTCDay() + 7) % 7;
+                d.setUTCDate(1 + diff);
+                return d;
+            }
+
         function buildWipeCalendar() {
             const cal = document.getElementById('wipeCalendar');
             if (!cal) return;
             const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
             const now = new Date();
 
-            function firstThursday(y, m) {
-                const d = new Date(Date.UTC(y, m, 1));
-                const diff = (4 - d.getUTCDay() + 7) % 7;
-                d.setUTCDate(1 + diff);
-                return d;
-            }
+            
 
             // BP wipe months (typically Jan, April, sometimes others - approximate)
             const bpWipeMonths = [0, 3]; // Jan, Apr
