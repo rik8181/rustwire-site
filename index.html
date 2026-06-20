@@ -3175,7 +3175,7 @@
             if (!container) return;
             let items = [];
             const [devblogs, commits, oxide, wipeStr] = await Promise.all([
-                fetchRSS('https://www.facepunch.com/blog/rust.rss'),
+                fetchRSS('https://store.steampowered.com/feeds/news/app/252490/'),
                 fetchRSS('https://commits.facepunch.com/?format=rss'),
                 fetchOxideLatest(),
                 fetchNextWipe(),
@@ -3650,7 +3650,7 @@
             const badge = document.getElementById('liveDropsBadge');
             if (!badge) return;
             // Check RSS feed for active drop campaigns (from loadLiveFeed data)
-            fetchRSS('https://www.facepunch.com/blog/rust.rss').then(items => {
+            fetchRSS('https://store.steampowered.com/feeds/news/app/252490/').then(items => {
                 const hasDrops = items.some(i =>
                     i.title && /drop/i.test(i.title) &&
                     (new Date() - new Date(i.date)) < 7 * 86400000
