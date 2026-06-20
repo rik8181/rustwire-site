@@ -3337,7 +3337,7 @@
                                 <span class="chat-message-time">${new Date(msg.created_at).toLocaleString('en-US')}</span>
                             </div>
                             <div class="chat-message-text">${escapeHtml(msg.content)}</div>
-                            ${currentUser && currentUser.id === ADMIN_ID ? `<button class="chat-delete-btn" onclick="deleteChatMessage('${msg.id}')" title="Delete message">🗑</button>` : ''}
+                            ${currentUser && currentUser.id === ADMIN_ID ? `<button class="chat-delete-btn" data-msgid="${msg.id}" title="Delete message">🗑</button>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -3348,6 +3348,14 @@
                 container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);font-family:monospace;font-size:12px;">⚠️ Could not load messages.</div>';
             }
         }
+
+        // Event delegation for chat delete buttons (avoids iframe scope issues)
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.chat-delete-btn');
+            if (!btn) return;
+            const id = btn.getAttribute('data-msgid');
+            if (id) deleteChatMessage(id);
+        });
 
         async function sendChatMessage() {
             const input = document.getElementById('chatInput');
