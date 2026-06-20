@@ -3499,15 +3499,7 @@
             const now = new Date();
             let year = now.getUTCFullYear();
             let month = now.getUTCMonth();
-            function firstThursday(y, m) {
-                const d = new Date(Date.UTC(y, m, 1));
-                const day = d.getUTCDay();
-                const diff = (4 - day + 7) % 7;
-                d.setUTCDate(1 + diff);
-                d.setUTCHours(19, 0, 0, 0); // ~7PM UTC typical wipe time
-                return d;
-            }
-            let wipe = firstThursday(year, month);
+                let wipe = firstThursday(year, month);
             if (now >= wipe) {
                 month++;
                 if (month > 11) { month = 0; year++; }
