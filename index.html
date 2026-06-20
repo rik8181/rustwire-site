@@ -1,4 +1,17 @@
-<!DOCTYPE html>
+<!DOCTYPE
+
+        async function deleteChatMessage(id) {
+            if (!currentUser || currentUser.id !== ADMIN_ID) return;
+            if (!confirm('Delete this message?')) return;
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/messages?id=eq.' + id, {
+                    method: 'DELETE',
+                    headers: sbHeaders()
+                });
+                if (res.ok) await loadChatMessages();
+                else console.error('Delete failed:', res.status);
+            } catch(e) { console.error('Delete error:', e); }
+        } html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -2409,7 +2422,28 @@
             margin-left: 8px;
             opacity: 0.85;
         }
-</style>
+
+        /* ── Admin delete button ── */
+        .chat-delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            opacity: 0;
+            padding: 2px 5px;
+            border-radius: 4px;
+            transition: opacity 0.15s, background 0.15s;
+            vertical-align: middle;
+            margin-left: 6px;
+        }
+        .chat-message:hover .chat-delete-btn {
+            opacity: 0.5;
+        }
+        .chat-delete-btn:hover {
+            opacity: 1 !important;
+            background: rgba(206,66,43,0.2);
+        }
+        </style>
     <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
@@ -3077,6 +3111,7 @@
         // LIVE FEED
         // =============================================================
         const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+        const ADMIN_ID = '1150895418033569792';
 
         function fmtTime(dateStr) {
             const d = dateStr ? new Date(dateStr) : new Date();
@@ -3302,6 +3337,7 @@
                                 <span class="chat-message-time">${new Date(msg.created_at).toLocaleString('en-US')}</span>
                             </div>
                             <div class="chat-message-text">${escapeHtml(msg.content)}</div>
+                            ${currentUser && currentUser.id === ADMIN_ID ? `<button class="chat-delete-btn" onclick="deleteChatMessage('${msg.id}')" title="Delete message">🗑</button>` : ''}
                         </div>
                     </div>
                 `).join('');
