@@ -11,8 +11,7 @@
                 if (res.ok) await loadChatMessages();
                 else console.error('Delete failed:', res.status);
             } catch(e) { console.error('Delete error:', e); }
-        }
-        window.deleteChatMessage = deleteChatMessage; html>
+        } html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -3548,6 +3547,9 @@
             buildWipeCalendar();
             checkLiveDrops();
             setInterval(checkLiveDrops, 10 * 60 * 1000);
+
+            // Expose globals for event delegation
+            window.deleteChatMessage = deleteChatMessage;
 
             // Init retention features
             initChangelogBadge();
