@@ -11,7 +11,8 @@
                 if (res.ok) await loadChatMessages();
                 else console.error('Delete failed:', res.status);
             } catch(e) { console.error('Delete error:', e); }
-        } html>
+        }
+        window.deleteChatMessage = deleteChatMessage; html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -3349,12 +3350,12 @@
             }
         }
 
-        // Event delegation for chat delete buttons (avoids iframe scope issues)
+        // Event delegation for chat delete buttons
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.chat-delete-btn');
             if (!btn) return;
             const id = btn.getAttribute('data-msgid');
-            if (id) deleteChatMessage(id);
+            if (id) window.deleteChatMessage(id);
         });
 
         async function sendChatMessage() {
