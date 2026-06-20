@@ -3292,7 +3292,10 @@
                 const messages = data.slice().reverse();
                 container.innerHTML = messages.map(msg => `
                     <div class="chat-message">
-                        <div class="chat-message-avatar">${msg.username ? msg.username.charAt(0).toUpperCase() : '?'}</div>
+                        <div class="chat-message-avatar">${msg.avatar_url
+                            ? `<img src="${msg.avatar_url}" alt="${msg.username || ''}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentNode.textContent='${msg.username ? msg.username.charAt(0).toUpperCase() : '?'}'">`
+                            : (msg.username ? msg.username.charAt(0).toUpperCase() : '?')
+                        }</div>
                         <div class="chat-message-content">
                             <div>
                                 <span class="chat-message-username">${msg.username || 'Unknown'}</span>
@@ -3319,8 +3322,12 @@
             sendBtn.disabled = true;
             sendBtn.textContent = 'Sending...';
             try {
+                const avatarUrl = currentUser.avatar
+                    ? `https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png?size=64`
+                    : null;
                 await sbPost('messages', {
                     username: currentUser.global_name || currentUser.username || 'User',
+                    avatar_url: avatarUrl,
                     content: msg
                 });
                 input.value = '';
