@@ -1,6 +1,6 @@
 <!DOCTYPE
 
-        async function deleteChatMessage(id) {
+        window.deleteChatMessage = async function(id) {
             if (!currentUser || currentUser.id !== ADMIN_ID) return;
             if (!confirm('Delete this message?')) return;
             try {
@@ -3547,9 +3547,6 @@
             buildWipeCalendar();
             checkLiveDrops();
             setInterval(checkLiveDrops, 10 * 60 * 1000);
-
-            // Expose globals for event delegation
-            window.deleteChatMessage = deleteChatMessage;
 
             // Init retention features
             initChangelogBadge();
