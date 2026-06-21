@@ -1,17 +1,4 @@
-<!DOCTYPE
-
-        window.deleteChatMessage = async function(id) {
-            if (!currentUser || currentUser.id !== ADMIN_ID) return;
-            if (!confirm('Delete this message?')) return;
-            try {
-                const res = await fetch(SUPABASE_URL + '/rest/v1/messages?id=eq.' + id, {
-                    method: 'DELETE',
-                    headers: sbHeaders()
-                });
-                if (res.ok) await loadChatMessages();
-                else console.error('Delete failed:', res.status);
-            } catch(e) { console.error('Delete error:', e); }
-        } html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -2423,26 +2410,14 @@
             opacity: 0.85;
         }
 
-        /* ── Admin delete button ── */
         .chat-delete-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 13px;
-            opacity: 0;
-            padding: 2px 5px;
-            border-radius: 4px;
-            transition: opacity 0.15s, background 0.15s;
-            vertical-align: middle;
-            margin-left: 6px;
+            background: none; border: none; cursor: pointer;
+            font-size: 13px; opacity: 0; padding: 2px 5px;
+            border-radius: 4px; transition: opacity 0.15s, background 0.15s;
+            vertical-align: middle; margin-left: 6px;
         }
-        .chat-message:hover .chat-delete-btn {
-            opacity: 0.5;
-        }
-        .chat-delete-btn:hover {
-            opacity: 1 !important;
-            background: rgba(206,66,43,0.2);
-        }
+        .chat-message:hover .chat-delete-btn { opacity: 0.5; }
+        .chat-delete-btn:hover { opacity: 1 !important; background: rgba(206,66,43,0.2); }
         </style>
     <script defer src="/_vercel/insights/script.js"></script>
 </head>
@@ -3081,6 +3056,13 @@
             showPage(page);
         }
 
+        window.addEventListener('popstate', function(e) {
+            const page = e.state && e.state.page ? e.state.page : 'home';
+            showPage(page);
+        });
+
+
+
         // =============================================================
         // MOBILE MENU
         // =============================================================
@@ -3328,7 +3310,7 @@
                 container.innerHTML = messages.map(msg => `
                     <div class="chat-message">
                         <div class="chat-message-avatar">${msg.avatar_url
-                            ? `<img src="${msg.avatar_url}" alt="${msg.username || ''}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentNode.textContent='${msg.username ? msg.username.charAt(0).toUpperCase() : '?'}'">`
+                            ? `<img src="${msg.avatar_url}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.style.display='none';this.parentNode.textContent='${msg.username ? msg.username.charAt(0).toUpperCase() : '?'}';">`
                             : (msg.username ? msg.username.charAt(0).toUpperCase() : '?')
                         }</div>
                         <div class="chat-message-content">
@@ -3337,7 +3319,7 @@
                                 <span class="chat-message-time">${new Date(msg.created_at).toLocaleString('en-US')}</span>
                             </div>
                             <div class="chat-message-text">${escapeHtml(msg.content)}</div>
-                            ${currentUser && currentUser.id === ADMIN_ID ? `<button class="chat-delete-btn" data-msgid="${msg.id}" title="Delete message">🗑</button>` : ''}
+                            ${currentUser && currentUser.id === ADMIN_ID ? `<button class="chat-delete-btn" data-msgid="${msg.id}" title="Delete">🗑</button>` : ''}
                         </div>
                     </div>
                 `).join('');
@@ -3349,12 +3331,24 @@
             }
         }
 
-        // Event delegation for chat delete buttons
+        window.deleteChatMessage = async function deleteChatMessage(id) {
+            if (!currentUser || currentUser.id !== ADMIN_ID) return;
+            if (!confirm('Delete this message?')) return;
+            try {
+                const res = await fetch(SUPABASE_URL + '/rest/v1/messages?id=eq.' + id, {
+                    method: 'DELETE',
+                    headers: sbHeaders()
+                });
+                if (res.ok) await loadChatMessages();
+                else console.error('Delete failed:', res.status);
+            } catch(e) { console.error('Delete error:', e); }
+        };
+
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.chat-delete-btn');
             if (!btn) return;
             const id = btn.getAttribute('data-msgid');
-            if (id) window.deleteChatMessage(id);
+            if (id && window.deleteChatMessage) window.deleteChatMessage(id);
         });
 
         async function sendChatMessage() {
@@ -3546,6 +3540,8 @@
             setInterval(updateWipeCountdown, 1000);
             buildWipeCalendar();
             checkLiveDrops();
+            initPageFromURL();
+            initChangelogBadge();
             setInterval(checkLiveDrops, 10 * 60 * 1000);
 
             // Init retention features
