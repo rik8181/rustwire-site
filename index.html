@@ -3360,12 +3360,9 @@
             sendBtn.disabled = true;
             sendBtn.textContent = 'Sending...';
             try {
-                const avatarUrl = currentUser.avatar
-                    ? `https://cdn.discordapp.com/avatars/${currentUser.id}/${currentUser.avatar}.png?size=64`
-                    : null;
                 await sbPost('messages', {
                     username: currentUser.global_name || currentUser.username || 'User',
-                    avatar_url: avatarUrl,
+                    avatar_url: currentUser.avatar || null,
                     content: msg
                 });
                 input.value = '';
