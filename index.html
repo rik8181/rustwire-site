@@ -89,6 +89,134 @@
             --muted: #5A5550;
             --white: #F0EBE3;
             --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --nav-bg: rgba(10, 10, 10, 0.95);
+            --card-bg: rgba(255,255,255,0.03);
+            --input-bg: rgba(255,255,255,0.05);
+            --code-bg: rgba(0,0,0,0.4);
+        }
+
+        /* ============================================================
+           LIGHT MODE
+           ============================================================ */
+        html.light {
+            --bg: #F4F1EE;
+            --bg2: #EAE6E1;
+            --bg3: #FFFFFF;
+            --text: #1C1A18;
+            --muted: #7A7470;
+            --white: #1C1A18;
+            --border: rgba(206, 66, 43, 0.2);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --nav-bg: rgba(244, 241, 238, 0.97);
+            --card-bg: rgba(255,255,255,0.7);
+            --input-bg: rgba(0,0,0,0.04);
+            --code-bg: rgba(0,0,0,0.06);
+        }
+
+        html.light body { background: var(--bg); color: var(--text); }
+        html.light #particleCanvas { opacity: 0.12; }
+        html.light .hazard { opacity: 0.03; }
+        html.light ::-webkit-scrollbar-track { background: var(--bg2); }
+
+        html.light nav {
+            background: var(--nav-bg) !important;
+            border-bottom-color: var(--border);
+        }
+
+        html.light .hero {
+            background: linear-gradient(135deg, #F4F1EE 0%, #EAE6E1 50%, #F0EBE3 100%) !important;
+        }
+
+        html.light .hero-bg { opacity: 0.04 !important; }
+
+        html.light .stat-card,
+        html.light .feature-card,
+        html.light .cmd-card,
+        html.light .changelog-entry,
+        html.light .calc-box,
+        html.light .wipe-cal-day,
+        html.light .privacy-block,
+        html.light .chat-panel,
+        html.light .dash-card,
+        html.light .countdown-box {
+            background: var(--card-bg) !important;
+            border-color: var(--border) !important;
+        }
+
+        html.light .stat-card:hover,
+        html.light .feature-card:hover { background: rgba(255,255,255,0.9) !important; }
+
+        html.light .cmd-tag {
+            background: rgba(206,66,43,0.1) !important;
+            color: var(--rust) !important;
+        }
+
+        html.light .section-tag {
+            background: rgba(206,66,43,0.1) !important;
+            color: var(--rust) !important;
+        }
+
+        html.light .cmd-search,
+        html.light .calc-input,
+        html.light .chat-input-box {
+            background: var(--input-bg) !important;
+            border-color: var(--border) !important;
+            color: var(--text) !important;
+        }
+
+        html.light .lang-dropdown,
+        html.light .nav-mobile {
+            background: rgba(244,241,238,0.98) !important;
+            border-color: var(--border) !important;
+        }
+
+        html.light .lang-option { color: var(--muted) !important; }
+        html.light .lang-option:hover { background: rgba(229,98,26,0.08) !important; color: var(--text) !important; }
+        html.light .lang-option.active { color: var(--orange) !important; }
+
+        html.light pre,
+        html.light code,
+        html.light .cmd-usage {
+            background: var(--code-bg) !important;
+            color: var(--rust) !important;
+        }
+
+        html.light .wipe-cal-day.today { background: var(--orange) !important; color: #fff !important; }
+        html.light .wipe-cal-day.wipe-day { background: rgba(206,66,43,0.15) !important; border-color: var(--rust) !important; }
+
+        html.light .chat-msg-bubble { background: rgba(255,255,255,0.8) !important; color: var(--text) !important; }
+        html.light .chat-msg-bubble.own { background: rgba(206,66,43,0.15) !important; }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: rgba(229,98,26,0.08);
+            border: 1px solid rgba(229,98,26,0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            transition: all 0.3s ease !important;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--orange);
+            background: rgba(229,98,26,0.15);
+            transform: rotate(20deg);
+        }
+
+        /* Smooth theme transitions */
+        body, nav, .stat-card, .feature-card, .cmd-card, .changelog-entry,
+        .calc-box, .countdown-box, .hero, .lang-dropdown, .nav-mobile,
+        .chat-panel, .chat-msg-bubble, .wipe-cal-day, .privacy-block {
+            transition: background 0.35s ease, color 0.35s ease,
+                        border-color 0.35s ease, box-shadow 0.35s ease !important;
         }
 
         html {
@@ -248,9 +376,9 @@
             justify-content: space-between;
             padding: 0 24px;
             height: 60px;
-            background: rgba(10, 10, 10, 0.95);
+            background: var(--nav-bg);
             backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(229, 98, 26, 0.15);
+            border-bottom: 1px solid var(--border);
         }
 
         .nav-brand {
@@ -395,7 +523,7 @@
             top: 66px;
             left: 0;
             right: 0;
-            background: rgba(10, 10, 10, 0.98);
+            background: var(--nav-bg);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(229, 98, 26, 0.15);
             padding: 16px 24px;
@@ -2714,6 +2842,8 @@
             </div>
         </div>
 
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle light/dark mode" onclick="toggleTheme()">🌙</button>
+
         <button class="nav-hamburger" id="hamburgerBtn" aria-label="Menu">
             <span></span><span></span><span></span>
         </button>
@@ -3890,6 +4020,27 @@
 
 
 
+
+        // ── Theme Toggle ─────────────────────────────────────────────
+        function toggleTheme() {
+            const isLight = document.documentElement.classList.toggle('light');
+            localStorage.setItem('rw-theme', isLight ? 'light' : 'dark');
+            document.getElementById('themeToggle').textContent = isLight ? '☀️' : '🌙';
+        }
+
+        (function initTheme() {
+            const saved = localStorage.getItem('rw-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const useLight = saved === 'light' || (!saved && !prefersDark);
+            if (useLight) {
+                document.documentElement.classList.add('light');
+            }
+            // Set icon after DOM ready
+            document.addEventListener('DOMContentLoaded', function() {
+                const btn = document.getElementById('themeToggle');
+                if (btn) btn.textContent = document.documentElement.classList.contains('light') ? '☀️' : '🌙';
+            });
+        })();
 
         // ── Cookie Consent ──────────────────────────────────────────
         function hideCookieBanner() {
