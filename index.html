@@ -156,6 +156,29 @@
             color: var(--rust) !important;
         }
 
+        html.light { --cmd-item-border: rgba(0,0,0,0.13); }
+
+        html.light .cmd-acc-item {
+            background: rgba(255,255,255,0.6);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        html.light .cmd-acc-btn {
+            background: transparent;
+            color: var(--text);
+        }
+
+        html.light .cmd-acc-btn:hover {
+            background: rgba(229,98,26,0.04) !important;
+        }
+
+        html.light .cmd-acc-btn.active {
+            background: rgba(206,66,43,0.06) !important;
+        }
+
+        html.light .cmd-acc-label { color: var(--text); }
+        html.light .cmd-acc-arrow { color: var(--muted); }
+
         html.light .cmd-search,
         html.light .calc-input,
         html.light .chat-input-box {
@@ -3090,7 +3113,7 @@
             margin-top: 32px;
         }
         .cmd-acc-item {
-            border: 1px solid rgba(255,255,255,0.07);
+            border: 1px solid var(--cmd-item-border, rgba(255,255,255,0.07));
             border-radius: 10px;
             overflow: hidden;
             transition: border-color 0.2s;
