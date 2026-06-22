@@ -2053,13 +2053,9 @@
             line-height: 1;
         }
 
-        /* Tooltip */
-        .vstats-flag-item::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%) scale(0.85);
+        /* Tooltip — rendered via JS to avoid viewport clipping */
+        .vstats-tooltip {
+            position: fixed;
             background: rgba(10,10,10,0.95);
             color: #fff;
             font-size: 12px;
@@ -2070,31 +2066,13 @@
             border: 1px solid rgba(229,98,26,0.3);
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.15s ease, transform 0.15s ease;
-            z-index: 10;
+            transition: opacity 0.12s ease;
+            z-index: 9999;
         }
 
-        .vstats-flag-item::before {
-            content: '';
-            position: absolute;
-            bottom: calc(100% + 3px);
-            left: 50%;
-            transform: translateX(-50%);
-            border: 5px solid transparent;
-            border-top-color: rgba(10,10,10,0.95);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.15s ease;
-            z-index: 10;
-        }
+        .vstats-tooltip.visible { opacity: 1; }
 
-        .vstats-flag-item:hover::after,
-        .vstats-flag-item:hover::before {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-        }
-
-        html.light .vstats-flag-item::after {
+        html.light .vstats-tooltip {
             background: rgba(28,26,24,0.95);
         }
 
@@ -4754,8 +4732,52 @@
         }
 
         // Load & render visitor stats
-        const VSTATS_INITIAL = 12; // flags shown before "show all"
-        let vstatsAllData = [];    // cache for current period
+        const VSTATS_INITIAL = 12;
+        let vstatsAllData = [];
+
+        // ── JS Tooltip (viewport-aware) ───────────────────────────────
+        (function() {
+            const tip = document.createElement('div');
+            tip.className = 'vstats-tooltip';
+            document.body.appendChild(tip);
+
+            let currentTarget = null;
+
+            document.addEventListener('mouseover', function(e) {
+                const item = e.target.closest('.vstats-flag-item');
+                if (!item || !item.dataset.tooltip) return;
+                currentTarget = item;
+                tip.textContent = item.dataset.tooltip;
+                tip.classList.add('visible');
+                positionTip(item);
+            });
+
+            document.addEventListener('mouseout', function(e) {
+                const item = e.target.closest('.vstats-flag-item');
+                if (!item) return;
+                tip.classList.remove('visible');
+                currentTarget = null;
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (!currentTarget) return;
+                positionTip(currentTarget);
+            });
+
+            function positionTip(item) {
+                const rect = item.getBoundingClientRect();
+                const tw = tip.offsetWidth;
+                const th = tip.offsetHeight;
+                // Center above the flag, but clamp to viewport
+                let left = rect.left + rect.width / 2 - tw / 2;
+                let top  = rect.top - th - 8;
+                const pad = 8;
+                left = Math.max(pad, Math.min(left, window.innerWidth - tw - pad));
+                if (top < pad) top = rect.bottom + 8; // flip below if no room above
+                tip.style.left = left + 'px';
+                tip.style.top  = top  + 'px';
+            }
+        })();
 
         function renderVstatsGrid(sorted, showAll) {
             const listEl = document.getElementById('vstatsCountryList');
