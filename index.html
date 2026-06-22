@@ -1845,6 +1845,68 @@
         }
 
 
+
+        /* Rate cards */
+        .rate-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 900px) { .rate-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 601px) and (max-width: 900px) { .rate-grid { grid-template-columns: 1fr 1fr; } }
+
+        .rate-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 24px;
+            text-decoration: none;
+            transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .rate-card:hover {
+            border-color: var(--orange);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(229,98,26,0.1);
+        }
+
+        .rate-card--main {
+            border-color: rgba(229,98,26,0.35);
+            background: rgba(229,98,26,0.05);
+        }
+
+        .rate-card--main:hover {
+            border-color: var(--orange);
+            background: rgba(229,98,26,0.08);
+        }
+
+        .rate-card-icon { font-size: 28px; }
+
+        .rate-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .rate-card-desc {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .rate-card-cta {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--orange);
+            margin-top: 4px;
+        }
+
         /* ============================================================
            VISITOR STATS
            ============================================================ */
@@ -3639,8 +3701,8 @@
                     <div class="how-step reveal reveal-delay-2">
                         <div class="how-num">02</div>
                         <div class="how-icon">⚙️</div>
-                        <div class="how-title">Run /wire setupchannels</div>
-                        <div class="how-desc">One command creates all feed channels automatically — drops, skins, commits, bans.</div>
+                        <div class="how-title">Use commands or set up channels</div>
+                        <div class="how-desc">Ask for info anytime with slash commands — or optionally run <code>/wire setupchannels</code> to get automatic feed channels for drops, skins, and more.</div>
                     </div>
                     <div class="how-connector reveal reveal-delay-3">──────</div>
                     <div class="how-step reveal reveal-delay-3">
@@ -3654,53 +3716,32 @@
         </div>
 
         <!-- ============================================================
-        TESTIMONIALS
+        RATE US
         ============================================================ -->
         <div class="divider"></div>
         <div class="section testimonials-section">
             <div class="section-inner">
-                <div class="section-label">// from the wasteland</div>
-                <h2 class="section-title reveal">Trusted by survivors<br />across 100+ servers.</h2>
-                <div class="testimonials-grid">
-                    <div class="testi-card reveal reveal-delay-1">
-                        <div class="testi-stars">★★★★★</div>
-                        <div class="testi-text">"Finally a bot that actually keeps up with drops. We never miss a Twitch campaign anymore. The setup was insanely easy — one command and everything just worked."</div>
-                        <div class="testi-author">
-                            <div class="testi-avatar" style="background:linear-gradient(135deg,#7289da,#5865f2);">S</div>
-                            <div>
-                                <div class="testi-name">SteelWolf</div>
-                                <div class="testi-server">Admin · 2,400 member server</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testi-card reveal reveal-delay-2">
-                        <div class="testi-stars">★★★★★</div>
-                        <div class="testi-text">"The raid calculator alone is worth adding this bot. We use it every wipe to plan our offline raids. Ban check saved us from letting a cheater into our team twice."</div>
-                        <div class="testi-author">
-                            <div class="testi-avatar" style="background:linear-gradient(135deg,#ce421b,#e8621a);">R</div>
-                            <div>
-                                <div class="testi-name">RaidLeader_88</div>
-                                <div class="testi-server">Owner · Competitive clan</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="testi-card reveal reveal-delay-3">
-                        <div class="testi-stars">★★★★★</div>
-                        <div class="testi-text">"Been running Rust community servers for 3 years. RustWire replaced 4 different bots we were running. The content filter alone is a game changer for community safety."</div>
-                        <div class="testi-author">
-                            <div class="testi-avatar" style="background:linear-gradient(135deg,#43b581,#2ecc71);">K</div>
-                            <div>
-                                <div class="testi-name">KuroAdmin</div>
-                                <div class="testi-server">Founder · RustCraft Network</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="testi-topgg reveal" style="margin-top:40px;text-align:center;">
-                    <a href="https://top.gg/bot/1418440547441573900" target="_blank" rel="noopener" class="topgg-badge">
-                        <span class="topgg-icon">⭐</span>
-                        <span>Rated on Top.gg</span>
-                        <span class="topgg-arrow">→</span>
+                <div class="section-label">// community</div>
+                <h2 class="section-title reveal">Using RustWire?<br />Let the wasteland know.</h2>
+                <p class="section-desc">Drop a rating on Top.gg — it helps other server admins find the bot and keeps development going.</p>
+                <div class="rate-grid reveal">
+                    <a href="https://top.gg/bot/1418440547441573900#reviews" target="_blank" rel="noopener" class="rate-card rate-card--main">
+                        <div class="rate-card-icon">⭐</div>
+                        <div class="rate-card-title">Rate on Top.gg</div>
+                        <div class="rate-card-desc">Takes 10 seconds. Means a lot.</div>
+                        <div class="rate-card-cta">Leave a review →</div>
+                    </a>
+                    <a href="https://discord.gg/Ws44MGuKGq" target="_blank" rel="noopener" class="rate-card">
+                        <div class="rate-card-icon">💬</div>
+                        <div class="rate-card-title">Join the Discord</div>
+                        <div class="rate-card-desc">Share feedback, report bugs, or just hang out with the community.</div>
+                        <div class="rate-card-cta">Join server →</div>
+                    </a>
+                    <a href="https://top.gg/bot/1418440547441573900/vote" target="_blank" rel="noopener" class="rate-card">
+                        <div class="rate-card-icon">🗳️</div>
+                        <div class="rate-card-title">Vote on Top.gg</div>
+                        <div class="rate-card-desc">Vote every 12 hours to boost RustWire in the rankings.</div>
+                        <div class="rate-card-cta">Vote now →</div>
                     </a>
                 </div>
             </div>
@@ -3723,7 +3764,7 @@
                     <span>✓ No credit card</span>
                     <span>✓ Instant setup</span>
                     <span>✓ 24/7 uptime</span>
-                    <span>✓ 100+ servers trust us</span>
+                    <span>✓ Growing community</span>
                 </div>
             </div>
         </div>
@@ -3916,7 +3957,7 @@
                 <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary ripple-btn" style="font-size:16px;padding:18px 40px;" data-i18n="cta_btn_enlist">Enlist Free →</a>
                 <a href="https://discord.gg/Ws44MGuKGq" target="_blank" class="btn-outline ripple-btn" style="font-size:16px;padding:18px 40px;" data-i18n="cta_btn_join">Join Community</a>
             </div>
-            <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-top:24px;" data-i18n="cta_stats">10,000+ users · 100+ servers · 24/7 uptime</p>
+            <p style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--muted);margin-top:24px;" data-i18n="cta_stats">Free forever · 24/7 uptime · Always improving</p>
         </div>
     </div>
 
@@ -5206,7 +5247,7 @@
                     "cta_desc": "Free. No credit card. No ads. Just Rust intel,\ndelivered straight to your Discord server.",
                     "cta_btn_enlist": "Enlist Free →",
                     "cta_btn_join": "Join Community",
-                    "cta_stats": "10,000+ users · 100+ servers · 24/7 uptime",
+                    "cta_stats": "Free forever · 24/7 uptime · Always improving",
                     "stat_users": "Users",
                     "stat_servers_label": "Servers",
                     "stat_uptime": "Uptime",
@@ -6086,7 +6127,7 @@
                     "cta_desc": "完全免费。无需信用卡。没有广告。\n只有你需要的 Rust 资讯，直达你的 Discord 服务器。",
                     "cta_btn_enlist": "免费加入 →",
                     "cta_btn_join": "加入社区",
-                    "cta_stats": "10,000+ 用户 · 100+ 服务器 · 24/7 在线",
+                    "cta_stats": "永久免费 · 24/7 在线 · 持续更新",
                     "stat_users": "用户数",
                     "stat_servers_label": "服务器数",
                     "stat_uptime": "在线率",
