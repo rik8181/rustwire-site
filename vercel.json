@@ -1,9 +1,9 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
     { "source": "/pair", "destination": "/pair.html" },
-    { "source": "/start", "destination": "/start.html" }
+    { "source": "/start", "destination": "/start.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
     {
