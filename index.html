@@ -459,13 +459,13 @@
            ============================================================ */
         .page {
             display: none !important;
-            animation: fadeIn 0.5s ease;
             padding-top: 80px;
             min-height: 100vh;
         }
 
         .page.active {
             display: block !important;
+            animation: fadeIn 0.5s ease;
         }
 
         @keyframes fadeIn {
@@ -3295,7 +3295,7 @@
         </div>
         <div class="footer-col">
             <div class="footer-col-title" data-i18n="footer_legal">Legal</div>
-            <a href="#privacy" onclick="showPage('privacy')" data-i18n="footer_privacy">Privacy Policy</a>
+            <a onclick="showPage('privacy')" data-i18n="footer_privacy">Privacy Policy</a>
         </div>
         <div class="footer-col">
             <div class="footer-col-title">// Status</div>
@@ -3323,6 +3323,10 @@
 
         function showPage(page) {
             console.log('➜ showPage called:', page);
+
+            // If already on this page, do nothing
+            const current = document.querySelector('.page.active');
+            if (current && current.id === 'page-' + page) return;
 
             // Hide all pages
             pageNames.forEach(p => {
@@ -3787,6 +3791,11 @@
         // =============================================================
         // INIT
         // =============================================================
+        // Run page routing immediately (sync) so there's never a flash of white
+        document.addEventListener('DOMContentLoaded', function() {
+            initPageFromURL();
+        });
+
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('🚀 DOM fully loaded!');
 
@@ -3870,15 +3879,9 @@
             setInterval(updateWipeCountdown, 1000);
             buildWipeCalendar();
             checkLiveDrops();
-            initPageFromURL();
             initChangelogBadge();
             initCookieBanner();
             setInterval(checkLiveDrops, 10 * 60 * 1000);
-
-            // Init retention features
-            initChangelogBadge();
-            initCookieBanner();
-            initPageFromURL();
             if (DROP_CAMPAIGN_ACTIVE) {
                 updateDropTimer();
                 setInterval(updateDropTimer, 1000);
