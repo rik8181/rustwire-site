@@ -1600,6 +1600,422 @@
             flex-wrap: wrap;
         }
 
+
+        /* ============================================================
+           HOW IT WORKS
+           ============================================================ */
+        .how-section { padding: 80px 0; }
+
+        .how-grid {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-top: 48px;
+            position: relative;
+        }
+
+        .how-step {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 36px 28px;
+            position: relative;
+            transition: border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .how-step:hover {
+            border-color: var(--orange);
+            transform: translateY(-4px);
+        }
+
+        .how-num {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--orange);
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 12px;
+        }
+
+        .how-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .how-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 10px;
+        }
+
+        .how-desc {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .how-connector {
+            flex: 0 0 48px;
+            text-align: center;
+            color: var(--orange);
+            font-size: 18px;
+            opacity: 0.4;
+            letter-spacing: -4px;
+            padding-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .how-grid { flex-direction: column; gap: 16px; }
+            .how-connector { transform: rotate(90deg); flex: 0 0 24px; padding: 0; }
+        }
+
+        /* ============================================================
+           TESTIMONIALS
+           ============================================================ */
+        .testimonials-section { padding: 80px 0; }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+
+        @media (max-width: 900px) { .testimonials-grid { grid-template-columns: 1fr; } }
+        @media (min-width: 901px) and (max-width: 1100px) { .testimonials-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .testi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .testi-card:hover {
+            border-color: var(--orange);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(229, 98, 26, 0.08);
+        }
+
+        .testi-stars {
+            color: var(--yellow);
+            font-size: 14px;
+            letter-spacing: 2px;
+        }
+
+        .testi-text {
+            font-size: 14px;
+            color: var(--text);
+            line-height: 1.7;
+            flex: 1;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .testi-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .testi-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .testi-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .testi-server {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .topgg-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 115, 50, 0.08);
+            border: 1px solid rgba(255, 115, 50, 0.25);
+            border-radius: 8px;
+            padding: 12px 24px;
+            color: var(--orange);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .topgg-badge:hover {
+            background: rgba(255, 115, 50, 0.15);
+            border-color: var(--orange);
+            transform: translateY(-2px);
+        }
+
+        .topgg-icon { font-size: 18px; }
+        .topgg-arrow { opacity: 0.6; }
+
+        /* ============================================================
+           FINAL CTA BANNER
+           ============================================================ */
+        .cta-banner-section {
+            padding: 80px 24px;
+            background: linear-gradient(135deg, rgba(206,66,43,0.06) 0%, rgba(232,98,26,0.04) 50%, rgba(206,66,43,0.06) 100%);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        html.light .cta-banner-section {
+            background: linear-gradient(135deg, rgba(206,66,43,0.05) 0%, rgba(232,98,26,0.03) 50%, rgba(206,66,43,0.05) 100%);
+        }
+
+        .cta-banner-inner {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .cta-banner-tag {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            color: var(--orange);
+            font-family: 'Share Tech Mono', monospace;
+            margin-bottom: 20px;
+        }
+
+        .cta-banner-title {
+            font-size: clamp(32px, 5vw, 52px);
+            font-weight: 900;
+            line-height: 1.15;
+            color: var(--white);
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .cta-banner-desc {
+            font-size: 16px;
+            color: var(--muted);
+            margin-bottom: 36px;
+            line-height: 1.6;
+        }
+
+        .cta-banner-btns {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .cta-banner-stat {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: var(--muted);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .cta-banner-stat span { display: flex; align-items: center; gap: 6px; }
+
+        @media (max-width: 600px) {
+            .cta-banner-btns { flex-direction: column; align-items: center; }
+            .cta-banner-stat { gap: 12px; }
+        }
+
+
+        /* ============================================================
+           VISITOR STATS
+           ============================================================ */
+        .visitor-stats-section { padding: 80px 0; }
+
+        .visitor-stats-wrap {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 40px;
+            backdrop-filter: blur(8px);
+        }
+
+        .vstats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 28px;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .vstats-total {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+
+        .vstats-total-num {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--orange);
+            font-family: 'Share Tech Mono', monospace;
+            line-height: 1;
+        }
+
+        .vstats-total-label {
+            font-size: 13px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .vstats-period-tabs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .vstats-tab {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .vstats-tab:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .vstats-tab.active {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: #fff;
+        }
+
+        .vstats-body {
+            padding: 8px 0;
+            min-height: 220px;
+        }
+
+        .vstats-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 60px 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .vstats-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-top-color: var(--orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .vstats-row {
+            display: grid;
+            grid-template-columns: 32px 1fr auto auto;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 28px;
+            border-bottom: 1px solid rgba(229,98,26,0.05);
+            transition: background 0.15s ease;
+        }
+
+        .vstats-row:last-child { border-bottom: none; }
+
+        .vstats-row:hover { background: rgba(229,98,26,0.04); }
+
+        .vstats-flag {
+            font-size: 22px;
+            line-height: 1;
+            text-align: center;
+        }
+
+        .vstats-country {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .vstats-bar-wrap {
+            width: 160px;
+            height: 5px;
+            background: rgba(229,98,26,0.1);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .vstats-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--rust), var(--orange));
+            border-radius: 99px;
+            transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
+        }
+
+        .vstats-count {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--orange);
+            font-family: 'Share Tech Mono', monospace;
+            min-width: 40px;
+            text-align: right;
+        }
+
+        .vstats-footer {
+            padding: 14px 28px;
+            border-top: 1px solid var(--border);
+            font-size: 11px;
+            color: var(--muted);
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        .vstats-empty {
+            text-align: center;
+            padding: 60px 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .vstats-bar-wrap { width: 80px; }
+            .vstats-row { padding: 10px 16px; gap: 8px; }
+            .vstats-header { padding: 16px; }
+        }
+
         /* ============================================================
            FOOTER
            ============================================================ */
@@ -3202,6 +3618,152 @@
                 </div>
             </div>
         </div>
+
+        <!-- ============================================================
+        HOW IT WORKS
+        ============================================================ -->
+        <div class="divider"></div>
+        <div class="section how-section">
+            <div class="section-inner">
+                <div class="section-label">// setup</div>
+                <h2 class="section-title reveal">Up and running<br />in 60 seconds.</h2>
+                <p class="section-desc">No coding. No config files. Three clicks and your server is wired.</p>
+                <div class="how-grid">
+                    <div class="how-step reveal reveal-delay-1">
+                        <div class="how-num">01</div>
+                        <div class="how-icon">➕</div>
+                        <div class="how-title">Add the bot</div>
+                        <div class="how-desc">Click "Add Bot" and authorize RustWire to your Discord server. Takes 10 seconds.</div>
+                    </div>
+                    <div class="how-connector reveal reveal-delay-2">──────</div>
+                    <div class="how-step reveal reveal-delay-2">
+                        <div class="how-num">02</div>
+                        <div class="how-icon">⚙️</div>
+                        <div class="how-title">Run /wire setupchannels</div>
+                        <div class="how-desc">One command creates all feed channels automatically — drops, skins, commits, bans.</div>
+                    </div>
+                    <div class="how-connector reveal reveal-delay-3">──────</div>
+                    <div class="how-step reveal reveal-delay-3">
+                        <div class="how-num">03</div>
+                        <div class="how-icon">📡</div>
+                        <div class="how-title">You're live</div>
+                        <div class="how-desc">RustWire starts posting automatically. No manual updates, no missed drops.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        TESTIMONIALS
+        ============================================================ -->
+        <div class="divider"></div>
+        <div class="section testimonials-section">
+            <div class="section-inner">
+                <div class="section-label">// from the wasteland</div>
+                <h2 class="section-title reveal">Trusted by survivors<br />across 100+ servers.</h2>
+                <div class="testimonials-grid">
+                    <div class="testi-card reveal reveal-delay-1">
+                        <div class="testi-stars">★★★★★</div>
+                        <div class="testi-text">"Finally a bot that actually keeps up with drops. We never miss a Twitch campaign anymore. The setup was insanely easy — one command and everything just worked."</div>
+                        <div class="testi-author">
+                            <div class="testi-avatar" style="background:linear-gradient(135deg,#7289da,#5865f2);">S</div>
+                            <div>
+                                <div class="testi-name">SteelWolf</div>
+                                <div class="testi-server">Admin · 2,400 member server</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testi-card reveal reveal-delay-2">
+                        <div class="testi-stars">★★★★★</div>
+                        <div class="testi-text">"The raid calculator alone is worth adding this bot. We use it every wipe to plan our offline raids. Ban check saved us from letting a cheater into our team twice."</div>
+                        <div class="testi-author">
+                            <div class="testi-avatar" style="background:linear-gradient(135deg,#ce421b,#e8621a);">R</div>
+                            <div>
+                                <div class="testi-name">RaidLeader_88</div>
+                                <div class="testi-server">Owner · Competitive clan</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testi-card reveal reveal-delay-3">
+                        <div class="testi-stars">★★★★★</div>
+                        <div class="testi-text">"Been running Rust community servers for 3 years. RustWire replaced 4 different bots we were running. The content filter alone is a game changer for community safety."</div>
+                        <div class="testi-author">
+                            <div class="testi-avatar" style="background:linear-gradient(135deg,#43b581,#2ecc71);">K</div>
+                            <div>
+                                <div class="testi-name">KuroAdmin</div>
+                                <div class="testi-server">Founder · RustCraft Network</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="testi-topgg reveal" style="margin-top:40px;text-align:center;">
+                    <a href="https://top.gg/bot/1418440547441573900" target="_blank" rel="noopener" class="topgg-badge">
+                        <span class="topgg-icon">⭐</span>
+                        <span>Rated on Top.gg</span>
+                        <span class="topgg-arrow">→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        FINAL CTA BANNER
+        ============================================================ -->
+        <div class="divider"></div>
+        <div class="cta-banner-section">
+            <div class="cta-banner-inner reveal">
+                <div class="cta-banner-tag">// free. always.</div>
+                <h2 class="cta-banner-title">Wire your server.<br />Miss nothing.</h2>
+                <p class="cta-banner-desc">Join 100+ Rust servers already using RustWire. Free forever — no premium tiers, no paywalls.</p>
+                <div class="cta-banner-btns">
+                    <a href="https://discord.com/oauth2/authorize?client_id=1418440547441573900&permissions=8&scope=bot+applications.commands" class="btn-primary ripple-btn" style="font-size:16px;padding:16px 36px;">Enlist Free →</a>
+                    <a href="https://discord.gg/Ws44MGuKGq" target="_blank" class="btn-outline ripple-btn" style="font-size:16px;padding:16px 32px;"><i class="fab fa-discord"></i> Join Discord</a>
+                </div>
+                <div class="cta-banner-stat">
+                    <span>✓ No credit card</span>
+                    <span>✓ Instant setup</span>
+                    <span>✓ 24/7 uptime</span>
+                    <span>✓ 100+ servers trust us</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+        VISITOR STATS MAP
+        ============================================================ -->
+        <div class="divider"></div>
+        <div class="section visitor-stats-section">
+            <div class="section-inner">
+                <div class="section-label">// live intel</div>
+                <h2 class="section-title reveal">Where the wasteland connects from.</h2>
+                <p class="section-desc">Real-time visitor map — updated every time someone visits.</p>
+                <div class="visitor-stats-wrap reveal">
+                    <div class="vstats-header">
+                        <div class="vstats-total" id="vstatsTotalWrap">
+                            <span class="vstats-total-num" id="vstatsTotalNum">—</span>
+                            <span class="vstats-total-label">total visits</span>
+                        </div>
+                        <div class="vstats-period-tabs">
+                            <button class="vstats-tab active" onclick="setVstatsPeriod('all', this)">All time</button>
+                            <button class="vstats-tab" onclick="setVstatsPeriod('30d', this)">30 days</button>
+                            <button class="vstats-tab" onclick="setVstatsPeriod('7d', this)">7 days</button>
+                        </div>
+                    </div>
+                    <div class="vstats-body">
+                        <div class="vstats-list" id="vstatsCountryList">
+                            <div class="vstats-loading">
+                                <div class="vstats-spinner"></div>
+                                <span>Loading intel...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vstats-footer">
+                        <span id="vstatsUpdated">—</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- ============================================================
@@ -3457,6 +4019,9 @@
             // If already on this page, do nothing
             const current = document.querySelector('.page.active');
             if (current && current.id === 'page-' + page) return;
+
+            // Reload visitor stats when navigating to home
+            if (page === 'home') setTimeout(() => loadVstats(vstatsCurrentPeriod), 300);
 
             // Hide all pages
             pageNames.forEach(p => {
@@ -4011,6 +4576,7 @@
             checkLiveDrops();
             initChangelogBadge();
             initCookieBanner();
+            initVstats();
             setInterval(checkLiveDrops, 10 * 60 * 1000);
             if (DROP_CAMPAIGN_ACTIVE) {
                 updateDropTimer();
@@ -4041,6 +4607,128 @@
                 if (btn) btn.textContent = document.documentElement.classList.contains('light') ? '☀️' : '🌙';
             });
         })();
+
+
+        // ── Visitor Stats ─────────────────────────────────────────────
+        let vstatsCurrentPeriod = 'all';
+
+        // Country code → flag emoji
+        function countryFlag(cc) {
+            if (!cc || cc.length !== 2) return '🌍';
+            return String.fromCodePoint(
+                ...cc.toUpperCase().split('').map(c => 0x1F1E6 + c.charCodeAt(0) - 65)
+            );
+        }
+
+        // Track this visit (once per session)
+        async function trackVisit() {
+            if (sessionStorage.getItem('rw_tracked')) return;
+            try {
+                const geo = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
+                if (!geo.ok) return;
+                const d = await geo.json();
+                if (!d.country_code || d.error) return;
+
+                await fetch(SUPABASE_URL + '/rest/v1/visitor_stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        country_code: d.country_code,
+                        country_name: d.country_name || d.country_code,
+                        city: d.city || null
+                    })
+                });
+                sessionStorage.setItem('rw_tracked', '1');
+            } catch(e) {
+                // Silent fail — tracking is non-critical
+            }
+        }
+
+        // Load & render visitor stats
+        async function loadVstats(period) {
+            const listEl = document.getElementById('vstatsCountryList');
+            const totalEl = document.getElementById('vstatsTotalNum');
+            const updatedEl = document.getElementById('vstatsUpdated');
+            if (!listEl) return;
+
+            listEl.innerHTML = '<div class="vstats-loading"><div class="vstats-spinner"></div><span>Loading intel...</span></div>';
+
+            try {
+                let url = SUPABASE_URL + '/rest/v1/visitor_stats?select=country_code,country_name';
+                if (period === '7d') {
+                    url += '&visited_at=gte.' + new Date(Date.now() - 7*24*60*60*1000).toISOString();
+                } else if (period === '30d') {
+                    url += '&visited_at=gte.' + new Date(Date.now() - 30*24*60*60*1000).toISOString();
+                }
+                url += '&limit=5000';
+
+                const res = await fetch(url, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY
+                    }
+                });
+
+                if (!res.ok) throw new Error('fetch failed');
+                const rows = await res.json();
+
+                // Aggregate by country
+                const counts = {};
+                const names = {};
+                for (const r of rows) {
+                    counts[r.country_code] = (counts[r.country_code] || 0) + 1;
+                    names[r.country_code] = r.country_name;
+                }
+
+                const sorted = Object.entries(counts)
+                    .sort((a,b) => b[1] - a[1])
+                    .slice(0, 15);
+
+                const total = rows.length;
+                const max = sorted[0]?.[1] || 1;
+
+                totalEl.textContent = total.toLocaleString();
+
+                if (sorted.length === 0) {
+                    listEl.innerHTML = '<div class="vstats-empty">No visits recorded yet. Be the first! 🌍</div>';
+                    return;
+                }
+
+                listEl.innerHTML = sorted.map(([cc, cnt]) => `
+                    <div class="vstats-row">
+                        <span class="vstats-flag">${countryFlag(cc)}</span>
+                        <span class="vstats-country">${names[cc] || cc}</span>
+                        <div class="vstats-bar-wrap">
+                            <div class="vstats-bar" style="width:${Math.round(cnt/max*100)}%"></div>
+                        </div>
+                        <span class="vstats-count">${cnt}</span>
+                    </div>
+                `).join('');
+
+                updatedEl.textContent = '// last updated: ' + new Date().toLocaleTimeString();
+
+            } catch(e) {
+                listEl.innerHTML = '<div class="vstats-empty">Could not load data. Try again later.</div>';
+            }
+        }
+
+        function setVstatsPeriod(period, btn) {
+            vstatsCurrentPeriod = period;
+            document.querySelectorAll('.vstats-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            loadVstats(period);
+        }
+
+        // Init visitor tracking + stats when home page is visible
+        function initVstats() {
+            trackVisit();
+            loadVstats('all');
+        }
 
         // ── Cookie Consent ──────────────────────────────────────────
         function hideCookieBanner() {
