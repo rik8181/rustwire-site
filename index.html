@@ -1993,35 +1993,23 @@
             font-family: inherit;
         }
 
-        .vstats-tab:hover {
-            border-color: var(--orange);
-            color: var(--orange);
-        }
+        .vstats-tab:hover { border-color: var(--orange); color: var(--orange); }
+        .vstats-tab.active { background: var(--orange); border-color: var(--orange); color: #fff; }
 
-        .vstats-tab.active {
-            background: var(--orange);
-            border-color: var(--orange);
-            color: #fff;
-        }
-
-        .vstats-body {
-            padding: 8px 0;
-            min-height: 220px;
-        }
+        .vstats-body { padding: 24px 28px 16px; min-height: 120px; }
 
         .vstats-loading {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 12px;
-            padding: 60px 0;
+            padding: 48px 0;
             color: var(--muted);
             font-size: 13px;
         }
 
         .vstats-spinner {
-            width: 18px;
-            height: 18px;
+            width: 18px; height: 18px;
             border: 2px solid var(--border);
             border-top-color: var(--orange);
             border-radius: 50%;
@@ -2030,58 +2018,110 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .vstats-row {
-            display: grid;
-            grid-template-columns: 32px 1fr auto auto;
+        /* Flag grid */
+        .vstats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .vstats-flag-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            padding: 11px 28px;
-            border-bottom: 1px solid rgba(229,98,26,0.05);
-            transition: background 0.15s ease;
+            gap: 4px;
+            cursor: default;
         }
 
-        .vstats-row:last-child { border-bottom: none; }
-
-        .vstats-row:hover { background: rgba(229,98,26,0.04); }
-
-        .vstats-flag {
-            font-size: 22px;
+        .vstats-flag-emoji {
+            font-size: 30px;
             line-height: 1;
-            text-align: center;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25));
+            transition: transform 0.15s ease;
         }
 
-        .vstats-country {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--white);
+        .vstats-flag-item:hover .vstats-flag-emoji {
+            transform: scale(1.25);
         }
 
-        .vstats-bar-wrap {
-            width: 160px;
-            height: 5px;
-            background: rgba(229,98,26,0.1);
-            border-radius: 99px;
-            overflow: hidden;
-        }
-
-        .vstats-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--rust), var(--orange));
-            border-radius: 99px;
-            transition: width 0.8s cubic-bezier(0.22,1,0.36,1);
-        }
-
-        .vstats-count {
-            font-size: 13px;
+        .vstats-flag-count {
+            font-size: 11px;
             font-weight: 700;
-            color: var(--orange);
             font-family: 'Share Tech Mono', monospace;
-            min-width: 40px;
-            text-align: right;
+            color: var(--orange);
+            line-height: 1;
+        }
+
+        /* Tooltip */
+        .vstats-flag-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.85);
+            background: rgba(10,10,10,0.95);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(229,98,26,0.3);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            z-index: 10;
+        }
+
+        .vstats-flag-item::before {
+            content: '';
+            position: absolute;
+            bottom: calc(100% + 3px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(10,10,10,0.95);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 10;
+        }
+
+        .vstats-flag-item:hover::after,
+        .vstats-flag-item:hover::before {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        html.light .vstats-flag-item::after {
+            background: rgba(28,26,24,0.95);
+        }
+
+        /* Show more button */
+        .vstats-showmore {
+            margin-top: 16px;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            display: block;
+            width: 100%;
+        }
+
+        .vstats-showmore:hover {
+            border-color: var(--orange);
+            color: var(--orange);
         }
 
         .vstats-footer {
-            padding: 14px 28px;
+            padding: 12px 28px;
             border-top: 1px solid var(--border);
             font-size: 11px;
             color: var(--muted);
@@ -2090,15 +2130,15 @@
 
         .vstats-empty {
             text-align: center;
-            padding: 60px 0;
+            padding: 48px 0;
             color: var(--muted);
             font-size: 13px;
         }
 
         @media (max-width: 600px) {
-            .vstats-bar-wrap { width: 80px; }
-            .vstats-row { padding: 10px 16px; gap: 8px; }
             .vstats-header { padding: 16px; }
+            .vstats-body { padding: 16px; }
+            .vstats-flag-emoji { font-size: 26px; }
         }
 
         /* ============================================================
@@ -4714,8 +4754,34 @@
         }
 
         // Load & render visitor stats
-        async function loadVstats(period) {
+        const VSTATS_INITIAL = 12; // flags shown before "show all"
+        let vstatsAllData = [];    // cache for current period
+
+        function renderVstatsGrid(sorted, showAll) {
             const listEl = document.getElementById('vstatsCountryList');
+            if (!listEl) return;
+
+            const visible = showAll ? sorted : sorted.slice(0, VSTATS_INITIAL);
+            const hidden  = sorted.length - visible.length;
+
+            const flags = visible.map(([cc, cnt, name]) => `
+                <div class="vstats-flag-item" data-tooltip="${name} · ${cnt} visit${cnt !== 1 ? 's' : ''}">
+                    <span class="vstats-flag-emoji">${countryFlag(cc)}</span>
+                    <span class="vstats-flag-count">${cnt}</span>
+                </div>
+            `).join('');
+
+            const showMoreBtn = hidden > 0
+                ? `<button class="vstats-showmore" onclick="renderVstatsGrid(vstatsAllData, true)">
+                       Show all ${sorted.length} countries (${hidden} more) ↓
+                   </button>`
+                : '';
+
+            listEl.innerHTML = `<div class="vstats-grid">${flags}</div>${showMoreBtn}`;
+        }
+
+        async function loadVstats(period) {
+            const listEl  = document.getElementById('vstatsCountryList');
             const totalEl = document.getElementById('vstatsTotalNum');
             const updatedEl = document.getElementById('vstatsUpdated');
             if (!listEl) return;
@@ -4741,39 +4807,26 @@
                 if (!res.ok) throw new Error('fetch failed');
                 const rows = await res.json();
 
-                // Aggregate by country
-                const counts = {};
-                const names = {};
+                // Aggregate
+                const counts = {}, names = {};
                 for (const r of rows) {
                     counts[r.country_code] = (counts[r.country_code] || 0) + 1;
-                    names[r.country_code] = r.country_name;
+                    names[r.country_code]  = r.country_name;
                 }
 
-                const sorted = Object.entries(counts)
-                    .sort((a,b) => b[1] - a[1])
-                    .slice(0, 15);
+                vstatsAllData = Object.entries(counts)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([cc, cnt]) => [cc, cnt, names[cc] || cc]);
 
                 const total = rows.length;
-                const max = sorted[0]?.[1] || 1;
-
                 totalEl.textContent = total.toLocaleString();
 
-                if (sorted.length === 0) {
+                if (vstatsAllData.length === 0) {
                     listEl.innerHTML = '<div class="vstats-empty">No visits recorded yet. Be the first! 🌍</div>';
                     return;
                 }
 
-                listEl.innerHTML = sorted.map(([cc, cnt]) => `
-                    <div class="vstats-row">
-                        <span class="vstats-flag">${countryFlag(cc)}</span>
-                        <span class="vstats-country">${names[cc] || cc}</span>
-                        <div class="vstats-bar-wrap">
-                            <div class="vstats-bar" style="width:${Math.round(cnt/max*100)}%"></div>
-                        </div>
-                        <span class="vstats-count">${cnt}</span>
-                    </div>
-                `).join('');
-
+                renderVstatsGrid(vstatsAllData, false);
                 updatedEl.textContent = '// last updated: ' + new Date().toLocaleTimeString();
 
             } catch(e) {
@@ -4788,7 +4841,6 @@
             loadVstats(period);
         }
 
-        // Init visitor tracking + stats when home page is visible
         function initVstats() {
             trackVisit();
             loadVstats('all');
