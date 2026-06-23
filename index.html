@@ -1689,6 +1689,25 @@
             text-align: center;
         }
 
+
+        .cmd-row-category {
+            padding: 14px 16px 6px;
+            background: none;
+            border-bottom: none;
+            cursor: default;
+        }
+
+        .cmd-row-category:hover { background: none; }
+
+        .cmd-category-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--orange);
+            text-transform: uppercase;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
         /* ============================================================
            HOW IT WORKS
            ============================================================ */
@@ -3641,29 +3660,33 @@
                     <div class="cmd-acc-item" id="acc-rust">
                         <button class="cmd-acc-btn ripple-btn active" onclick="toggleCmdAcc('rust')" data-i18n="cmd_tab_rust">
                             <span class="cmd-acc-label">/rust</span>
-                            <span class="cmd-acc-meta">18 commands</span>
+                            <span class="cmd-acc-meta">22 commands</span>
                             <span class="cmd-acc-arrow">▾</span>
                         </button>
                         <div class="cmd-acc-panel open" id="cmd-rust">
                             <div class="cmd-list">
+                                <div class="cmd-row"><span class="cmd-name">/rust ping</span><span class="cmd-desc">Latency check — is the bot alive?</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust help</span><span class="cmd-desc">Show all available RustWire commands</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust drops</span><span class="cmd-desc">Post current Twitch Drop campaigns</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust kick-drops</span><span class="cmd-desc">Post current Kick Drop campaigns</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust skins</span><span class="cmd-desc">All available Rust store skins (region-aware)</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust dlc</span><span class="cmd-desc">All available Rust DLC with region-correct prices</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rust devblogs</span><span class="cmd-desc">Latest Facepunch Devblogs (posts last 3)</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust devblogs</span><span class="cmd-desc">Latest Facepunch Devblogs (posts last 3 to feed channel)</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust community</span><span class="cmd-desc">Latest Facepunch Community posts (posts last 3)</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust general</span><span class="cmd-desc">Latest Facepunch General posts (posts last 3)</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust commits</span><span class="cmd-desc">Latest Facepunch GitHub commits summary</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust oxide</span><span class="cmd-desc">Latest Oxide/uMod releases summary</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rust bans</span><span class="cmd-desc">Latest BattleMetrics org bans</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust bans</span><span class="cmd-desc">Latest BattleMetrics org bans (requires API key)</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust bancheck [steamid]</span><span class="cmd-desc">Check Steam VAC, Game, Community bans + BattleMetrics</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust playtime [steamid]</span><span class="cmd-desc">Rust hours, total Steam playtime, top 5 games</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust inventory [steamid]</span><span class="cmd-desc">Show Steam Rust inventory with market prices</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rust stats [steamid]</span><span class="cmd-desc">Detailed Rust player statistics via Steam</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust wipe</span><span class="cmd-desc">Next forced wipe countdown</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rust faq</span><span class="cmd-desc">Frequently asked Rust questions</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rust community</span><span class="cmd-desc">Latest Facepunch Community posts (last 3)</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rust general</span><span class="cmd-desc">Latest Facepunch General posts (last 3)</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust faq</span><span class="cmd-desc">Show RustWire FAQ</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices (e.g. GB, US) — admin only</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust filter [on/off]</span><span class="cmd-desc">Enable or disable content filter — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust setupchannels</span><span class="cmd-desc">Create or refresh feed channels — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust repopulate</span><span class="cmd-desc">Repost latest content to all feed channels — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust posthours</span><span class="cmd-desc">Post the Rust Hours verification card — admin only</span></div>
                             </div>
                         </div>
                     </div>
@@ -3671,20 +3694,16 @@
                     <div class="cmd-acc-item" id="acc-wire">
                         <button class="cmd-acc-btn ripple-btn" onclick="toggleCmdAcc('wire')" data-i18n="cmd_tab_wire">
                             <span class="cmd-acc-label">/wire</span>
-                            <span class="cmd-acc-meta">9 commands</span>
+                            <span class="cmd-acc-meta">5 commands</span>
                             <span class="cmd-acc-arrow">▾</span>
                         </button>
                         <div class="cmd-acc-panel" id="cmd-wire">
                             <div class="cmd-list">
-                                <div class="cmd-row"><span class="cmd-name">/wire setupchannels</span><span class="cmd-desc">Create or link feed channels — admin only</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wire repopulate</span><span class="cmd-desc">Repost latest content to all channels — admin only</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wire setregion [cc]</span><span class="cmd-desc">Set the store region for this server</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wire language set [lang]</span><span class="cmd-desc">Set server language for bot responses</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wire botstats</span><span class="cmd-desc">Bot statistics — owner only, ephemeral</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wire language set [lang]</span><span class="cmd-desc">Set server language for bot responses — admin only</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/wire language current</span><span class="cmd-desc">Show currently configured language</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/wire language list</span><span class="cmd-desc">List all available languages</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wire botstats</span><span class="cmd-desc">Bot statistics — owner only, ephemeral</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wire ping</span><span class="cmd-desc">Check if the bot is online and latency</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/setwelcome [channel]</span><span class="cmd-desc">Set welcome / leave message channel — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wire setwelcome [channel]</span><span class="cmd-desc">Set welcome / leave message channel — admin only</span></div>
                             </div>
                         </div>
                     </div>
@@ -3692,42 +3711,74 @@
                     <div class="cmd-acc-item" id="acc-tools">
                         <button class="cmd-acc-btn ripple-btn" onclick="toggleCmdAcc('tools')" data-i18n="cmd_tab_tools">
                             <span class="cmd-acc-label">Tools</span>
-                            <span class="cmd-acc-meta">30 commands</span>
+                            <span class="cmd-acc-meta">52 commands</span>
                             <span class="cmd-acc-arrow">▾</span>
                         </button>
                         <div class="cmd-acc-panel" id="cmd-tools">
                             <div class="cmd-list">
-                                <div class="cmd-row"><span class="cmd-name">/raid calculate [target]</span><span class="cmd-desc">Calculate explosives needed to raid a structure</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/raid compare [target]</span><span class="cmd-desc">Compare all raid methods side-by-side</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/raid plan [method] [amount]</span><span class="cmd-desc">Create a raid plan with material splitting for your team</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/raid materials [explosive]</span><span class="cmd-desc">Calculate materials needed to craft explosives</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">⚔️ Raid</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/raid calculate</span><span class="cmd-desc">Calculate raid cost for a structure</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/raid compare</span><span class="cmd-desc">Compare all raid methods side-by-side</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/raid plan</span><span class="cmd-desc">Create a raid plan with material splitting for your team</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/raid materials</span><span class="cmd-desc">Calculate materials needed to craft explosives</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">♻️ Recycle</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/recycle item [item]</span><span class="cmd-desc">Show what you get from recycling an item</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/recycle search [query]</span><span class="cmd-desc">Search recyclable items</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">🔨 Craft</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/craft recipe [item]</span><span class="cmd-desc">Show crafting recipe and materials needed</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/craft batch [item] [qty]</span><span class="cmd-desc">Calculate materials for batch crafting</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/craft team [item] [qty]</span><span class="cmd-desc">Split crafting materials among team members</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/craft search [query]</span><span class="cmd-desc">Search craftable items</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/blueprint add/remove/list</span><span class="cmd-desc">Track your learned blueprints</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">📋 Blueprint</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/blueprint add</span><span class="cmd-desc">Mark a blueprint as learned</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/blueprint remove</span><span class="cmd-desc">Remove a blueprint from your list</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/blueprint list</span><span class="cmd-desc">Show all your learned blueprints</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/blueprint team</span><span class="cmd-desc">Show all blueprints across your team</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/blueprint who [item]</span><span class="cmd-desc">Find who on the team has a specific blueprint</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/repair cost [item]</span><span class="cmd-desc">Calculate repair cost for an item at current condition</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/repair worth [item]</span><span class="cmd-desc">Compare repair cost vs crafting from scratch</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/smelt calculate [ore]</span><span class="cmd-desc">Calculate smelting output by furnace type</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/smelt compare [ore]</span><span class="cmd-desc">Compare all furnace types for smelting</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/upkeep calculate</span><span class="cmd-desc">Daily TC upkeep cost and how long resources last</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/upkeep decay [material]</span><span class="cmd-desc">How long until a structure decays without upkeep</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/cctv list</span><span class="cmd-desc">List all CCTV camera codes by monument</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/cctv search [query]</span><span class="cmd-desc">Search for CCTV codes by monument name</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/puzzle guide [monument]</span><span class="cmd-desc">Full puzzle walkthrough for a monument</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/puzzle keycard [color]</span><span class="cmd-desc">Keycard locations and required access info</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/puzzle difficulty [level]</span><span class="cmd-desc">List monuments by puzzle difficulty</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/vending alert [item]</span><span class="cmd-desc">Set a price alert for an item in vending machines</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/vending history [item]</span><span class="cmd-desc">View vending machine price history</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wipestats current</span><span class="cmd-desc">Show Cargo, Heli, CH47, Crate stats for this wipe</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/eventtimers</span><span class="cmd-desc">Estimated next event spawn based on last seen times</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/eventtoggle set [event]</span><span class="cmd-desc">Toggle Rust+ event notifications per type — admin only</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wipeschedule setup</span><span class="cmd-desc">Set up wipe schedule notifications — admin only</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/wipeschedule info</span><span class="cmd-desc">Show current wipe schedule configuration</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/blueprint search [query]</span><span class="cmd-desc">Search the blueprints database</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">🔧 Repair & Smelt</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/repair cost</span><span class="cmd-desc">Calculate repair cost for an item</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/repair worth</span><span class="cmd-desc">Compare repair cost vs crafting from scratch</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/smelt calculate</span><span class="cmd-desc">Calculate smelting output and fuel needed</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/smelt compare</span><span class="cmd-desc">Compare furnace efficiency side-by-side</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">🏠 Base & Upkeep</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/upkeep calculate</span><span class="cmd-desc">Daily TC upkeep cost + how long your resources last</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/upkeep decay</span><span class="cmd-desc">How long until a structure decays without upkeep</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">📍 Monuments & CCTV</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/puzzle guide</span><span class="cmd-desc">Get full monument puzzle walkthrough</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/puzzle list</span><span class="cmd-desc">List all monument guides</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/puzzle keycard</span><span class="cmd-desc">Keycard locations and colour info</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/puzzle difficulty</span><span class="cmd-desc">List monuments sorted by difficulty</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/cctv list</span><span class="cmd-desc">List all known CCTV codes</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/cctv search</span><span class="cmd-desc">Search for a specific CCTV code</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/cctv add</span><span class="cmd-desc">Add a custom CCTV code — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/cctv remove</span><span class="cmd-desc">Remove a custom CCTV code — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/cctv custom</span><span class="cmd-desc">View your server's custom CCTV codes</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">🛒 Vending & Market</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/vending alert</span><span class="cmd-desc">Set a price alert for an item</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/vending alerts</span><span class="cmd-desc">View your active price alerts</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/vending remove</span><span class="cmd-desc">Remove a price alert</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/vending history</span><span class="cmd-desc">View price history for an item</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">⏰ Wipe Schedule</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wipeschedule setup</span><span class="cmd-desc">Setup wipe schedule notifications — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wipeschedule info</span><span class="cmd-desc">Show current wipe schedule config</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wipeschedule post</span><span class="cmd-desc">Manually post next wipe notification</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wipeschedule enable</span><span class="cmd-desc">Enable wipe notifications — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wipeschedule disable</span><span class="cmd-desc">Disable wipe notifications — admin only</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">🏆 Leveling & Wipe Stats</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/leveling leaderboard</span><span class="cmd-desc">Top 10 XP leaderboard for this server</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/leveling toggle</span><span class="cmd-desc">Enable or disable the leveling system — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/leveling settings</span><span class="cmd-desc">Configure XP rates and level-up messages — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/leveling managexp</span><span class="cmd-desc">Add/remove/set XP for a user — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/leveling resetxp</span><span class="cmd-desc">Reset XP for a user or the whole server — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wipestats current</span><span class="cmd-desc">Show stats for the current wipe</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/wipestats setchannel</span><span class="cmd-desc">Set channel for automatic wipe summary — admin only</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">👥 LFG</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/lfg post</span><span class="cmd-desc">Create a Looking For Group post</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/lfg search</span><span class="cmd-desc">Search for teammates</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/lfg mypost</span><span class="cmd-desc">View or delete your LFG post</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/lfg rate</span><span class="cmd-desc">Rate a teammate after playing together</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/lfg profile</span><span class="cmd-desc">View a user's LFG profile and ratings</span></div>
                             </div>
                         </div>
                     </div>
@@ -3762,28 +3813,31 @@
                     <div class="cmd-acc-item" id="acc-rustplus">
                         <button class="cmd-acc-btn ripple-btn" onclick="toggleCmdAcc('rustplus')" data-i18n="cmd_tab_rustplus">
                             <span class="cmd-acc-label">Rust+</span>
-                            <span class="cmd-acc-meta">17 commands</span>
+                            <span class="cmd-acc-meta">13 commands</span>
                             <span class="cmd-acc-arrow">▾</span>
                         </button>
                         <div class="cmd-acc-panel" id="cmd-rustplus">
                             <div class="cmd-list">
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">⚙️ Setup</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus help</span><span class="cmd-desc">Show all Rust+ commands</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus setup</span><span class="cmd-desc">Connect your Rust+ server to Discord — admin only</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus config</span><span class="cmd-desc">Configure auto-updates channel and interval — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus config</span><span class="cmd-desc">Configure auto-update channel and interval — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus disconnect</span><span class="cmd-desc">Disconnect from Rust+ — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus reconnect</span><span class="cmd-desc">Reconnect to Rust+ — admin only</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">🗺️ Server Info</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus map</span><span class="cmd-desc">Show live map of your connected Rust server</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus info</span><span class="cmd-desc">Server info: population, map size, queue</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus time</span><span class="cmd-desc">Current in-game time</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus team</span><span class="cmd-desc">Show team members and their online status</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus monuments</span><span class="cmd-desc">List active monuments and their status</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus shops</span><span class="cmd-desc">List all vending machine shops on the map</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus switch [entity_id]</span><span class="cmd-desc">Control a smart switch remotely</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus events</span><span class="cmd-desc">Show active and recent in-game events</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus chat [message]</span><span class="cmd-desc">Send a message to in-game team chat from Discord</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus tracker</span><span class="cmd-desc">Track online/offline status of specific players</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus peaktime</span><span class="cmd-desc">Show peak player activity hours chart for this server</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus marker add/list/remove</span><span class="cmd-desc">Manage custom map markers (bases, loot, etc.)</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus status</span><span class="cmd-desc">Check Rust+ connection status</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus disconnect</span><span class="cmd-desc">Disconnect from Rust+ — admin only</span></div>
-                                <div class="cmd-row"><span class="cmd-name">/rustplus reconnect</span><span class="cmd-desc">Reconnect to Rust+ — admin only</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">👥 Team</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus team</span><span class="cmd-desc">Show team members and their online status</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus switch [entity_id]</span><span class="cmd-desc">Control a smart switch remotely</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus tracker</span><span class="cmd-desc">Track online/offline status of specific players</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus marker add</span><span class="cmd-desc">Add a custom map marker (base, loot, etc.)</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus marker list</span><span class="cmd-desc">List your saved map markers</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus marker remove</span><span class="cmd-desc">Remove a custom map marker</span></div>
                             </div>
                         </div>
                     </div>
