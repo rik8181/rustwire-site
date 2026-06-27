@@ -1108,7 +1108,10 @@
             max-height: 200px; object-fit: cover;
         }
         #feed-embed.open .fe-img {
-            animation: imgReveal 0.45s 0.25s cubic-bezier(0.22,1,0.36,1) both;
+            animation: none;
+        }
+        .fe-img.img-loaded {
+            animation: imgReveal 0.45s cubic-bezier(0.22,1,0.36,1) both !important;
         }
         @keyframes imgReveal {
             from { clip-path: inset(0 0 100% 0); filter: brightness(2) saturate(0); opacity: 0; }
@@ -5150,6 +5153,22 @@
                     const data = JSON.parse(store.textContent);
                     // Reset animations by replacing innerHTML
                     embedBody.innerHTML = data.ehtml;
+
+                    // Wait for image to load before animating it
+                    const img = embedBody.querySelector('.fe-img');
+                    if (img) {
+                        img.style.opacity = '0';
+                        const doReveal = () => {
+                            img.style.opacity = '';
+                            img.classList.add('img-loaded');
+                        };
+                        if (img.complete && img.naturalWidth) {
+                            doReveal();
+                        } else {
+                            img.addEventListener('load', doReveal, { once: true });
+                            img.addEventListener('error', doReveal, { once: true });
+                        }
+                    }
                     container.querySelectorAll('.feed-info-btn.fi-active').forEach(b=>b.classList.remove('fi-active'));
                     btn.classList.add('fi-active');
                     // Remove open first so animations restart
