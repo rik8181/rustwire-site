@@ -895,6 +895,7 @@
             padding: 8px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             font-family: 'Share Tech Mono', monospace;
+            position: relative;
         }
 
         .feed-item:last-child {
@@ -910,16 +911,273 @@
             font-size: 11px;
             color: var(--orange);
             margin: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
+        .feed-cmd-text { flex: 1; min-width: 0; }
+
+        /* ── Info button ── */
+        .feed-info-btn {
+            flex-shrink: 0;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            border: 1px solid rgba(206,66,43,0.5);
+            background: transparent;
+            color: rgba(206,66,43,0.8);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 9px;
+            line-height: 1;
+            cursor: pointer;
+            display: inline-flex; align-items: center; justify-content: center;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            padding: 0;
+            border-radius: 50%;
+        }
+        .feed-info-btn:hover, .feed-info-btn.fi-active {
+            background: var(--rust);
+            border-color: var(--rust);
+            color: #fff;
+        }
         .feed-sub {
             font-size: 10px;
             color: #4a4540;
             padding-left: 12px;
         }
+        .feed-sub::before { content: '└ '; }
 
-        .feed-sub::before {
-            content: '└ ';
+        /* ══════════════════════════════════════════════════════════
+           DISCORD EMBED POPUP — Premium Effects
+           ══════════════════════════════════════════════════════════ */
+
+        /* Backdrop — fade in with blur */
+        #feed-embed-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 8990;
+            background: rgba(0,0,0,0);
+            backdrop-filter: blur(0px);
+            -webkit-backdrop-filter: blur(0px);
+            pointer-events: none;
+            transition: background 0.3s ease, backdrop-filter 0.3s ease;
+        }
+        #feed-embed-backdrop.open {
+            background: rgba(0,0,0,0.72);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            pointer-events: auto;
+        }
+
+        /* Popup container */
+        #feed-embed {
+            position: fixed;
+            left: 50%; top: 50%;
+            z-index: 8995;
+            width: min(390px, calc(100vw - 24px));
+            max-height: 88vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+
+            background: #2b2d31;
+            border-left: 4px solid var(--rust);
+            border-radius: 4px;
+
+            /* Start state */
+            opacity: 0;
+            transform: translate(-50%, -48%) scale(0.92);
+            pointer-events: none;
+
+            transition:
+                opacity   0.28s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+
+            box-shadow:
+                0 0 0 1px rgba(206,66,43,0.0),
+                0 24px 80px rgba(0,0,0,0.0);
+        }
+        #feed-embed.open {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+            box-shadow:
+                0 0 0 1px rgba(206,66,43,0.25),
+                0 0 40px rgba(206,66,43,0.1),
+                0 24px 80px rgba(0,0,0,0.95),
+                0 4px 16px rgba(0,0,0,0.7);
+            animation: embedGlow 0.6s 0.2s ease forwards;
+        }
+        @keyframes embedGlow {
+            0%   { box-shadow: 0 0 0 1px rgba(206,66,43,0.6), 0 0 50px rgba(206,66,43,0.35), 0 24px 80px rgba(0,0,0,0.95); }
+            100% { box-shadow: 0 0 0 1px rgba(206,66,43,0.2), 0 0 20px rgba(206,66,43,0.08), 0 24px 80px rgba(0,0,0,0.95); }
+        }
+
+        /* Scanline sweep on open */
+        #feed-embed::before {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            height: 60px;
+            background: linear-gradient(to bottom, transparent, rgba(206,66,43,0.12), transparent);
+            pointer-events: none;
+            z-index: 10;
+            top: -60px;
+            opacity: 0;
+        }
+        #feed-embed.open::before {
+            animation: embedSweep 0.7s 0.15s ease forwards;
+        }
+        @keyframes embedSweep {
+            0%   { top: -60px; opacity: 1; }
+            100% { top: 110%;  opacity: 0; }
+        }
+
+        /* Left border pulse */
+        #feed-embed::after {
+            content: '';
+            position: absolute;
+            left: -4px; top: 0; bottom: 0; width: 4px;
+            background: var(--rust);
+            pointer-events: none;
+        }
+        #feed-embed.open::after {
+            animation: borderPulse 1s 0.1s ease forwards;
+        }
+        @keyframes borderPulse {
+            0%   { box-shadow: 0 0 16px 4px rgba(206,66,43,0.9); }
+            100% { box-shadow: 0 0 4px 1px rgba(206,66,43,0.2); }
+        }
+
+        /* ── Inner elements animate in staggered ── */
+        #feed-embed-body > * {
+            opacity: 0;
+            transform: translateY(8px);
+        }
+        #feed-embed.open #feed-embed-body > *:nth-child(1) { animation: feSlide 0.3s 0.12s cubic-bezier(0.22,1,0.36,1) forwards; }
+        #feed-embed.open #feed-embed-body > *:nth-child(2) { animation: feSlide 0.3s 0.18s cubic-bezier(0.22,1,0.36,1) forwards; }
+        #feed-embed.open #feed-embed-body > *:nth-child(3) { animation: feSlide 0.3s 0.23s cubic-bezier(0.22,1,0.36,1) forwards; }
+        #feed-embed.open #feed-embed-body > *:nth-child(4) { animation: feSlide 0.3s 0.27s cubic-bezier(0.22,1,0.36,1) forwards; }
+        #feed-embed.open #feed-embed-body > *:nth-child(5) { animation: feSlide 0.3s 0.31s cubic-bezier(0.22,1,0.36,1) forwards; }
+        #feed-embed.open #feed-embed-body > *:nth-child(6) { animation: feSlide 0.3s 0.34s cubic-bezier(0.22,1,0.36,1) forwards; }
+        @keyframes feSlide {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Header ── */
+        .fe-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 14px 14px 0;
+        }
+        .fe-icon {
+            width: 22px; height: 22px; border-radius: 50%;
+            object-fit: cover; flex-shrink: 0;
+            background: #111;
+            box-shadow: 0 0 0 2px rgba(206,66,43,0.3);
+        }
+        .fe-source {
+            font-size: 13px; font-weight: 600;
+            color: #fff; font-family: 'Inter', sans-serif;
+            letter-spacing: 0.2px;
+        }
+        .fe-source span { color: #949ba4; font-weight: 400; font-size: 12px; }
+
+        /* ── Title ── */
+        .fe-title {
+            padding: 8px 14px 4px;
+            font-size: 14px; font-weight: 600;
+            color: #00aff4;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.4;
+            display: block;
+        }
+
+        /* ── Description ── */
+        .fe-desc {
+            padding: 2px 14px 8px;
+            font-size: 13px; color: #dbdee1;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+        }
+
+        /* ── Image with reveal animation ── */
+        .fe-img-wrap {
+            overflow: hidden; margin: 6px 0 0;
+        }
+        .fe-img {
+            display: block; width: 100%;
+            max-height: 200px; object-fit: cover;
+        }
+        #feed-embed.open .fe-img {
+            animation: imgReveal 0.45s 0.25s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes imgReveal {
+            from { clip-path: inset(0 0 100% 0); filter: brightness(2) saturate(0); opacity: 0; }
+            to   { clip-path: inset(0 0 0% 0);   filter: brightness(1) saturate(1); opacity: 1; }
+        }
+
+        /* ── Footer ── */
+        .fe-footer {
+            padding: 8px 14px 12px;
+            font-size: 11px; color: #949ba4;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ── Code block ── */
+        .fe-code {
+            margin: 6px 14px 8px;
+            background: #1e1f22;
+            border: 1px solid #3b3d45;
+            border-radius: 3px;
+            padding: 9px 11px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 11px; color: #57f287;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            overflow: hidden;
+        }
+        /* Type-on shimmer */
+        #feed-embed.open .fe-code::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; bottom: 0; width: 60%;
+            background: linear-gradient(90deg, transparent, rgba(87,242,135,0.07), transparent);
+            animation: codeShimmer 0.8s 0.3s ease forwards;
+        }
+        @keyframes codeShimmer {
+            to { left: 150%; }
+        }
+
+        /* ── Field block ── */
+        .fe-field {
+            margin: 6px 14px 0;
+            background: #1e1f22;
+            border: 1px solid #3b3d45;
+            border-radius: 3px;
+            padding: 7px 11px;
+        }
+        .fe-field-label {
+            font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+            color: #dbdee1; margin-bottom: 3px;
+            font-family: 'Inter', sans-serif; text-transform: uppercase;
+        }
+        .fe-field-value { color: #57f287; font-size: 12px; font-family: 'Share Tech Mono', monospace; }
+
+        /* ── Close button ── */
+        .fe-close {
+            position: absolute; top: 8px; right: 10px;
+            background: none; border: none;
+            color: #5d6169; font-size: 20px;
+            cursor: pointer; line-height: 1;
+            padding: 3px 5px; border-radius: 4px;
+            transition: color 0.15s, background 0.15s, transform 0.15s;
+            z-index: 5;
+        }
+        .fe-close:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.08);
+            transform: rotate(90deg);
         }
 
         /* ============================================================
@@ -4601,6 +4859,13 @@
     <!-- ============================================================
     JAVASCRIPT
     ============================================================ -->
+    <!-- Feed Discord-style embed popup -->
+    <div id="feed-embed-backdrop"></div>
+    <div id="feed-embed" role="dialog" aria-modal="true">
+        <button class="fe-close" id="feed-embed-close" aria-label="Close">✕</button>
+        <div id="feed-embed-body"></div>
+    </div>
+
     <!-- LIGHTBOX -->
     <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Image viewer">
         <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">✕</button>
@@ -4758,18 +5023,27 @@
                 const json = await res.json();
                 if (json.status !== 'ok') return [];
                 return (json.items || []).slice(0, 2).map(item => ({
-                    title: item.title || '',
-                    date: item.pubDate || item.published || '',
+                    title:       item.title || '',
+                    date:        item.pubDate || item.published || '',
+                    link:        item.link || item.url || '',
+                    description: item.description ? item.description.replace(/<[^>]*>/g,'').slice(0, 180) : '',
+                    image:       item.thumbnail || item.enclosure?.link || '',
                 }));
             } catch { return []; }
         }
 
         async function fetchOxideLatest() {
             try {
-                const res = await fetch('https://api.github.com/repos/OxideMod/Oxide.Rust/releases/latest', { signal: AbortSignal
-                        .timeout(8000) });
+                const res = await fetch('https://api.github.com/repos/OxideMod/Oxide.Rust/releases/latest', { signal: AbortSignal.timeout(8000) });
                 const json = await res.json();
-                return [{ title: json.tag_name || 'Latest release', date: json.published_at || '' }];
+                return [{
+                    title:       json.tag_name || 'Latest release',
+                    date:        json.published_at || '',
+                    link:        json.html_url || 'https://github.com/OxideMod/Oxide.Rust/releases',
+                    body:        (json.body || 'Release notes on GitHub.').slice(0, 200),
+                    description: '',
+                    image:       '',
+                }];
             } catch { return []; }
         }
 
@@ -4788,11 +5062,49 @@
             return `T-${days}d ${hours}h ${mins}m remaining`;
         }
 
-        function makeFeedItem(time, cmd, sub) {
+        // Build Discord-style embed HTML per feed type
+        function buildEmbed(type, item) {
+            const fmtDate = d => { if (!d) return ''; const dt = new Date(d); return isNaN(dt) ? d : dt.toUTCString().replace('GMT','UTC'); };
+            if (type === 'devblog') return `
+                <div class="fe-header">
+                    <img class="fe-icon" src="https://store.steampowered.com/favicon.ico" alt="">
+                    <span class="fe-source">Rust News</span>
+                </div>
+                <div class="fe-title">${item.fullTitle}</div>
+                ${item.desc ? `<div class="fe-desc">${item.desc}${item.desc.length>=180?'…':''}</div>` : ''}
+                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy"></div>` : ''}
+                <div class="fe-footer">Devblog • ${fmtDate(item.rawDate)}</div>`;
+            if (type === 'commit') return `
+                <div class="fe-header">
+                    <img class="fe-icon" src="https://commits.facepunch.com/favicon.ico" alt="">
+                    <span class="fe-source">Facepunch <span>• Commit</span></span>
+                </div>
+                <div class="fe-title">${item.fullTitle}</div>
+                ${item.desc ? `<div class="fe-code">${item.desc}</div>` : ''}
+                <div class="fe-field"><div class="fe-field-label">Branch</div><div class="fe-field-value">rust_reboot</div></div>
+                <div class="fe-footer" style="margin-top:8px">Committed: ${fmtDate(item.rawDate)}</div>`;
+            if (type === 'oxide') return `
+                <div class="fe-header">
+                    <img class="fe-icon" src="https://github.com/favicon.ico" alt="">
+                    <span class="fe-source">Oxide.Rust <span>• Release</span></span>
+                </div>
+                <div class="fe-title" style="font-size:20px;padding-top:10px">${item.fullTitle.replace('Oxide.Rust ','')}</div>
+                <div class="fe-code">${item.body || 'Release notes on GitHub.'}</div>
+                <div class="fe-field"><div class="fe-field-label">Released</div><div class="fe-field-value">${fmtDate(item.rawDate)}</div></div>
+                <div style="height:10px"></div>`;
+            return `<div class="fe-title">${item.fullTitle}</div>`;
+        }
+
+        function makeFeedItem(item) {
+            const hasInfo = !!item.link;
+            const btnId = 'fi_' + Math.random().toString(36).slice(2,7);
+            const infoBtn = hasInfo ? `<button class="feed-info-btn" data-fid="${btnId}" aria-label="View details">i</button>` : '';
+            const dataStore = hasInfo ? `<script type="application/json" id="${btnId}">${JSON.stringify({ehtml: buildEmbed(item.embedType, item)})}<\/script>` : '';
             return `<div class="feed-item">
-                <div class="feed-time">${time}</div>
-                <div class="feed-cmd">${cmd}</div>
-                <div class="feed-sub">${sub}</div>
+                <div class="feed-time">${item.time}</div>
+                <div class="feed-cmd"><span class="feed-cmd-text">${item.cmd}</span>${infoBtn}</div>
+                <div class="feed-sub">${item.sub}</div>
+                ${dataStore}
             </div>`;
         }
 
@@ -4806,24 +5118,56 @@
                 fetchOxideLatest(),
                 fetchNextWipe(),
             ]);
-            devblogs.forEach(item => { if (item.title) items.push({ time: fmtTime(item.date),
-                    cmd: `/rust devblogs -- ${truncate(item.title, 34)}`, sub: 'New Facepunch post published',
-                    date: new Date(item.date) }); });
-            commits.forEach(item => { if (item.title) items.push({ time: fmtTime(item.date),
-                    cmd: `/rust commits -- Facepunch`, sub: truncate(item.title, 46), date: new Date(item.date) }); });
-            oxide.forEach(item => { if (item.title) items.push({ time: fmtTime(item.date),
-                    cmd: `/rust oxide -- uMod Update`, sub: `Oxide ${item.title} released`, date: new Date(item
-                        .date) }); });
-            items.push({ time: fmtTime(), cmd: `/rust wipe -- Force Wipe`, sub: wipeStr, date: new Date(0) });
-            items.sort((a, b) => b.date - a.date);
-            items = items.slice(0, 5);
-            if (items.length <= 1) {
-                container.innerHTML = makeFeedItem(fmtTime(), '/rust drops -- Twitch Drops', 'Check active campaigns') +
-                    makeFeedItem(fmtTime(), '/rust wipe -- Force Wipe', wipeStr);
-                return;
+            devblogs.forEach(i => { if (i.title) items.push({ embedType:'devblog', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust devblogs -- ${truncate(i.title,34)}`, sub:'New Facepunch post published', link:i.link, fullTitle:i.title, desc:i.description, image:i.image, date:new Date(i.date) }); });
+            commits.forEach(i => { if (i.title) items.push({ embedType:'commit', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust commits -- Facepunch`, sub:truncate(i.title,46), link:i.link, fullTitle:i.title, desc:i.description, date:new Date(i.date) }); });
+            oxide.forEach(i => { if (i.title) items.push({ embedType:'oxide', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust oxide -- uMod Update`, sub:`Oxide ${i.title} released`, link:i.link, fullTitle:`Oxide.Rust ${i.title}`, body:i.body, date:new Date(i.date) }); });
+            items.push({ embedType:'wipe', time:fmtTime(), cmd:`/rust wipe -- Force Wipe`, sub:wipeStr, link:'', fullTitle:'', date:new Date(0) });
+            items.sort((a,b) => b.date - a.date);
+            items = items.slice(0,5);
+            container.innerHTML = items.map(makeFeedItem).join('');
+
+            // ── Embed popup ────────────────────────────────────────────────
+            const embed     = document.getElementById('feed-embed');
+            const embedBd   = document.getElementById('feed-embed-backdrop');
+            const embedBody = document.getElementById('feed-embed-body');
+            const embedClose= document.getElementById('feed-embed-close');
+            if (!embed) return;
+
+            function closeEmbed() {
+                embed.classList.remove('open');
+                embedBd.classList.remove('open');
+                container.querySelectorAll('.feed-info-btn.fi-active').forEach(b=>b.classList.remove('fi-active'));
             }
-            container.innerHTML = items.map(i => makeFeedItem(i.time, i.cmd, i.sub)).join('');
+
+            container.addEventListener('click', function(e) {
+                const btn = e.target.closest('.feed-info-btn');
+                if (!btn) return;
+                e.stopPropagation();
+                const fid = btn.getAttribute('data-fid');
+                const store = document.getElementById(fid);
+                if (!store) return;
+                try {
+                    const data = JSON.parse(store.textContent);
+                    // Reset animations by replacing innerHTML
+                    embedBody.innerHTML = data.ehtml;
+                    container.querySelectorAll('.feed-info-btn.fi-active').forEach(b=>b.classList.remove('fi-active'));
+                    btn.classList.add('fi-active');
+                    // Remove open first so animations restart
+                    embed.classList.remove('open');
+                    embedBd.classList.remove('open');
+                    void embed.offsetWidth; // reflow
+                    embed.classList.add('open');
+                    embedBd.classList.add('open');
+                    embed.scrollTop = 0;
+                } catch(err) { console.error(err); }
+            });
+
+            embedClose.addEventListener('click', closeEmbed);
+            embedBd.addEventListener('click', closeEmbed);
+            document.addEventListener('keydown', function(e) { if(e.key==='Escape') closeEmbed(); });
         }
+
+
 
         // =============================================================
         // DISCORD LOGIN
