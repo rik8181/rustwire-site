@@ -7459,61 +7459,6 @@
         </div>
     </div>
 
-    <!-- WIRE-AI CHATBOT -->
-    <link rel="stylesheet" href="wireai.css">
 
-    <!-- WIRE-AI toggle button -->
-    <div id="wai-btn" title="Ask WIRE-AI" onclick="waiToggle()">
-        <div id="wai-notif"></div>
-        <img id="wai-logo" src="https://rustwire.co.uk/icon.png" alt="RustWire" onerror="this.style.display='none';document.getElementById('wai-logo-fallback').style.display='flex'">
-        <div id="wai-logo-fallback" style="display:none;width:26px;height:26px;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 24 24" style="width:26px;height:26px;fill:#fff"><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.526 3.66 1.438 5.168L2.05 21.95l4.782-1.388A9.953 9.953 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm-1 13H7v-2h4v2zm6 0h-4v-2h4v2zm0-4H7V9h10v2z"/></svg>
-        </div>
-        <svg class="wai-icon-close" viewBox="0 0 24 24" style="display:none;position:absolute;width:22px;height:22px;fill:#fff"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-    </div>
-
-    <!-- WIRE-AI chat window -->
-    <div id="wai-window">
-        <div id="wai-header">
-            <div id="wai-avatar">
-                <img src="https://rustwire.co.uk/icon.png" alt="RustWire" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.innerHTML='🤖'">
-            </div>
-            <div id="wai-header-info">
-                <div id="wai-header-name">WIRE-AI</div>
-                <div id="wai-header-status">
-                    <span class="wai-status-dot"></span>
-                    ONLINE · RustWire Assistant
-                </div>
-            </div>
-            <button id="wai-close-btn" onclick="waiToggle()" aria-label="Close">✕</button>
-        </div>
-
-        <div id="wai-messages"></div>
-
-        <div id="wai-typing">
-            <div class="wai-typing-avatar">
-                <img src="https://rustwire.co.uk/icon.png" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.parentElement.innerHTML='🤖'">
-            </div>
-            <div class="wai-typing-dots">
-                <span></span><span></span><span></span>
-            </div>
-        </div>
-
-        <div id="wai-footer">
-            <div id="wai-suggestions">
-                <button class="wai-sug" onclick="waiSuggest(this)">What can RustWire do?</button>
-                <button class="wai-sug" onclick="waiSuggest(this)">All commands</button>
-                <button class="wai-sug" onclick="waiSuggest(this)">How to setup Rust+?</button>
-                <button class="wai-sug" onclick="waiSuggest(this)">Raid calculator</button>
-            </div>
-            <div id="wai-input-row">
-                <textarea id="wai-input" placeholder="Kérdezz bármit a RustWire-ról..." rows="1"></textarea>
-                <button id="wai-send" onclick="waiSend()" aria-label="Send">
-                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script src="wireai.js"></script>
 </body>
+</html>
