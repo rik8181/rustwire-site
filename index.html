@@ -5131,16 +5131,16 @@
             const fmtDate = d => { if (!d) return ''; const dt = new Date(d); return isNaN(dt) ? d : dt.toUTCString().replace('GMT','UTC'); };
             if (type === 'devblog') return `
                 <div class="fe-header">
-                    <img class="fe-icon" src="https://store.steampowered.com/favicon.ico" alt="">
+                    <img class="fe-icon" src="https://store.steampowered.com/favicon.ico" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">
                     <span class="fe-source">Rust News</span>
                 </div>
                 <div class="fe-title">${item.fullTitle}</div>
                 ${item.desc ? `<div class="fe-desc">${item.desc}${item.desc.length>=180?'…':''}</div>` : ''}
-                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy"></div>` : ''}
+                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.fe-img-wrap').style.display='none'"></div>` : ''}
                 <div class="fe-footer">Devblog • ${fmtDate(item.rawDate)}</div>`;
             if (type === 'commit') return `
                 <div class="fe-header">
-                    <img class="fe-icon" src="https://commits.facepunch.com/favicon.ico" alt="">
+                    <img class="fe-icon" src="https://commits.facepunch.com/favicon.ico" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">
                     <span class="fe-source">Facepunch <span>• Commit</span></span>
                 </div>
                 <div class="fe-title">${item.fullTitle}</div>
@@ -5149,7 +5149,7 @@
                 <div class="fe-footer" style="margin-top:8px">Committed: ${fmtDate(item.rawDate)}</div>`;
             if (type === 'oxide') return `
                 <div class="fe-header">
-                    <img class="fe-icon" src="https://github.com/favicon.ico" alt="">
+                    <img class="fe-icon" src="https://github.com/favicon.ico" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">
                     <span class="fe-source">Oxide.Rust <span>• Release</span></span>
                 </div>
                 <div class="fe-title" style="font-size:20px;padding-top:10px">${item.fullTitle.replace('Oxide.Rust ','')}</div>
@@ -5160,12 +5160,12 @@
                 const isKick = type === 'kickdrop';
                 return `
                 <div class="fe-header">
-                    <img class="fe-icon" src="${isKick ? 'https://kick.com/favicon.ico' : 'https://www.twitch.tv/favicon.ico'}" alt="">
+                    <img class="fe-icon" src="${isKick ? 'https://kick.com/favicon.ico' : 'https://www.twitch.tv/favicon.ico'}" alt="" referrerpolicy="no-referrer" onerror="this.style.visibility='hidden'">
                     <span class="fe-source">${isKick ? 'Kick' : 'Twitch'} <span>• Drops Campaign</span></span>
                 </div>
                 <div class="fe-title">${item.fullTitle}</div>
                 ${item.desc ? `<div class="fe-desc">${item.desc}</div>` : ''}
-                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy"></div>` : ''}
+                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.fe-img-wrap').style.display='none'"></div>` : ''}
                 <div class="fe-field"><div class="fe-field-label">Reward</div><div class="fe-field-value">${item.reward}</div></div>
                 <div class="fe-field"><div class="fe-field-label">Starts</div><div class="fe-field-value">${fmtDate(item.startDate)}</div></div>
                 <div class="fe-field"><div class="fe-field-label">Ends</div><div class="fe-field-value">${fmtDate(item.endDate)}</div></div>
