@@ -5096,7 +5096,9 @@
         function sanitizeImageUrl(raw) {
             if (!raw) return '';
             const cleaned = raw.split(/[\s"'<>]|&quot;|&#0?39;/)[0];
-            return /^https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?$/i.test(cleaned) ? cleaned : '';
+            const ok = /^https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?$/i.test(cleaned);
+            if (!ok) console.warn('[RustWire feed] discarded image, raw value was:', JSON.stringify(raw), '→ cleaned to:', JSON.stringify(cleaned));
+            return ok ? cleaned : '';
         }
 
         async function fetchRSS(url) {
