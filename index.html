@@ -5095,7 +5095,17 @@
         // originated in our own code or in the upstream service's response.
         function sanitizeImageUrl(raw) {
             if (!raw) return '';
-            const cleaned = raw.split(/[\s"'<>]|&quot;|&#0?39;/)[0];
+            // The upstream feed can glue a trailing HTML attribute onto the end of
+            // the image URL (from an unquoted <img src=...> attribute in Steam's
+            // markup), and the whole mangled string sometimes arrives ALREADY
+            // percent-encoded — meaning the spaces show up as the literal text
+            // "%20", not real whitespace, so splitting on \s alone misses them
+            // entirely. Cut at the first sign of a stray attribute: real
+            // whitespace/quotes, their percent-encoded forms, or a literal
+            // "style=" marker (encoded or not) — whichever comes first.
+            let cleaned = raw.split(/[\s"'<>]|%20|%22|%27|&quot;|&#0?39;/i)[0];
+            const styleIdx = cleaned.search(/style=/i);
+            if (styleIdx > -1) cleaned = cleaned.slice(0, styleIdx);
             const ok = /^https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?$/i.test(cleaned);
             if (!ok) console.warn('[RustWire feed] discarded image, raw value was:', JSON.stringify(raw), '→ cleaned to:', JSON.stringify(cleaned));
             return ok ? cleaned : '';
