@@ -5088,6 +5088,21 @@
             return `onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='https://wsrv.nl/?url='+encodeURIComponent(this.src);}else{this.closest('.fe-img-wrap').style.display='none';}"`;
         }
 
+        // Let the browser's own HTML parser resolve the description's <img src>
+        // instead of hand-rolling a regex. Steam's description HTML sometimes
+        // encodes quotes as literal &quot; entities or leaves attributes
+        // unquoted, which breaks any regex that tries to find the boundary —
+        // DOMParser handles all of that correctly and gives back a clean,
+        // browser-resolved absolute URL via the .src property.
+        function extractImgSrc(descHtml) {
+            if (!descHtml) return '';
+            try {
+                const doc = new DOMParser().parseFromString(descHtml, 'text/html');
+                const img = doc.querySelector('img');
+                return (img && img.src && /^https?:\/\//i.test(img.src)) ? img.src : '';
+            } catch { return ''; }
+        }
+
         async function fetchRSS(url) {
             try {
                 const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
@@ -5097,22 +5112,13 @@
                     // Steam devblog posts often carry their cover image as a proper
                     // RSS <enclosure>/media:thumbnail rather than an inline <img> in
                     // the description — check every field RSS2JSON might use before
-                    // falling back to scraping the description HTML.
-                    //
-                    // IMPORTANT: don't try to parse the <img src="..."> tag by matching
-                    // quote characters — Steam's description HTML sometimes has its
-                    // quotes as literal &quot; entities instead of real " marks, which
-                    // makes a quote-delimited regex swallow the rest of the tag (e.g.
-                    // trailing style="...") into the "URL". Instead, match a bare image
-                    // URL directly (it always ends in a normal image extension), which
-                    // is safe regardless of how the surrounding quotes are encoded.
-                    const imgMatch = item.description && item.description.match(/https?:\/\/[^\s"'<>&]+\.(?:jpg|jpeg|png|gif|webp)/i);
+                    // falling back to parsing the description HTML.
                     const rawImage = item.thumbnail
                         || item.enclosure?.link
                         || item.enclosure?.url
                         || item.media?.thumbnail?.url
                         || item.media?.content?.url
-                        || (imgMatch ? imgMatch[0] : '')
+                        || extractImgSrc(item.description)
                         || '';
                     return {
                         title:       item.title || '',
