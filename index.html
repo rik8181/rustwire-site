@@ -5076,6 +5076,15 @@
             return clean.length > n ? clean.substring(0, n) + '...' : clean;
         }
 
+        // Steam's CDN blocks hotlinked images via Sec-Fetch-Site checks that
+        // referrerpolicy can't bypass, so route them through a public image
+        // proxy that fetches the image server-side and re-serves it with
+        // permissive headers.
+        function proxyImage(url) {
+            if (!url) return '';
+            return 'https://images.weserv.nl/?url=' + encodeURIComponent(url.replace(/^https?:\/\//, ''));
+        }
+
         async function fetchRSS(url) {
             try {
                 const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
@@ -5085,12 +5094,13 @@
                     // Steam's news RSS doesn't set thumbnail/enclosure — the image lives
                     // inline inside the description HTML, so pull the first <img> src.
                     const imgMatch = item.description && item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
+                    const rawImage = item.thumbnail || item.enclosure?.link || (imgMatch ? imgMatch[1] : '') || '';
                     return {
                         title:       item.title || '',
                         date:        item.pubDate || item.published || '',
                         link:        item.link || item.url || '',
                         description: item.description ? item.description.replace(/<[^>]*>/g,'').slice(0, 180) : '',
-                        image:       item.thumbnail || item.enclosure?.link || (imgMatch ? imgMatch[1] : '') || '',
+                        image:       proxyImage(rawImage),
                     };
                 });
             } catch { return []; }
