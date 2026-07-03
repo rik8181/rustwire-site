@@ -5080,9 +5080,12 @@
         // referrerpolicy can't bypass, so route them through a public image
         // proxy that fetches the image server-side and re-serves it with
         // permissive headers.
-        function proxyImage(url) {
-            if (!url) return '';
-            return 'https://images.weserv.nl/?url=' + encodeURIComponent(url.replace(/^https?:\/\//, ''));
+        // If a direct-hotlinked image fails to load (Steam's CDN sometimes blocks
+        // cross-site requests), retry once through wsrv.nl, which fetches the
+        // image server-side and re-serves it — no more direct browser request
+        // to Steam's CDN, so hotlink protection can't trigger.
+        function imgFallbackAttr() {
+            return `onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='https://wsrv.nl/?url='+encodeURIComponent(this.src);}else{this.closest('.fe-img-wrap').style.display='none';}"`;
         }
 
         async function fetchRSS(url) {
@@ -5108,7 +5111,7 @@
                         date:        item.pubDate || item.published || '',
                         link:        item.link || item.url || '',
                         description: item.description ? item.description.replace(/<[^>]*>/g,'').slice(0, 180) : '',
-                        image:       proxyImage(rawImage),
+                        image:       rawImage,
                     };
                 });
             } catch { return []; }
@@ -5154,7 +5157,7 @@
                 </div>
                 <div class="fe-title">${item.fullTitle}</div>
                 ${item.desc ? `<div class="fe-desc">${item.desc}${item.desc.length>=180?'…':''}</div>` : ''}
-                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.fe-img-wrap').style.display='none'"></div>` : ''}
+                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy" referrerpolicy="no-referrer" ${imgFallbackAttr()}></div>` : ''}
                 <div class="fe-footer">Devblog • ${fmtDate(item.rawDate)}</div>`;
             if (type === 'commit') return `
                 <div class="fe-header">
@@ -5183,7 +5186,7 @@
                 </div>
                 <div class="fe-title">${item.fullTitle}</div>
                 ${item.desc ? `<div class="fe-desc">${item.desc}</div>` : ''}
-                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.fe-img-wrap').style.display='none'"></div>` : ''}
+                ${item.image ? `<div class="fe-img-wrap"><img class="fe-img" src="${item.image}" alt="" loading="lazy" referrerpolicy="no-referrer" ${imgFallbackAttr()}></div>` : ''}
                 <div class="fe-field"><div class="fe-field-label">Reward</div><div class="fe-field-value">${item.reward}</div></div>
                 <div class="fe-field"><div class="fe-field-label">Starts</div><div class="fe-field-value">${fmtDate(item.startDate)}</div></div>
                 <div class="fe-field"><div class="fe-field-label">Ends</div><div class="fe-field-value">${fmtDate(item.endDate)}</div></div>
