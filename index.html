@@ -5081,13 +5081,18 @@
                 const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
                 const json = await res.json();
                 if (json.status !== 'ok') return [];
-                return (json.items || []).slice(0, 2).map(item => ({
-                    title:       item.title || '',
-                    date:        item.pubDate || item.published || '',
-                    link:        item.link || item.url || '',
-                    description: item.description ? item.description.replace(/<[^>]*>/g,'').slice(0, 180) : '',
-                    image:       item.thumbnail || item.enclosure?.link || '',
-                }));
+                return (json.items || []).slice(0, 2).map(item => {
+                    // Steam's news RSS doesn't set thumbnail/enclosure — the image lives
+                    // inline inside the description HTML, so pull the first <img> src.
+                    const imgMatch = item.description && item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
+                    return {
+                        title:       item.title || '',
+                        date:        item.pubDate || item.published || '',
+                        link:        item.link || item.url || '',
+                        description: item.description ? item.description.replace(/<[^>]*>/g,'').slice(0, 180) : '',
+                        image:       item.thumbnail || item.enclosure?.link || (imgMatch ? imgMatch[1] : '') || '',
+                    };
+                });
             } catch { return []; }
         }
 
@@ -7594,9 +7599,9 @@
 
 <a href="https://ko-fi.com/moonsai" target="_blank" class="btn-primary ripple-btn support-rustwire">☕ Support RustWire</a>
 <style>
-.support-rustwire{position:fixed;left:24px;bottom:24px;z-index:9999;text-decoration:none}
-@media(max-width:768px){.support-rustwire{left:16px;bottom:16px;transform:scale(.9);transform-origin:left bottom}}
-body.cookie-visible .support-rustwire{bottom:110px}
+.support-rustwire{position:fixed;left:24px;bottom:24px;z-index:9999;text-decoration:none;padding:8px 16px !important;font-size:11px !important;letter-spacing:1px !important;border-radius:20px !important;box-shadow:0 2px 10px rgba(0,0,0,0.35);}
+@media(max-width:768px){.support-rustwire{left:14px;bottom:14px;padding:7px 14px !important;font-size:10px !important}}
+body.cookie-visible .support-rustwire{bottom:100px}
 </style>
 <script>
 function adj(){const b=document.querySelector('#cookie-banner,.cookie-banner,.cc-window,.cky-consent-container,[id*=cookie],[class*=cookie]');const s=document.querySelector('.support-rustwire');if(!s)return; if(b&&getComputedStyle(b).display!=='none'){s.style.bottom=(b.offsetHeight+20)+'px';}else{s.style.bottom=window.innerWidth<768?'16px':'24px';}}
