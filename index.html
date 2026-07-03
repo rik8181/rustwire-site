@@ -5076,10 +5076,6 @@
             return clean.length > n ? clean.substring(0, n) + '...' : clean;
         }
 
-        // Steam's CDN blocks hotlinked images via Sec-Fetch-Site checks that
-        // referrerpolicy can't bypass, so route them through a public image
-        // proxy that fetches the image server-side and re-serves it with
-        // permissive headers.
         // If a direct-hotlinked image fails to load (Steam's CDN sometimes blocks
         // cross-site requests), retry once through wsrv.nl, which fetches the
         // image server-side and re-serves it — no more direct browser request
@@ -5088,37 +5084,24 @@
             return `onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='https://wsrv.nl/?url='+encodeURIComponent(this.src);}else{this.closest('.fe-img-wrap').style.display='none';}"`;
         }
 
-        // Let the browser's own HTML parser resolve the description's <img src>
-        // instead of hand-rolling a regex. Steam's description HTML sometimes
-        // encodes quotes as literal &quot; entities or leaves attributes
-        // unquoted, which breaks any regex that tries to find the boundary —
-        // DOMParser handles all of that correctly and gives back a clean,
-        // browser-resolved absolute URL via the .src property.
-        function extractImgSrc(descHtml) {
-            if (!descHtml) return '';
-            try {
-                const doc = new DOMParser().parseFromString(descHtml, 'text/html');
-                const img = doc.querySelector('img');
-                return (img && img.src && /^https?:\/\//i.test(img.src)) ? img.src : '';
-            } catch { return ''; }
-        }
-
         async function fetchRSS(url) {
             try {
                 const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
                 const json = await res.json();
                 if (json.status !== 'ok') return [];
                 return (json.items || []).slice(0, 2).map(item => {
-                    // Steam devblog posts often carry their cover image as a proper
-                    // RSS <enclosure>/media:thumbnail rather than an inline <img> in
-                    // the description — check every field RSS2JSON might use before
-                    // falling back to parsing the description HTML.
+                    // Only trust RSS2JSON's own structured image fields — never scrape
+                    // the description HTML for an <img> tag. Steam's description markup
+                    // is inconsistent (unquoted attributes, entity-encoded quotes) and
+                    // any regex/DOMParser attempt to pull an image out of it has proven
+                    // unreliable in production, occasionally producing a mangled "URL"
+                    // that includes trailing CSS and fails to load. If there's no proper
+                    // thumbnail/enclosure, the item is simply shown without an image.
                     const rawImage = item.thumbnail
                         || item.enclosure?.link
                         || item.enclosure?.url
                         || item.media?.thumbnail?.url
                         || item.media?.content?.url
-                        || extractImgSrc(item.description)
                         || '';
                     return {
                         title:       item.title || '',
