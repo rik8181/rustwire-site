@@ -5098,13 +5098,21 @@
                     // RSS <enclosure>/media:thumbnail rather than an inline <img> in
                     // the description — check every field RSS2JSON might use before
                     // falling back to scraping the description HTML.
-                    const imgMatch = item.description && item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
+                    //
+                    // IMPORTANT: don't try to parse the <img src="..."> tag by matching
+                    // quote characters — Steam's description HTML sometimes has its
+                    // quotes as literal &quot; entities instead of real " marks, which
+                    // makes a quote-delimited regex swallow the rest of the tag (e.g.
+                    // trailing style="...") into the "URL". Instead, match a bare image
+                    // URL directly (it always ends in a normal image extension), which
+                    // is safe regardless of how the surrounding quotes are encoded.
+                    const imgMatch = item.description && item.description.match(/https?:\/\/[^\s"'<>&]+\.(?:jpg|jpeg|png|gif|webp)/i);
                     const rawImage = item.thumbnail
                         || item.enclosure?.link
                         || item.enclosure?.url
                         || item.media?.thumbnail?.url
                         || item.media?.content?.url
-                        || (imgMatch ? imgMatch[1] : '')
+                        || (imgMatch ? imgMatch[0] : '')
                         || '';
                     return {
                         title:       item.title || '',
