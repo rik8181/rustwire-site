@@ -5091,10 +5091,18 @@
                 const json = await res.json();
                 if (json.status !== 'ok') return [];
                 return (json.items || []).slice(0, 2).map(item => {
-                    // Steam's news RSS doesn't set thumbnail/enclosure — the image lives
-                    // inline inside the description HTML, so pull the first <img> src.
+                    // Steam devblog posts often carry their cover image as a proper
+                    // RSS <enclosure>/media:thumbnail rather than an inline <img> in
+                    // the description — check every field RSS2JSON might use before
+                    // falling back to scraping the description HTML.
                     const imgMatch = item.description && item.description.match(/<img[^>]+src=["']([^"']+)["']/i);
-                    const rawImage = item.thumbnail || item.enclosure?.link || (imgMatch ? imgMatch[1] : '') || '';
+                    const rawImage = item.thumbnail
+                        || item.enclosure?.link
+                        || item.enclosure?.url
+                        || item.media?.thumbnail?.url
+                        || item.media?.content?.url
+                        || (imgMatch ? imgMatch[1] : '')
+                        || '';
                     return {
                         title:       item.title || '',
                         date:        item.pubDate || item.published || '',
