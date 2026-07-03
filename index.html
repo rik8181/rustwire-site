@@ -5084,19 +5084,27 @@
             return `onerror="if(!this.dataset.fb){this.dataset.fb='1';this.src='https://wsrv.nl/?url='+encodeURIComponent(this.src);}else{this.closest('.fe-img-wrap').style.display='none';}"`;
         }
 
+        // RSS2JSON's own upstream parser can return a "thumbnail" value with
+        // trailing garbage baked in — e.g. Steam sometimes emits an unquoted
+        // <img src=...> attribute, and RSS2JSON's parser grabs everything up to
+        // the next quote character instead of stopping at the whitespace before
+        // the next attribute, producing "…file.jpg style=box-sizing:...;". A
+        // real URL never contains a literal space, so truncate at the first
+        // whitespace/quote and verify what remains actually looks like a URL
+        // before trusting it — this catches corruption regardless of whether it
+        // originated in our own code or in the upstream service's response.
+        function sanitizeImageUrl(raw) {
+            if (!raw) return '';
+            const cleaned = raw.split(/[\s"'<>]|&quot;|&#0?39;/)[0];
+            return /^https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?$/i.test(cleaned) ? cleaned : '';
+        }
+
         async function fetchRSS(url) {
             try {
                 const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
                 const json = await res.json();
                 if (json.status !== 'ok') return [];
                 return (json.items || []).slice(0, 2).map(item => {
-                    // Only trust RSS2JSON's own structured image fields — never scrape
-                    // the description HTML for an <img> tag. Steam's description markup
-                    // is inconsistent (unquoted attributes, entity-encoded quotes) and
-                    // any regex/DOMParser attempt to pull an image out of it has proven
-                    // unreliable in production, occasionally producing a mangled "URL"
-                    // that includes trailing CSS and fails to load. If there's no proper
-                    // thumbnail/enclosure, the item is simply shown without an image.
                     const rawImage = item.thumbnail
                         || item.enclosure?.link
                         || item.enclosure?.url
@@ -5108,7 +5116,7 @@
                         date:        item.pubDate || item.published || '',
                         link:        item.link || item.url || '',
                         description: item.description ? item.description.replace(/<[^>]*>/g,'').slice(0, 180) : '',
-                        image:       rawImage,
+                        image:       sanitizeImageUrl(rawImage),
                     };
                 });
             } catch { return []; }
