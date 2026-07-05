@@ -6100,7 +6100,8 @@
         // WIPE CALENDAR
         // =============================================================
         function firstThursday(y, m) {
-                const d = new Date(Date.UTC(y, m, 1));
+                // Facepunch force wipes go live at 19:00 UTC on the first Thursday of the month
+                const d = new Date(Date.UTC(y, m, 1, 19, 0, 0));
                 const diff = (4 - d.getUTCDay() + 7) % 7;
                 d.setUTCDate(1 + diff);
                 return d;
