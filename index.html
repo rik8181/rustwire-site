@@ -6140,7 +6140,7 @@
                 // Find if this is the very next upcoming wipe
                 const checkNext = wipe > now;
 
-                html += `<div class="wipe-cal-item reveal ${isPast ? 'past' : ''}" style="${checkNext && offset >= 0 && !isPast ? 'border-color:var(--orange);background:rgba(229,98,26,0.08);' : ''}">
+                html += `<div class="wipe-cal-item reveal visible ${isPast ? 'past' : ''}" style="${checkNext && offset >= 0 && !isPast ? 'border-color:var(--orange);background:rgba(229,98,26,0.08);' : ''}">
                     <div class="wipe-cal-date">${wipe.getUTCDate()}</div>
                     <div class="wipe-cal-month">${MONTHS[m]} ${y}</div>
                     <div class="wipe-cal-type force">FORCE</div>
