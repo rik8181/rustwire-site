@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<title>BotForge Now Playing</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- 🔒 Ez a legfontosabb sor: megmondja a Google-nek és minden más keresőnek,
+     hogy SOHA ne indexelje be, ne listázza, és ne is kövesse innen a linkeket.
+     Így még akkor sem jelenik meg semmilyen keresésben, ha valaki véletlenül
+     idelinkelne valahonnan. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #050508;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+</style>
+</head>
+<body>
+
+  <div id="bf-nowplaying-cod"></div>
+  <div id="bf-nowplaying-botforge"></div>
+
+  <script src="/nowplaying-widget.js"></script>
+  <script>
+    BotForgeNowPlaying.mount('#bf-nowplaying-cod', {
+      apiUrl: '/api/nowplaying',
+      guildId: '1448337263548305520', // CoD Magyar Közösség
+      pollMs: 4000
+    });
+
+    BotForgeNowPlaying.mount('#bf-nowplaying-botforge', {
+      apiUrl: '/api/nowplaying',
+      guildId: '1396414791861669968', // BotForge Music
+      pollMs: 4000
+    });
+  </script>
+</body>
+</html>
