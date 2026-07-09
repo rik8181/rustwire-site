@@ -4448,7 +4448,7 @@
                     <div class="cmd-acc-item" id="acc-rustplus">
                         <button class="cmd-acc-btn ripple-btn" onclick="toggleCmdAcc('rustplus')" data-i18n="cmd_tab_rustplus">
                             <span class="cmd-acc-label">Rust+</span>
-                            <span class="cmd-acc-meta">13 commands</span>
+                            <span class="cmd-acc-meta">17 commands</span>
                             <span class="cmd-acc-arrow">▾</span>
                         </button>
                         <div class="cmd-acc-panel" id="cmd-rustplus">
@@ -4473,6 +4473,11 @@
                                 <div class="cmd-row"><span class="cmd-name">/rustplus marker add</span><span class="cmd-desc">Add a custom map marker (base, loot, etc.)</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus marker list</span><span class="cmd-desc">List your saved map markers</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rustplus marker remove</span><span class="cmd-desc">Remove a custom map marker</span></div>
+                                <div class="cmd-row cmd-row-category"><span class="cmd-category-label">📦 Storage Monitor</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus storage add</span><span class="cmd-desc">Pair a Storage Monitor (TC, box, or vending machine)</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus storage list</span><span class="cmd-desc">List all tracked Storage Monitors and their status</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus storage status</span><span class="cmd-desc">Full breakdown with contents and last update time</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rustplus storage remove</span><span class="cmd-desc">Unpair a Storage Monitor</span></div>
                             </div>
                         </div>
                     </div>
@@ -4494,6 +4499,14 @@
                 <h2 class="section-title reveal" data-i18n="cl_title">What's new.</h2>
                 <p class="section-desc" data-i18n="cl_desc">Recent updates and improvements to RustWire.</p>
                 <div class="cl-list">
+                    <div class="cl-entry">
+                        <div class="cl-date">Jul 2026</div>
+                        <div>
+                            <span class="cl-badge badge-new" data-i18n="cl_tag_new">New</span>
+                            <div class="cl-title">Storage Monitor Tracking &amp; In-Game Chat Commands</div>
+                            <div class="cl-desc">Pair a Storage Monitor to get an instant alert the moment your TC starts decaying, plus new in-game team chat commands (!wipe, !time, !pop, !upkeep) — no need to tab out to Discord.</div>
+                        </div>
+                    </div>
                     <div class="cl-entry">
                         <div class="cl-date" data-i18n="cl1_date">Jun 2026</div>
                         <div>
@@ -6052,7 +6065,7 @@
 
         // ── CHANGELOG BADGE ─────────────────────────────────────────
         // Latest changelog entry date — update this when you add a new entry
-        const LATEST_CHANGELOG_DATE = '2026-06-01';
+        const LATEST_CHANGELOG_DATE = '2026-07-09';
 
         function initChangelogBadge() {
             try {
