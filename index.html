@@ -6188,19 +6188,20 @@
         // =============================================================
         // Raid costs — verified against rustbasedesigns.com & rustlabs.com (2026)
         // HP:  twig=10 | wood=250 | stone=500 | metal=1000 | armored=2000
-        //      sheet_door=250 | hqm_door=1000 | wood_door=200 | garage_door=600
+        //      sheet_door=250 | hqm_door=800 | wood_door=200 | garage_door=600
         // Dmg: Rocket=137.65 | C4=275 | Satchel=70 | Explo.ammo=2.5
-        // sulfur = cheapest route (C4 where available, satchels for twig/wood/doors)
+        // Verified against rustly.com, rust.fandom.com and rustbasedesigns.com (July 2026 build).
+        // sulfur = true cheapest route among rockets/C4/satchels/explosive ammo shown below.
         const RAID_DATA = {
-            twig:       { rockets: 1,  c4: 0, satchels: 1,  explo_ammo: 4,   sulfur: 480   },
-            wood:       { rockets: 2,  c4: 1, satchels: 4,  explo_ammo: 100, sulfur: 2200  },
+            twig:       { rockets: 1,  c4: 0, satchels: 1,  explo_ammo: 4,   sulfur: 100   },
+            wood:       { rockets: 2,  c4: 1, satchels: 3,  explo_ammo: 100, sulfur: 1440  },
             stone:      { rockets: 4,  c4: 2, satchels: 10, explo_ammo: 200, sulfur: 4400  },
             metal:      { rockets: 8,  c4: 4, satchels: 23, explo_ammo: 400, sulfur: 8800  },
             armored:    { rockets: 15, c4: 8, satchels: 46, explo_ammo: 800, sulfur: 17600 },
-            sheet_door: { rockets: 1,  c4: 1, satchels: 4,  explo_ammo: 63,  sulfur: 1920  },
-            hqm_door:   { rockets: 4,  c4: 2, satchels: 15, explo_ammo: 400, sulfur: 4400  },
-            wood_door:  { rockets: 1,  c4: 0, satchels: 2,  explo_ammo: 32,  sulfur: 960   },
-            garage_door:{ rockets: 5,  c4: 2, satchels: 9,  explo_ammo: 150, sulfur: 4400  },
+            sheet_door: { rockets: 2,  c4: 1, satchels: 4,  explo_ammo: 63,  sulfur: 1575  },
+            hqm_door:   { rockets: 5,  c4: 3, satchels: 15, explo_ammo: 400, sulfur: 6600  },
+            wood_door:  { rockets: 1,  c4: 1, satchels: 2,  explo_ammo: 32,  sulfur: 800   },
+            garage_door:{ rockets: 3,  c4: 2, satchels: 9,  explo_ammo: 150, sulfur: 3750  },
         };
 
         function calcRaid() {
@@ -6225,19 +6226,20 @@
         // =============================================================
         // RECYCLE CALCULATOR DATA
         // =============================================================
-        // Recycle outputs — verified against tradeit.gg/blog/rust-recycle-chart (2026) & rust.fandom.com
+        // Recycle outputs — verified against rust.fandom.com (Rust Wiki) dedicated item pages,
+        // cross-checked with gamersdecide.com and rustbasedesigns.com (July 2026 build).
         const RECYCLE_DATA = {
             rifle_body:    { scraps: 25, hqm: 2  },
-            smg_body:      { scraps: 15, hqm: 2  },
-            semi_body:     { scraps: 15, hqm: 2, metal_frags: 75 },
-            road_signs:    { scraps: 5,  metal_frags: 10 },
-            sheet_metal:   { scraps: 8,  metal_frags: 10 },
-            metal_pipe:    { scraps: 5,  metal_frags: 10 },
-            metal_spring:  { scraps: 10 },
-            tech_trash:    { scraps: 20, hqm: 10 },
+            smg_body:      { scraps: 15, hqm: 3  },
+            semi_body:     { scraps: 15, hqm: 3, metal_frags: 75 },
+            road_signs:    { scraps: 5,  hqm: 2 },
+            sheet_metal:   { hqm: 3, metal_frags: 100 },
+            metal_pipe:    { scraps: 5,  hqm: 1 },
+            metal_spring:  { scraps: 10, hqm: 1 },
+            tech_trash:    { scraps: 5,  hqm: 1 },
             tarp:          { cloth: 50 },
             rope:          { cloth: 15 },
-            sewing_kit:    { scraps: 2,  cloth: 10 },
+            sewing_kit:    { cloth: 10, rope: 2 },
             leather:       { leather_out: 4 },
             cctv_camera:   { hqm: 2, tech_trash_out: 2 },
             targeting_comp:{ scraps: 5, hqm: 10, tech_trash_out: 3 },
@@ -6246,7 +6248,7 @@
 
         const RECYCLE_LABELS = {
             scraps: 'Scrap', hqm: 'HQM', metal_frags: 'Metal Frags',
-            cloth: 'Cloth', leather_out: 'Leather',
+            cloth: 'Cloth', leather_out: 'Leather', rope: 'Rope',
             tech_trash_out: 'Tech Trash', sewing_kit: 'Sewing Kit'
         };
 
