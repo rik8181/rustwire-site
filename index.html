@@ -4295,7 +4295,7 @@
                     <div class="cmd-acc-item" id="acc-rust">
                         <button class="cmd-acc-btn ripple-btn active" onclick="toggleCmdAcc('rust')" data-i18n="cmd_tab_rust">
                             <span class="cmd-acc-label">/rust</span>
-                            <span class="cmd-acc-meta">22 commands</span>
+                            <span class="cmd-acc-meta">23 commands</span>
                             <span class="cmd-acc-arrow">▾</span>
                         </button>
                         <div class="cmd-acc-panel open" id="cmd-rust">
@@ -4320,6 +4320,7 @@
                                 <div class="cmd-row"><span class="cmd-name">/rust setregion [cc]</span><span class="cmd-desc">Set store region for skin/DLC prices (e.g. GB, US) — admin only</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust filter [on/off]</span><span class="cmd-desc">Enable or disable content filter — admin only</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust setupchannels</span><span class="cmd-desc">Create or refresh feed channels — admin only</span></div>
+                                <div class="cmd-row"><span class="cmd-name">/rust setchannel [feed] [channel]</span><span class="cmd-desc">Point a single feed at any existing channel — no setupchannels required — admin only</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust repopulate</span><span class="cmd-desc">Repost latest content to all feed channels — admin only</span></div>
                                 <div class="cmd-row"><span class="cmd-name">/rust posthours</span><span class="cmd-desc">Post the Rust Hours verification card — admin only</span></div>
                             </div>
@@ -4500,11 +4501,19 @@
                 <p class="section-desc" data-i18n="cl_desc">Recent updates and improvements to RustWire.</p>
                 <div class="cl-list">
                     <div class="cl-entry">
-                        <div class="cl-date">Jul 2026</div>
+                        <div class="cl-date" data-i18n="cl_sc_date">Aug 2026</div>
                         <div>
                             <span class="cl-badge badge-new" data-i18n="cl_tag_new">New</span>
-                            <div class="cl-title">Storage Monitor Tracking &amp; In-Game Chat Commands</div>
-                            <div class="cl-desc">Pair a Storage Monitor to get an instant alert the moment your TC starts decaying, plus new in-game team chat commands (!wipe, !time, !pop, !upkeep) — no need to tab out to Discord.</div>
+                            <div class="cl-title" data-i18n="cl_sc_title">Per-Feed Channel Selection — /rust setchannel</div>
+                            <div class="cl-desc" data-i18n="cl_sc_desc">Point any single automatic feed (Devblog, Skins, DLC, Drops, Commits, Bans, and more) at any existing channel on your server — no dedicated feed category and no /rust setupchannels required. The bot also checks its permissions in the channel up front, so you know immediately if something's missing.</div>
+                        </div>
+                    </div>
+                    <div class="cl-entry">
+                        <div class="cl-date" data-i18n="cl_sm_date">Jul 2026</div>
+                        <div>
+                            <span class="cl-badge badge-new" data-i18n="cl_tag_new">New</span>
+                            <div class="cl-title" data-i18n="cl_sm_title">Storage Monitor Tracking &amp; In-Game Chat Commands</div>
+                            <div class="cl-desc" data-i18n="cl_sm_desc">Pair a Storage Monitor to get an instant alert the moment your TC starts decaying, plus new in-game team chat commands (!wipe, !time, !pop, !upkeep) — no need to tab out to Discord.</div>
                         </div>
                     </div>
                     <div class="cl-entry">
@@ -6065,7 +6074,7 @@
 
         // ── CHANGELOG BADGE ─────────────────────────────────────────
         // Latest changelog entry date — update this when you add a new entry
-        const LATEST_CHANGELOG_DATE = '2026-07-09';
+        const LATEST_CHANGELOG_DATE = '2026-08-11';
 
         function initChangelogBadge() {
             try {
@@ -6567,12 +6576,18 @@
                         "showcase_cta_title": "Want these in your server?",
                         "showcase_cta_desc": "Free to add. No setup fee. Just install and run /wire setupchannels.",
                         "showcase_cta_btn": "Add RustWire Free →",
+                        "cl_sc_date": "Aug 2026",
+                        "cl_sm_date": "Jul 2026",
                         "cl1_date": "Jun 2026",
                         "cl2_date": "Jun 2026",
                         "cl3_date": "Jun 2026",
                         "cl4_date": "May 2026",
                         "cl_tag_new": "New",
                         "cl_tag_milestone": "Milestone",
+                        "cl_sc_title": "Per-Feed Channel Selection — /rust setchannel",
+                        "cl_sc_desc": "Point any single automatic feed (Devblog, Skins, DLC, Drops, Commits, Bans, and more) at any existing channel on your server — no dedicated feed category and no /rust setupchannels required. The bot also checks its permissions in the channel up front, so you know immediately if something's missing.",
+                        "cl_sm_title": "Storage Monitor Tracking &amp; In-Game Chat Commands",
+                        "cl_sm_desc": "Pair a Storage Monitor to get an instant alert the moment your TC starts decaying, plus new in-game team chat commands (!wipe, !time, !pop, !upkeep) — no need to tab out to Discord.",
                         "cl1_title": "Kick Drops Support",
                         "cl1_desc": "RustWire now tracks and posts Rust Kick Drop campaigns automatically.",
                         "cl2_title": "Ban Log Channel",
@@ -6834,12 +6849,18 @@
                         "showcase_cta_title": "Ezt szeretnéd a szerveredre is?",
                         "showcase_cta_desc": "Ingyenesen hozzáadható. Nincs beállítási díj. Csak telepítsd, és futtasd a /wire setupchannels parancsot.",
                         "showcase_cta_btn": "RustWire ingyenes hozzáadása →",
+                        "cl_sc_date": "2026. aug.",
+                        "cl_sm_date": "2026. júl.",
                         "cl1_date": "2026. jún.",
                         "cl2_date": "2026. jún.",
                         "cl3_date": "2026. jún.",
                         "cl4_date": "2026. máj.",
                         "cl_tag_new": "Új",
                         "cl_tag_milestone": "Mérföldkő",
+                        "cl_sc_title": "Egyedi csatorna-hozzárendelés — /rust setchannel",
+                        "cl_sc_desc": "Bármelyik automatikus hírfolyamot (Devblog, Skins, DLC, Drops, Commits, Bans és több) hozzárendelheted bármelyik meglévő csatornádhoz — nincs szükség külön hírfolyam-kategóriára, és a /rust setupchannels futtatására sem. A bot előre ellenőrzi a jogosultságait is az adott csatornában, így azonnal tudni fogod, ha valami hiányzik.",
+                        "cl_sm_title": "Tárolómonitor-követés és játékon belüli chat parancsok",
+                        "cl_sm_desc": "Párosíts egy Storage Monitort, hogy azonnal értesítést kapj, amint a TC-d elkezd bomlani, plusz új játékon belüli csapat-chat parancsok (!wipe, !time, !pop, !upkeep) — nem kell kilépned a Discordhoz.",
                         "cl1_title": "Kick Drops támogatás",
                         "cl1_desc": "A RustWire mostantól automatikusan követi és közzéteszi a Rust Kick Drop kampányokat.",
                         "cl2_title": "Ban napló csatorna",
@@ -7101,12 +7122,18 @@
                         "showcase_cta_title": "Willst du das auch auf deinem Server?",
                         "showcase_cta_desc": "Kostenlos hinzufügbar. Keine Einrichtungsgebühr. Einfach installieren und /wire setupchannels ausführen.",
                         "showcase_cta_btn": "RustWire kostenlos hinzufügen →",
+                        "cl_sc_date": "Aug. 2026",
+                        "cl_sm_date": "Jul. 2026",
                         "cl1_date": "Jun. 2026",
                         "cl2_date": "Jun. 2026",
                         "cl3_date": "Jun. 2026",
                         "cl4_date": "Mai 2026",
                         "cl_tag_new": "Neu",
                         "cl_tag_milestone": "Meilenstein",
+                        "cl_sc_title": "Individuelle Kanalauswahl — /rust setchannel",
+                        "cl_sc_desc": "Weise jeden einzelnen automatischen Feed (Devblog, Skins, DLC, Drops, Commits, Bans und mehr) einem beliebigen vorhandenen Kanal zu — keine eigene Feed-Kategorie und kein /rust setupchannels erforderlich. Der Bot prüft außerdem sofort seine Berechtigungen in diesem Kanal, damit du sofort weißt, falls etwas fehlt.",
+                        "cl_sm_title": "Storage-Monitor-Tracking &amp; Ingame-Chat-Befehle",
+                        "cl_sm_desc": "Verbinde einen Storage Monitor, um sofort benachrichtigt zu werden, sobald dein TC zu verfallen beginnt, plus neue Ingame-Team-Chat-Befehle (!wipe, !time, !pop, !upkeep) — ohne zu Discord wechseln zu müssen.",
                         "cl1_title": "Kick-Drops-Unterstützung",
                         "cl1_desc": "RustWire verfolgt und postet jetzt automatisch Rust-Kick-Drop-Kampagnen.",
                         "cl2_title": "Bann-Log-Kanal",
@@ -7368,12 +7395,18 @@
                         "showcase_cta_title": "Vous voulez ça sur votre serveur ?",
                         "showcase_cta_desc": "Ajout gratuit. Aucuns frais d'installation. Installez simplement et exécutez /wire setupchannels.",
                         "showcase_cta_btn": "Ajouter RustWire gratuitement →",
+                        "cl_sc_date": "août 2026",
+                        "cl_sm_date": "juil. 2026",
                         "cl1_date": "juin 2026",
                         "cl2_date": "juin 2026",
                         "cl3_date": "juin 2026",
                         "cl4_date": "mai 2026",
                         "cl_tag_new": "Nouveau",
                         "cl_tag_milestone": "Étape clé",
+                        "cl_sc_title": "Sélection de salon par flux — /rust setchannel",
+                        "cl_sc_desc": "Associez n'importe quel flux automatique (Devblog, Skins, DLC, Drops, Commits, Bans, etc.) à n'importe quel salon existant — sans catégorie de flux dédiée ni besoin d'exécuter /rust setupchannels. Le bot vérifie aussi immédiatement ses permissions dans ce salon, pour que vous sachiez tout de suite si quelque chose manque.",
+                        "cl_sm_title": "Suivi du moniteur de stockage et commandes de chat en jeu",
+                        "cl_sm_desc": "Associez un moniteur de stockage pour recevoir une alerte instantanée dès que votre TC commence à se dégrader, plus de nouvelles commandes de chat d'équipe en jeu (!wipe, !time, !pop, !upkeep) — plus besoin de basculer vers Discord.",
                         "cl1_title": "Prise en charge des Drops Kick",
                         "cl1_desc": "RustWire suit et publie désormais automatiquement les campagnes de Drops Kick pour Rust.",
                         "cl2_title": "Salon de journal des bans",
@@ -7635,12 +7668,18 @@
                         "showcase_cta_title": "¿Quieres esto en tu servidor?",
                         "showcase_cta_desc": "Gratis para añadir. Sin coste de configuración. Solo instala y ejecuta /wire setupchannels.",
                         "showcase_cta_btn": "Añadir RustWire gratis →",
+                        "cl_sc_date": "ago. 2026",
+                        "cl_sm_date": "jul. 2026",
                         "cl1_date": "jun. 2026",
                         "cl2_date": "jun. 2026",
                         "cl3_date": "jun. 2026",
                         "cl4_date": "may. 2026",
                         "cl_tag_new": "Nuevo",
                         "cl_tag_milestone": "Hito",
+                        "cl_sc_title": "Selección de canal por feed — /rust setchannel",
+                        "cl_sc_desc": "Asigna cualquier feed automático (Devblog, Skins, DLC, Drops, Commits, Bans y más) a cualquier canal existente — sin categoría de feeds dedicada ni necesidad de ejecutar /rust setupchannels. El bot también comprueba de inmediato sus permisos en ese canal, así sabrás al instante si falta algo.",
+                        "cl_sm_title": "Seguimiento de monitores de almacenamiento y comandos de chat en el juego",
+                        "cl_sm_desc": "Empareja un monitor de almacenamiento para recibir una alerta instantánea en cuanto tu TC empiece a degradarse, además de nuevos comandos de chat de equipo dentro del juego (!wipe, !time, !pop, !upkeep) — sin necesidad de salir a Discord.",
                         "cl1_title": "Compatibilidad con Drops de Kick",
                         "cl1_desc": "RustWire ahora rastrea y publica automáticamente las campañas de Drops de Kick para Rust.",
                         "cl2_title": "Canal de registro de baneos",
@@ -7902,12 +7941,18 @@
                         "showcase_cta_title": "Хотите то же самое на своём сервере?",
                         "showcase_cta_desc": "Бесплатное добавление. Без платы за настройку. Просто установите и выполните /wire setupchannels.",
                         "showcase_cta_btn": "Добавить RustWire бесплатно →",
+                        "cl_sc_date": "авг. 2026",
+                        "cl_sm_date": "июль 2026",
                         "cl1_date": "июнь 2026",
                         "cl2_date": "июнь 2026",
                         "cl3_date": "июнь 2026",
                         "cl4_date": "май 2026",
                         "cl_tag_new": "Новое",
                         "cl_tag_milestone": "Веха",
+                        "cl_sc_title": "Выбор канала для отдельных лент — /rust setchannel",
+                        "cl_sc_desc": "Привяжите любую автоматическую ленту (Devblog, Skins, DLC, Drops, Commits, Bans и другие) к любому существующему каналу — без отдельной категории для лент и без необходимости запускать /rust setupchannels. Бот сразу проверяет свои права в этом канале, поэтому вы сразу узнаете, если чего-то не хватает.",
+                        "cl_sm_title": "Отслеживание Storage Monitor и команды чата в игре",
+                        "cl_sm_desc": "Привяжите Storage Monitor, чтобы мгновенно получать уведомление, как только ваш TC начнёт разрушаться, а также новые команды командного чата в игре (!wipe, !time, !pop, !upkeep) — больше не нужно переключаться в Discord.",
                         "cl1_title": "Поддержка дропов Kick",
                         "cl1_desc": "Теперь RustWire автоматически отслеживает и публикует кампании дропов Kick для Rust.",
                         "cl2_title": "Канал журнала банов",
@@ -8169,12 +8214,18 @@
                         "showcase_cta_title": "Bunları sunucunuzda da istiyor musunuz?",
                         "showcase_cta_desc": "Eklemesi ücretsiz. Kurulum ücreti yok. Sadece kurun ve /wire setupchannels komutunu çalıştırın.",
                         "showcase_cta_btn": "RustWire'ı Ücretsiz Ekle →",
+                        "cl_sc_date": "Ağu 2026",
+                        "cl_sm_date": "Tem 2026",
                         "cl1_date": "Haz 2026",
                         "cl2_date": "Haz 2026",
                         "cl3_date": "Haz 2026",
                         "cl4_date": "May 2026",
                         "cl_tag_new": "Yeni",
                         "cl_tag_milestone": "Kilometre Taşı",
+                        "cl_sc_title": "Besleme Başına Kanal Seçimi — /rust setchannel",
+                        "cl_sc_desc": "Herhangi bir otomatik beslemeyi (Devblog, Skins, DLC, Drops, Commits, Bans ve daha fazlası) sunucunuzdaki mevcut herhangi bir kanala yönlendirin — ayrı bir besleme kategorisi ya da /rust setupchannels çalıştırmaya gerek yok. Bot ayrıca o kanaldaki izinlerini anında kontrol eder, böylece bir şey eksikse hemen öğrenirsiniz.",
+                        "cl_sm_title": "Depolama Monitörü Takibi ve Oyun İçi Sohbet Komutları",
+                        "cl_sm_desc": "TC'niz çürümeye başladığı anda anında bildirim almak için bir Depolama Monitörü eşleştirin, ayrıca yeni oyun içi takım sohbeti komutları (!wipe, !time, !pop, !upkeep) — Discord'a geçmenize gerek kalmadan.",
                         "cl1_title": "Kick Drops Desteği",
                         "cl1_desc": "RustWire artık Rust Kick Drop kampanyalarını otomatik olarak takip edip paylaşıyor.",
                         "cl2_title": "Ban Kayıt Kanalı",
@@ -8436,12 +8487,18 @@
                         "showcase_cta_title": "Chcesz mieć to na swoim serwerze?",
                         "showcase_cta_desc": "Dodanie za darmo. Bez opłaty za konfigurację. Po prostu zainstaluj i uruchom /wire setupchannels.",
                         "showcase_cta_btn": "Dodaj RustWire za darmo →",
+                        "cl_sc_date": "sie 2026",
+                        "cl_sm_date": "lip 2026",
                         "cl1_date": "cze 2026",
                         "cl2_date": "cze 2026",
                         "cl3_date": "cze 2026",
                         "cl4_date": "maj 2026",
                         "cl_tag_new": "Nowość",
                         "cl_tag_milestone": "Kamień milowy",
+                        "cl_sc_title": "Wybór kanału dla pojedynczego kanału informacyjnego — /rust setchannel",
+                        "cl_sc_desc": "Przypisz dowolny automatyczny kanał informacyjny (Devblog, Skiny, DLC, Dropy, Commity, Bany i inne) do dowolnego istniejącego kanału — bez dedykowanej kategorii kanałów i bez konieczności uruchamiania /rust setupchannels. Bot od razu sprawdza też swoje uprawnienia na tym kanale, więc natychmiast dowiesz się, jeśli czegoś brakuje.",
+                        "cl_sm_title": "Śledzenie monitora magazynowego i komendy czatu w grze",
+                        "cl_sm_desc": "Sparuj monitor magazynowy, aby otrzymać natychmiastowy alert w momencie, gdy Twój TC zacznie się rozkładać, a także nowe komendy czatu drużynowego w grze (!wipe, !time, !pop, !upkeep) — bez konieczności przełączania się na Discorda.",
                         "cl1_title": "Obsługa Dropów Kick",
                         "cl1_desc": "RustWire automatycznie śledzi i publikuje teraz kampanie Dropów Kick dla Rusta.",
                         "cl2_title": "Kanał dziennika banów",
@@ -8703,12 +8760,18 @@
                         "showcase_cta_title": "想在你的服务器上拥有这些功能吗？",
                         "showcase_cta_desc": "免费添加，无需设置费用。安装后运行 /wire setupchannels 即可。",
                         "showcase_cta_btn": "免费添加 RustWire →",
+                        "cl_sc_date": "2026年8月",
+                        "cl_sm_date": "2026年7月",
                         "cl1_date": "2026年6月",
                         "cl2_date": "2026年6月",
                         "cl3_date": "2026年6月",
                         "cl4_date": "2026年5月",
                         "cl_tag_new": "新",
                         "cl_tag_milestone": "里程碑",
+                        "cl_sc_title": "按频道单独设置推送 — /rust setchannel",
+                        "cl_sc_desc": "将任意一个自动推送内容（Devblog、皮肤、DLC、掉落、提交记录、封禁等）指定到你服务器中任意一个现有频道——无需专门的推送分类，也无需运行 /rust setupchannels。机器人还会立即检查它在该频道的权限，让你第一时间知道是否缺少权限。",
+                        "cl_sm_title": "存储监视器追踪与游戏内聊天指令",
+                        "cl_sm_desc": "配对一个存储监视器，在你的 TC 开始腐蚀的瞬间立即收到提醒，另外还新增了游戏内团队聊天指令（!wipe、!time、!pop、!upkeep）——无需切换到 Discord。",
                         "cl1_title": "支持 Kick 掉落",
                         "cl1_desc": "RustWire 现已自动追踪并发布 Rust 的 Kick 掉落活动。",
                         "cl2_title": "封禁日志频道",
