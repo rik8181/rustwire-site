@@ -297,20 +297,25 @@
         html.light { background: #F4F1EE; }
         html.light body::before {
             opacity: 1;
-            filter: saturate(.9) brightness(1.08);
+            filter: saturate(1.05) brightness(1.02);
         }
         html.light body::after {
             background:
-                linear-gradient(90deg, rgba(244,241,238,.86) 0%, rgba(244,241,238,.66) 40%, rgba(244,241,238,.38) 72%, rgba(244,241,238,.55) 100%),
-                linear-gradient(180deg, rgba(244,241,238,.20) 0%, rgba(244,241,238,.10) 45%, rgba(244,241,238,.78) 100%),
+                linear-gradient(90deg, rgba(244,241,238,.70) 0%, rgba(244,241,238,.40) 38%, rgba(244,241,238,.08) 70%, rgba(244,241,238,.20) 100%),
+                linear-gradient(180deg, rgba(244,241,238,.10) 0%, rgba(244,241,238,0) 45%, rgba(244,241,238,.50) 100%),
                 radial-gradient(ellipse at 68% 20%, rgba(229,98,26,.10), transparent 48%);
         }
         html.light .hero-bg::after {
             background:
-                linear-gradient(90deg, rgba(244,241,238,.55) 0%, rgba(244,241,238,.25) 45%, transparent 75%),
-                linear-gradient(180deg, transparent 60%, rgba(244,241,238,.55) 100%);
+                linear-gradient(90deg, rgba(244,241,238,.30) 0%, rgba(244,241,238,.10) 40%, transparent 65%),
+                linear-gradient(180deg, transparent 65%, rgba(244,241,238,.35) 100%);
         }
         html.light .hero-bg::before { opacity: .35; }
+        html.light .hero-left h1,
+        html.light .hero-left .hero-desc {
+            text-shadow: 0 1px 12px rgba(244,241,238,.9), 0 0 2px rgba(244,241,238,.8);
+        }
+        html.light .hero-left .hero-desc { color: #2E2A26; }
 
         ::-webkit-scrollbar {
             width: 4px;
@@ -2915,7 +2920,7 @@
             }
             .hero-bg::before { opacity: 0.48; animation-duration: 36s; }
             html.light .hero-bg::after {
-                background: linear-gradient(180deg, rgba(244,241,238,.55), rgba(244,241,238,.70));
+                background: linear-gradient(180deg, rgba(244,241,238,.40), rgba(244,241,238,.55));
             }
         }
 
