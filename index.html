@@ -123,11 +123,12 @@
             border-bottom-color: var(--border);
         }
 
+        /* Light mode keeps the hero transparent so the site-wide backdrop shows through */
         html.light .hero {
-            background: linear-gradient(135deg, #F4F1EE 0%, #EAE6E1 50%, #F0EBE3 100%) !important;
+            background: transparent !important;
         }
 
-        html.light .hero-bg { opacity: 0.35 !important; }
+        html.light .hero-bg { opacity: 1 !important; }
 
         html.light .stat-card,
         html.light .feature-card,
@@ -290,10 +291,26 @@
         html.light body {
             background: transparent !important;
         }
-        html.light body::before { opacity: .10; }
-        html.light body::after {
-            background: linear-gradient(rgba(244,241,238,.88), rgba(244,241,238,.94));
+        /* Light mode: same Rust backdrop, washed with a warm light haze.
+           Stronger on the left (where the hero text sits) and towards the
+           bottom (where the content sections start) so dark text stays readable. */
+        html.light { background: #F4F1EE; }
+        html.light body::before {
+            opacity: 1;
+            filter: saturate(.9) brightness(1.08);
         }
+        html.light body::after {
+            background:
+                linear-gradient(90deg, rgba(244,241,238,.86) 0%, rgba(244,241,238,.66) 40%, rgba(244,241,238,.38) 72%, rgba(244,241,238,.55) 100%),
+                linear-gradient(180deg, rgba(244,241,238,.20) 0%, rgba(244,241,238,.10) 45%, rgba(244,241,238,.78) 100%),
+                radial-gradient(ellipse at 68% 20%, rgba(229,98,26,.10), transparent 48%);
+        }
+        html.light .hero-bg::after {
+            background:
+                linear-gradient(90deg, rgba(244,241,238,.55) 0%, rgba(244,241,238,.25) 45%, transparent 75%),
+                linear-gradient(180deg, transparent 60%, rgba(244,241,238,.55) 100%);
+        }
+        html.light .hero-bg::before { opacity: .35; }
 
         ::-webkit-scrollbar {
             width: 4px;
@@ -2897,6 +2914,9 @@
                     linear-gradient(180deg, rgba(7,7,7,0.25), rgba(7,7,7,0.82));
             }
             .hero-bg::before { opacity: 0.48; animation-duration: 36s; }
+            html.light .hero-bg::after {
+                background: linear-gradient(180deg, rgba(244,241,238,.55), rgba(244,241,238,.70));
+            }
         }
 
         @media (prefers-reduced-motion: reduce) {
