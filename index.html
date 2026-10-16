@@ -127,7 +127,7 @@
             background: linear-gradient(135deg, #F4F1EE 0%, #EAE6E1 50%, #F0EBE3 100%) !important;
         }
 
-        html.light .hero-bg { opacity: 0.04 !important; }
+        html.light .hero-bg { opacity: 0.35 !important; }
 
         html.light .stat-card,
         html.light .feature-card,
@@ -246,13 +246,53 @@
             scroll-behavior: smooth;
         }
 
+        /* Persistent Rust-inspired backdrop: remains visible while scrolling and
+           when navigating between sections on this single-page site. */
+        html {
+            background: #080909;
+        }
+
         body {
-            background: var(--bg);
+            background: transparent;
             color: var(--text);
             font-family: 'Inter', sans-serif;
             font-size: 16px;
             line-height: 1.6;
             overflow-x: hidden;
+            isolation: isolate;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background-image: url('./rustwire-industrial-bg.png');
+            background-size: cover;
+            background-position: center 48%;
+            background-repeat: no-repeat;
+            transform: translateZ(0);
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            background:
+                linear-gradient(90deg, rgba(7,7,7,.64) 0%, rgba(7,7,7,.38) 42%, rgba(7,7,7,.30) 100%),
+                linear-gradient(180deg, rgba(7,7,7,.12) 0%, rgba(7,7,7,.22) 55%, rgba(7,7,7,.66) 100%),
+                radial-gradient(ellipse at 68% 20%, rgba(229,98,26,.15), transparent 48%);
+        }
+
+        html.light body {
+            background: transparent !important;
+        }
+        html.light body::before { opacity: .10; }
+        html.light body::after {
+            background: linear-gradient(rgba(244,241,238,.88), rgba(244,241,238,.94));
         }
 
         ::-webkit-scrollbar {
@@ -647,18 +687,51 @@
         .hero-bg {
             position: absolute;
             inset: 0;
-            background-image: url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=60');
-            background-size: cover;
-            background-position: center;
-            opacity: 0.06;
+            /* The site-wide background lives on body::before and stays fixed
+               while the visitor scrolls. This layer only adds hero-local grading. */
+            background: transparent;
+            opacity: 1;
             z-index: 0;
+            transform: none;
         }
 
+        /* Warm RustWire colour grade + darker text-safe area */
         .hero-bg::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(90deg, rgba(10, 10, 10, 0.95) 40%, rgba(10, 10, 10, 0.6));
+            background:
+                linear-gradient(90deg, rgba(7, 7, 7, 0.91) 0%, rgba(7, 7, 7, 0.70) 34%, rgba(7, 7, 7, 0.42) 67%, rgba(7, 7, 7, 0.72) 100%),
+                linear-gradient(180deg, rgba(7, 7, 7, 0.30) 0%, rgba(7, 7, 7, 0.05) 42%, rgba(7, 7, 7, 0.80) 100%),
+                linear-gradient(120deg, rgba(229, 98, 26, 0.19), transparent 52%, rgba(206, 66, 43, 0.13));
+        }
+
+        /* Subtle drifting haze: atmospheric, not a distracting video loop. */
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: -12% -8%;
+            z-index: 1;
+            pointer-events: none;
+            background:
+                radial-gradient(ellipse at 23% 68%, rgba(229, 98, 26, 0.10) 0%, transparent 34%),
+                radial-gradient(ellipse at 72% 35%, rgba(255, 153, 67, 0.08) 0%, transparent 31%);
+            filter: blur(24px);
+            opacity: 0.65;
+            animation: rustwireHaze 28s ease-in-out infinite alternate;
+        }
+
+        @keyframes rustwireHaze {
+            0%   { transform: translate3d(-1.2%, 0, 0) scale(1); opacity: 0.55; }
+            50%  { transform: translate3d(0.7%, -1%, 0) scale(1.025); opacity: 0.82; }
+            100% { transform: translate3d(1.5%, 0.6%, 0) scale(1.04); opacity: 0.62; }
+        }
+
+        .hero .live-feed {
+            background: rgba(12, 12, 12, 0.88);
+            border-color: rgba(229, 98, 26, 0.34);
+            box-shadow: 0 14px 42px rgba(0, 0, 0, 0.28), 0 0 28px rgba(229, 98, 26, 0.055);
+            backdrop-filter: blur(12px);
         }
 
         .hero-left {
@@ -2813,6 +2886,22 @@
             .support-card {
                 padding: 20px 16px;
             }
+        }
+
+
+        @media (max-width: 768px) {
+            body::before { background-position: 57% center; }
+            .hero-bg::after {
+                background:
+                    linear-gradient(90deg, rgba(7,7,7,0.84), rgba(7,7,7,0.58)),
+                    linear-gradient(180deg, rgba(7,7,7,0.25), rgba(7,7,7,0.82));
+            }
+            .hero-bg::before { opacity: 0.48; animation-duration: 36s; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hero-bg::before { animation: none !important; }
+            .hero-bg { transform: none; }
         }
 
         @media (prefers-reduced-motion: reduce) {
