@@ -1,15 +1,27 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/pair", "destination": "/pair.html" },
-    { "source": "/start", "destination": "/start.html" },
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/pair",
+      "destination": "/pair.html"
+    },
+    {
+      "source": "/start",
+      "destination": "/start.html"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/((?!api/).*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-store" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
       ]
     }
   ]
