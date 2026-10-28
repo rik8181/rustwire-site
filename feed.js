@@ -18,15 +18,40 @@ const decode = (t = '') => t
   .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
 const plain = (t = '') => decode(t).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
-// ---------- Steam news (official API, no key needed) ----------
+// ---------- Steam news ----------
+// Text from Steam's official news API; the big cover image from the Steam RSS
+// feed (<enclosure>), because the cover is usually NOT inside the post text.
+async function steamCovers() {
+  try {
+    const xml = await get('https://store.steampowered.com/feeds/news/app/252490/');
+    const covers = new Map();
+    for (const [, it] of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+      const title = plain((it.match(/<title[^>]*>([\s\S]*?)<\/title>/) || [])[1] || '');
+      const encl = (it.match(/<enclosure[^>]+url="([^"]+)"/i) || [])[1];
+      const inText = (decode((it.match(/<description[^>]*>([\s\S]*?)<\/description>/) || [])[1] || '').match(/<img[^>]+src=["']?([^"' >]+)/i) || [])[1];
+      const img = encl || inText;
+      if (title && img) covers.set(title.toLowerCase(), decode(img));
+    }
+    return covers;
+  } catch { return new Map(); }
+}
+
 async function devblogs() {
-  const json = await get('https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=252490&count=8&maxlength=0&format=json', 'json');
+  const [json, covers] = await Promise.all([
+    get('https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=252490&count=8&maxlength=0&format=json', 'json'),
+    steamCovers(),
+  ]);
   return (json.appnews?.newsitems || [])
     .filter(n => n.feedname === 'steam_community_announcements' || n.feed_type === 1)
     .slice(0, 2)
     .map(n => {
-      const img = (n.contents || '').match(/\{STEAM_CLAN_IMAGE\}\/([^\s\[\]"']+)/);
-      const text = (n.contents || '')
+      const contents = n.contents || '';
+      const clanImg = contents.match(/\{STEAM_CLAN_IMAGE\}\/([^\s\[\]"']+)/);
+      const plainImg = contents.match(/https?:\/\/[^\s\[\]"'<>]+\.(?:jpg|jpeg|png|gif|webp)/i);
+      const image = covers.get((n.title || '').toLowerCase())
+        || (clanImg ? 'https://clan.akamai.steamstatic.com/images/' + clanImg[1] : '')
+        || (plainImg ? plainImg[0] : '');
+      const text = contents
         .replace(/\{STEAM_CLAN_IMAGE\}\/[^\s\[\]"']+/g, '')
         .replace(/\[\/?[^\]]+\]/g, ' ');
       return {
@@ -34,7 +59,7 @@ async function devblogs() {
         date: new Date(n.date * 1000).toISOString(),
         link: n.url,
         description: plain(text).slice(0, 180),
-        image: img ? 'https://clan.akamai.steamstatic.com/images/' + img[1] : '',
+        image,
       };
     });
 }
