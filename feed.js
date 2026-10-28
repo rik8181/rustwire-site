@@ -16,52 +16,59 @@ const decode = (t = '') => t
   .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
   .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
   .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+// Facepunch masks private commit messages with block characters (█▆▅▃…)
+const isMasked = (t = '') => { const s = t.replace(/\s/g, ''); return !s || (s.match(/[\u2580-\u259F]/g) || []).length / s.length > 0.3; };
 const plain = (t = '') => decode(t).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
 // ---------- Steam news ----------
 // Text from Steam's official news API; the big cover image from the Steam RSS
 // feed (<enclosure>), because the cover is usually NOT inside the post text.
-async function steamCovers() {
+async function steamRss() {
   try {
     const xml = await get('https://store.steampowered.com/feeds/news/app/252490/');
-    const covers = new Map();
+    const items = [];
     for (const [, it] of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
-      const title = plain((it.match(/<title[^>]*>([\s\S]*?)<\/title>/) || [])[1] || '');
+      const tag = n => (it.match(new RegExp(`<${n}[^>]*>([\\s\\S]*?)</${n}>`)) || [])[1] || '';
+      const descHtml = decode(tag('description'));
       const encl = (it.match(/<enclosure[^>]+url="([^"]+)"/i) || [])[1];
-      const inText = (decode((it.match(/<description[^>]*>([\s\S]*?)<\/description>/) || [])[1] || '').match(/<img[^>]+src=["']?([^"' >]+)/i) || [])[1];
-      const img = encl || inText;
-      if (title && img) covers.set(title.toLowerCase(), decode(img));
+      const inText = (descHtml.match(/<img[^>]+src=["']?([^"' >]+)/i) || [])[1];
+      items.push({
+        title: plain(tag('title')),
+        date: new Date(plain(tag('pubDate'))).toISOString(),
+        link: plain(tag('link')),
+        description: plain(descHtml).slice(0, 180),
+        image: decode(encl || inText || ''),
+      });
     }
-    return covers;
-  } catch { return new Map(); }
+    return items.filter(i => i.title);
+  } catch { return []; }
 }
 
 async function devblogs() {
-  const [json, covers] = await Promise.all([
-    get('https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=252490&count=8&maxlength=0&format=json', 'json'),
-    steamCovers(),
+  const [api, rss] = await Promise.all([
+    get('https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=252490&count=8&maxlength=0&format=json', 'json').catch(() => null),
+    steamRss(),
   ]);
-  return (json.appnews?.newsitems || [])
-    .filter(n => n.feedname === 'steam_community_announcements' || n.feed_type === 1)
-    .slice(0, 2)
-    .map(n => {
-      const contents = n.contents || '';
-      const clanImg = contents.match(/\{STEAM_CLAN_IMAGE\}\/([^\s\[\]"']+)/);
-      const plainImg = contents.match(/https?:\/\/[^\s\[\]"'<>]+\.(?:jpg|jpeg|png|gif|webp)/i);
-      const image = covers.get((n.title || '').toLowerCase())
+  const covers = new Map(rss.filter(i => i.image).map(i => [i.title.toLowerCase(), i.image]));
+  const all = api?.appnews?.newsitems || [];
+  const official = all.filter(n => n.feedname === 'steam_community_announcements' || n.feed_type === 1);
+  const list = (official.length ? official : all).slice(0, 2).map(n => {
+    const contents = n.contents || '';
+    const clanImg = contents.match(/\{STEAM_CLAN_IMAGE\}\/([^\s\[\]"']+)/);
+    const plainImg = contents.match(/https?:\/\/[^\s\[\]"'<>]+\.(?:jpg|jpeg|png|gif|webp)/i);
+    return {
+      title: n.title || '',
+      date: new Date(n.date * 1000).toISOString(),
+      link: n.url,
+      description: plain(contents.replace(/\{STEAM_CLAN_IMAGE\}\/[^\s\[\]"']+/g, '').replace(/\[\/?[^\]]+\]/g, ' ')).slice(0, 180),
+      image: covers.get((n.title || '').toLowerCase())
         || (clanImg ? 'https://clan.akamai.steamstatic.com/images/' + clanImg[1] : '')
-        || (plainImg ? plainImg[0] : '');
-      const text = contents
-        .replace(/\{STEAM_CLAN_IMAGE\}\/[^\s\[\]"']+/g, '')
-        .replace(/\[\/?[^\]]+\]/g, ' ');
-      return {
-        title: n.title || '',
-        date: new Date(n.date * 1000).toISOString(),
-        link: n.url,
-        description: plain(text).slice(0, 180),
-        image,
-      };
-    });
+        || (plainImg ? plainImg[0] : ''),
+    };
+  });
+  if (list.length) return list;
+  if (rss.length) return rss.slice(0, 2);          // Steam API down → RSS still gives news + covers
+  throw new Error('Steam news API and RSS both unavailable');
 }
 
 // ---------- Facepunch commits (JSON, falls back to RSS) ----------
@@ -69,7 +76,7 @@ async function commits() {
   try {
     const json = await get('https://commits.facepunch.com/?format=json', 'json');
     const list = (json.results || (Array.isArray(json) ? json : []))
-      .filter(c => (c.message || '').trim() && (!c.repo || /rust/i.test(c.repo)))
+      .filter(c => !isMasked(c.message || '') && (!c.repo || /rust/i.test(c.repo)))
       .slice(0, 2)
       .map(c => ({
         title: (c.message || '').split('\n')[0].trim(),
@@ -84,7 +91,7 @@ async function commits() {
   return [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 2).map(([, it]) => {
     const tag = n => (it.match(new RegExp(`<${n}[^>]*>([\\s\\S]*?)</${n}>`)) || [])[1] || '';
     return { title: plain(tag('title')), date: tag('pubDate'), link: plain(tag('link')), description: plain(tag('description')).slice(0, 180), image: '' };
-  }).filter(i => i.title);
+  }).filter(i => i.title && !isMasked(i.title));
 }
 
 // ---------- Twitch / Kick Drops (same scraping as the RustWire bot) ----------
