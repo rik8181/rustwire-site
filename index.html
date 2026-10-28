@@ -5339,6 +5339,8 @@
                 }));
             try { return await Promise.any(tries); } catch { return null; }
         }
+        // Facepunch masks private commit messages with block characters (█▆▅▃…)
+        const isMaskedCommit = t => { const x = String(t || '').replace(/\s/g, ''); return !x || (x.match(/[\u2580-\u259F]/g) || []).length / x.length > 0.3; };
         const escHTML = str => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
         // Plain RSS/Atom parsing in the browser (fallback when rss2json is down)
@@ -5401,13 +5403,13 @@
         // Facepunch commits: JSON API → rss2json → raw RSS
         async function fetchCommits() {
             const sf = await serverFeed();
-            if (sf?.commits?.length) return sf.commits.map(escItem);
+            if (sf?.commits?.length) return sf.commits.filter(c => !isMaskedCommit(c.title)).map(escItem);
             const json = await fetchTextAny('https://commits.facepunch.com/?format=json');
             if (json) {
                 try {
                     const data = JSON.parse(json);
                     const list = (data.results || data || [])
-                        .filter(c => (c.message || '').trim() && (!c.repo || /rust/i.test(c.repo)))
+                        .filter(c => !isMaskedCommit(c.message || '') && (!c.repo || /rust/i.test(c.repo)))
                         .slice(0, 2);
                     if (list.length) return list.map(c => ({
                         title: escHTML((c.message || '').split('\n')[0].trim()),
@@ -5418,10 +5420,10 @@
                     }));
                 } catch { /* fall through */ }
             }
-            const viaRss2json = await fetchRSS('https://commits.facepunch.com/?format=rss');
+            const viaRss2json = (await fetchRSS('https://commits.facepunch.com/?format=rss')).filter(c => !isMaskedCommit(c.title));
             if (viaRss2json.length) return viaRss2json;
             const rss = await fetchTextAny('https://commits.facepunch.com/?format=rss');
-            const parsed = rss ? parseFeedXml(rss) : [];
+            const parsed = rss ? parseFeedXml(rss).filter(c => !isMaskedCommit(c.title)) : [];
             if (!parsed.length) console.warn('[RustWire feed] Commits unavailable from every source right now.');
             return parsed;
         }
@@ -5609,7 +5611,7 @@
             const parts = { devblog: [], commit: [], oxide: [], drops: [] };
             try {
                 const c = JSON.parse(localStorage.getItem(FEED_CACHE_KEY) || 'null');
-                if (c && Date.now() - c.at < 12 * 3600 * 1000) for (const k of Object.keys(parts)) parts[k] = (c.parts[k] || []).map(i => ({ ...i, date: new Date(i.date) }));
+                if (c && Date.now() - c.at < 12 * 3600 * 1000) for (const k of Object.keys(parts)) parts[k] = (c.parts[k] || []).filter(i => !(k === 'commit' && isMaskedCommit(i.fullTitle))).map(i => ({ ...i, date: new Date(i.date) }));
             } catch { /* no cache yet */ }
             const wipeStr = await fetchNextWipe();
             const render = () => {
