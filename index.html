@@ -4615,6 +4615,30 @@
                 <p class="section-desc" data-i18n="cl_desc">Recent updates and improvements to RustWire.</p>
                 <div class="cl-list">
                     <div class="cl-entry">
+                        <div class="cl-date" data-i18n="cl_wc_date">Oct 2026</div>
+                        <div>
+                            <span class="cl-badge badge-new" data-i18n="cl_tag_new">New</span>
+                            <div class="cl-title" data-i18n="cl_wc_title">Welcome &amp; Leave Cards — /wire welcomestyle</div>
+                            <div class="cl-desc" data-i18n="cl_wc_desc">Greet new members with a proper image card instead of a plain text message. Pick from 11 themes (Rust Metal, Rust Scrap, Neon, Winter and more), add your own accent colour or background image, and check it first with /wire welcomepreview. Prefer the old look? The original embed is still there.</div>
+                        </div>
+                    </div>
+                    <div class="cl-entry">
+                        <div class="cl-date" data-i18n="cl_lang_date">Oct 2026</div>
+                        <div>
+                            <span class="cl-badge badge-improve" data-i18n="cl_tag_improved">Improved</span>
+                            <div class="cl-title" data-i18n="cl_lang_title">Welcome Messages in Your Server's Language</div>
+                            <div class="cl-desc" data-i18n="cl_lang_desc">Welcome and leave messages now speak all 18 languages, dates and times included. If you've never picked a language with /wire language set, RustWire simply uses your server's Discord language.</div>
+                        </div>
+                    </div>
+                    <div class="cl-entry">
+                        <div class="cl-date" data-i18n="cl_sec_date">Oct 2026</div>
+                        <div>
+                            <span class="cl-badge badge-fix" data-i18n="cl_tag_fix">Fix</span>
+                            <div class="cl-title" data-i18n="cl_sec_title">Admin-Only Welcome Setup</div>
+                            <div class="cl-desc" data-i18n="cl_sec_desc">/wire setwelcome and /wire voterole now need the Administrator permission, so regular members can no longer change these settings.</div>
+                        </div>
+                    </div>
+                    <div class="cl-entry">
                         <div class="cl-date" data-i18n="cl_sc_date">Aug 2026</div>
                         <div>
                             <span class="cl-badge badge-new" data-i18n="cl_tag_new">New</span>
@@ -5183,7 +5207,12 @@
             }
         };
 
-        function dropsCountdown(endISO) {
+        function dropsCountdown(endISO, startISO) {
+            const toStart = startISO ? new Date(startISO) - new Date() : 0;
+            if (toStart > 0) {
+                const d = Math.floor(toStart / 86400000), h = Math.floor((toStart % 86400000) / 3600000), m = Math.floor((toStart % 3600000) / 60000);
+                return d > 0 ? `Starts in ${d}d ${h}h` : h > 0 ? `Starts in ${h}h ${m}m` : `Starts in ${m}m`;
+            }
             const diff = new Date(endISO) - new Date();
             if (diff <= 0) return 'Campaign ended';
             const days  = Math.floor(diff / 86400000);
@@ -5197,7 +5226,7 @@
         function dropsFeedItem(c, embedType) {
             return {
                 embedType, time: fmtTime(), cmd: `/rust drops -- ${c.title}`,
-                sub: dropsCountdown(c.end), link: c.link, fullTitle: c.title,
+                sub: dropsCountdown(c.end, c.start), link: c.link, fullTitle: c.title,
                 reward: c.reward, desc: c.desc, startDate: c.start, endDate: c.end,
                 image: c.image, date: new Date()
             };
@@ -5274,6 +5303,209 @@
             } catch { return []; }
         }
 
+        // ── Own server endpoint (Vercel function /api/feed) ──────────────
+        // Fetches Steam, Facepunch commits and Drops server-side, so browser
+        // CORS limits don't matter. Everything below is only a fallback.
+        let _srvFeed = null;
+        function serverFeed() {
+            if (!_srvFeed || Date.now() - _srvFeed.at > 5 * 60 * 1000) {
+                _srvFeed = { at: Date.now(), p: fetch('/api/feed', { signal: AbortSignal.timeout(12000) })
+                    .then(r => r.ok ? r.json() : null)
+                    .then(j => { if (j?.errors && Object.keys(j.errors).length) console.warn('[RustWire feed] /api/feed partial:', j.errors); return j; })
+                    .catch(() => { console.warn('[RustWire feed] /api/feed not reachable, using browser fallbacks.'); return null; }) };
+            }
+            return _srvFeed.p;
+        }
+        const escItem = i => ({ ...i, title: escHTML(i.title), description: escHTML(i.description), image: sanitizeImageUrl(i.image || '') });
+
+        // ── Resilient sources for the Live Feed ─────────────────────────
+        // rss2json alone was a single point of failure: when it errors or
+        // rate-limits, Devblogs and Commits silently vanished from the feed.
+        // Each source now tries several routes until one answers.
+        const CORS_ROUTES = [
+            u => u,                                                        // direct (works if the source sends CORS headers)
+            u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+            u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+            u => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u),
+        ];
+        async function fetchTextAny(url) {
+            for (const route of CORS_ROUTES) {
+                try {
+                    const res = await fetch(route(url), { signal: AbortSignal.timeout(7000) });
+                    if (!res.ok) continue;
+                    const text = await res.text();
+                    if (text && text.length > 40) return text;
+                } catch { /* try the next route */ }
+            }
+            return null;
+        }
+        const escHTML = str => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+        // Plain RSS/Atom parsing in the browser (fallback when rss2json is down)
+        function parseFeedXml(xml, limit = 2) {
+            try {
+                const doc = new DOMParser().parseFromString(xml, 'text/xml');
+                const nodes = [...doc.querySelectorAll('item, entry')].slice(0, limit);
+                return nodes.map(n => {
+                    const get = sel => n.querySelector(sel)?.textContent?.trim() || '';
+                    const link = get('link') || n.querySelector('link')?.getAttribute('href') || '';
+                    const html = get('description') || get('summary') || get('content');
+                    const imgMatch = html.match(/<img[^>]+src=["']?([^"' >]+)/i);
+                    const encl = n.querySelector('enclosure')?.getAttribute('url') || '';
+                    return {
+                        title: escHTML(get('title')),
+                        date: get('pubDate') || get('updated') || get('published'),
+                        link,
+                        description: escHTML(html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().slice(0, 180)),
+                        image: sanitizeImageUrl(encl || (imgMatch ? imgMatch[1] : '')),
+                    };
+                }).filter(i => i.title);
+            } catch { return []; }
+        }
+
+        // Steam news: rss2json → Steam's own news API → raw RSS
+        async function fetchDevblogs() {
+            const sf = await serverFeed();
+            if (sf?.devblogs?.length) return sf.devblogs.map(escItem);
+            const viaRss2json = await fetchRSS('https://store.steampowered.com/feeds/news/app/252490/');
+            if (viaRss2json.length) return viaRss2json;
+            const api = await fetchTextAny('https://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid=252490&count=6&maxlength=0&format=json');
+            if (api) {
+                try {
+                    const news = (JSON.parse(api).appnews?.newsitems || [])
+                        .filter(n => n.feedname === 'steam_community_announcements' || n.feed_type === 1)
+                        .slice(0, 2);
+                    if (news.length) return news.map(n => {
+                        const img = (n.contents || '').match(/\{STEAM_CLAN_IMAGE\}\/([^\s\[\]"']+)/);
+                        const text = (n.contents || '')
+                            .replace(/\{STEAM_CLAN_IMAGE\}\/[^\s\[\]"']+/g, '')
+                            .replace(/\[\/?[^\]]+\]/g, ' ')
+                            .replace(/<[^>]*>/g, ' ')
+                            .replace(/\s+/g, ' ').trim();
+                        return {
+                            title: escHTML(n.title),
+                            date: new Date(n.date * 1000).toISOString(),
+                            link: n.url,
+                            description: escHTML(text.slice(0, 180)),
+                            image: img ? sanitizeImageUrl('https://clan.akamai.steamstatic.com/images/' + img[1]) : '',
+                        };
+                    });
+                } catch { /* fall through */ }
+            }
+            const rss = await fetchTextAny('https://store.steampowered.com/feeds/news/app/252490/');
+            const parsed = rss ? parseFeedXml(rss) : [];
+            if (!parsed.length) console.warn('[RustWire feed] Devblogs unavailable from every source right now.');
+            return parsed;
+        }
+
+        // Facepunch commits: JSON API → rss2json → raw RSS
+        async function fetchCommits() {
+            const sf = await serverFeed();
+            if (sf?.commits?.length) return sf.commits.map(escItem);
+            const json = await fetchTextAny('https://commits.facepunch.com/?format=json');
+            if (json) {
+                try {
+                    const data = JSON.parse(json);
+                    const list = (data.results || data || [])
+                        .filter(c => (c.message || '').trim() && (!c.repo || /rust/i.test(c.repo)))
+                        .slice(0, 2);
+                    if (list.length) return list.map(c => ({
+                        title: escHTML((c.message || '').split('\n')[0].trim()),
+                        date: c.created || c.date || '',
+                        link: c.id ? `https://commits.facepunch.com/${c.id}` : 'https://commits.facepunch.com/',
+                        description: escHTML([c.user?.name, c.branch].filter(Boolean).join(' • ')),
+                        image: '',
+                    }));
+                } catch { /* fall through */ }
+            }
+            const viaRss2json = await fetchRSS('https://commits.facepunch.com/?format=rss');
+            if (viaRss2json.length) return viaRss2json;
+            const rss = await fetchTextAny('https://commits.facepunch.com/?format=rss');
+            const parsed = rss ? parseFeedXml(rss) : [];
+            if (!parsed.length) console.warn('[RustWire feed] Commits unavailable from every source right now.');
+            return parsed;
+        }
+
+        // ── Automatic Drops detection ──────────────────────────────────
+        // Reads twitch.facepunch.com / kick.facepunch.com (the same pages the
+        // bot scrapes) so new campaigns appear on their own. DROPS_CAMPAIGNS
+        // above is only a manual fallback/override now.
+        const DROPS_PAGES = {
+            twitch: { url: 'https://twitch.facepunch.com/', platform: 'Twitch', how: 'Watch any Rust stream on Twitch with the Drops Enabled tag' },
+            kick:   { url: 'https://kick.facepunch.com/',   platform: 'Kick',   how: 'Watch any Rust stream on Kick with the Drops Enabled tag' },
+        };
+        const _dropsCache = {};
+        async function fetchDropsAuto(key) {
+            const src = DROPS_PAGES[key];
+            if (_dropsCache[key] && Date.now() - _dropsCache[key].at < 30 * 60 * 1000) return _dropsCache[key].data;
+            // Server answer wins (null = checked, no campaign running)
+            const sf = await serverFeed();
+            if (sf?.drops && key in sf.drops && !sf.errors?.['drops_' + key]) {
+                const d = sf.drops[key];
+                const data = d ? { ...d, title: escHTML(d.title), reward: escHTML(d.reward), desc: escHTML(d.desc), image: sanitizeImageUrl(d.image || '') } : null;
+                _dropsCache[key] = { at: Date.now(), data };
+                return data;
+            }
+            let data = null;
+            try {
+                const html = await fetchTextAny(src.url);
+                if (html) {
+                    const doc = new DOMParser().parseFromString(html, 'text/html');
+                    doc.querySelectorAll('script,style').forEach(n => n.remove());
+                    // Text with a space between every tag, so "Round 50" and the event name never stick together
+                    const decode = t => t.replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n)).replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+                        .replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
+                    const body = decode(html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+                    const rm = body.match(/Round\s+(\d+)\s+(.+?)\s+Event\s+(Live|Upcoming|Ended)/i);
+                    const ts = [...doc.querySelectorAll('[data-date-id]')]
+                        .map(el => ((el.getAttribute('data-date-id') || '').match(/(\d{9,13})$/) || [])[1])
+                        .filter(Boolean).map(Number).map(t => t < 1e12 ? t * 1000 : t).sort((a, b) => a - b);
+                    if (rm && ts.length) {
+                        // Drop rewards: "<img src=files.facepunch.com/...> Name 2 Hours"
+                        const rewards = []; const seen = new Set();
+                        const re = /src="(https:\/\/files\.facepunch\.com\/[^"]+\.(?:jpg|jpeg|png|webp))"/gi; let m;
+                        while ((m = re.exec(html)) && rewards.length < 6) {
+                            if (/logo|marque|header/i.test(m[1])) continue;
+                            const tagEnd = html.indexOf('>', m.index) + 1, rest = html.substring(tagEnd, tagEnd + 600), cut = rest.search(/<img/i);
+                            const snip = (cut > -1 ? rest.slice(0, cut) : rest).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+                            const nh = snip.match(/^\s*([A-Za-z][A-Za-z0-9\s\-']{1,30}?)\s+(\d+)\s+Hours?/i);
+                            if (!nh) continue;
+                            const name = nh[1].trim().replace(/^[\s\W]+/, '');
+                            if (!name || seen.has(name)) continue;
+                            seen.add(name); rewards.push(`${name} (${nh[2]}h)`);
+                        }
+                        let image = '';
+                        doc.querySelectorAll('img').forEach(img => {
+                            const sv = img.getAttribute('src') || '';
+                            if (!image && sv.includes('facepunch.com') && !/logo|marque|svg/i.test(sv)) image = sv.startsWith('http') ? sv : 'https://files.facepunch.com' + sv;
+                        });
+                        data = {
+                            active: true, auto: true, status: rm[3],
+                            platform: src.platform,
+                            title: escHTML(`Round ${rm[1]} — ${rm[2].trim()}`),
+                            reward: escHTML(rewards.length ? rewards.slice(0, 3).join(', ') + (rewards.length > 3 ? ` +${rewards.length - 3} more` : '') : 'See the campaign page'),
+                            start: new Date(ts[0]).toISOString(),
+                            end: new Date(ts[ts.length - 1]).toISOString(),
+                            link: src.url,
+                            image: sanitizeImageUrl(image),
+                            desc: escHTML(`${src.how} to earn ${rewards.length ? rewards.map(r => r.replace(/ \(.*\)$/, '')).join(', ') : 'free in-game items'}.`),
+                        };
+                    }
+                }
+            } catch (e) { console.warn('[RustWire feed] Drops check failed for', key, e?.message); }
+            _dropsCache[key] = { at: Date.now(), data };
+            return data;
+        }
+        // Auto-detected campaign wins; the manual DROPS_CAMPAIGNS entry is only used if detection finds nothing
+        async function currentDrops(key) {
+            const now = new Date();
+            const auto = await fetchDropsAuto(key);
+            if (auto && auto.status !== 'Ended' && now < new Date(auto.end)) return auto;
+            const manual = DROPS_CAMPAIGNS[key];
+            if (manual?.active && manual.end && now < new Date(manual.end)) return manual;
+            return null;
+        }
+
         async function fetchOxideLatest() {
             try {
                 const res = await fetch('https://api.github.com/repos/OxideMod/Oxide.Rust/releases/latest', { signal: AbortSignal.timeout(8000) });
@@ -5347,7 +5579,7 @@
                 <div class="fe-field"><div class="fe-field-label">Reward</div><div class="fe-field-value">${item.reward}</div></div>
                 <div class="fe-field"><div class="fe-field-label">Starts</div><div class="fe-field-value">${fmtDate(item.startDate)}</div></div>
                 <div class="fe-field"><div class="fe-field-label">Ends</div><div class="fe-field-value">${fmtDate(item.endDate)}</div></div>
-                <div class="fe-footer" style="margin-top:8px">${dropsCountdown(item.endDate)}</div>`;
+                <div class="fe-footer" style="margin-top:8px">${dropsCountdown(item.endDate, item.startDate)}</div>`;
             }
             return `<div class="fe-title">${item.fullTitle}</div>`;
         }
@@ -5370,8 +5602,8 @@
             if (!container) return;
             let items = [];
             const [devblogs, commits, oxide, wipeStr] = await Promise.all([
-                fetchRSS('https://store.steampowered.com/feeds/news/app/252490/'),
-                fetchRSS('https://commits.facepunch.com/?format=rss'),
+                fetchDevblogs(),
+                fetchCommits(),
                 fetchOxideLatest(),
                 fetchNextWipe(),
             ]);
@@ -5380,12 +5612,9 @@
             oxide.forEach(i => { if (i.title) items.push({ embedType:'oxide', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust oxide -- uMod Update`, sub:`Oxide ${i.title} released`, link:i.link, fullTitle:`Oxide.Rust ${i.title}`, body:i.body, date:new Date(i.date) }); });
             items.push({ embedType:'wipe', time:fmtTime(), cmd:`/rust wipe -- Force Wipe`, sub:wipeStr, link:'', fullTitle:'', date:new Date(0) });
             const now = new Date();
-            if (DROPS_CAMPAIGNS.twitch.active && now < new Date(DROPS_CAMPAIGNS.twitch.end)) {
-                items.push(dropsFeedItem(DROPS_CAMPAIGNS.twitch, 'twitchdrop'));
-            }
-            if (DROPS_CAMPAIGNS.kick.active && now < new Date(DROPS_CAMPAIGNS.kick.end)) {
-                items.push(dropsFeedItem(DROPS_CAMPAIGNS.kick, 'kickdrop'));
-            }
+            const [twitchDrops, kickDrops] = await Promise.all([currentDrops('twitch'), currentDrops('kick')]);
+            if (twitchDrops) items.push(dropsFeedItem(twitchDrops, 'twitchdrop'));
+            if (kickDrops) items.push(dropsFeedItem(kickDrops, 'kickdrop'));
             items.sort((a,b) => b.date - a.date);
             items = items.slice(0,5);
             container.innerHTML = items.map(makeFeedItem).join('');
@@ -6188,7 +6417,7 @@
 
         // ── CHANGELOG BADGE ─────────────────────────────────────────
         // Latest changelog entry date — update this when you add a new entry
-        const LATEST_CHANGELOG_DATE = '2026-08-11';
+        const LATEST_CHANGELOG_DATE = '2026-10-28';
 
         function initChangelogBadge() {
             try {
@@ -6241,13 +6470,10 @@
         function checkLiveDrops() {
             const badge = document.getElementById('liveDropsBadge');
             if (!badge) return;
-            // Check RSS feed for active drop campaigns (from loadLiveFeed data)
-            fetchRSS('https://store.steampowered.com/feeds/news/app/252490/').then(items => {
-                const hasDrops = items.some(i =>
-                    i.title && /drop/i.test(i.title) &&
-                    (new Date() - new Date(i.date)) < 7 * 86400000
-                );
-                badge.classList.toggle('visible', hasDrops);
+            // Badge shows while a Twitch or Kick campaign is actually live
+            Promise.all([currentDrops('twitch'), currentDrops('kick')]).then(([tw, kk]) => {
+                const live = [tw, kk].some(c => c && new Date() >= new Date(c.start) && new Date() < new Date(c.end));
+                badge.classList.toggle('visible', live);
             }).catch(() => {});
         }
 
@@ -6690,6 +6916,17 @@
                         "showcase_cta_title": "Want these in your server?",
                         "showcase_cta_desc": "Free to add. No setup fee. Just install and run /wire setupchannels.",
                         "showcase_cta_btn": "Add RustWire Free →",
+                        "cl_tag_improved": "Improved",
+                        "cl_tag_fix": "Fix",
+                        "cl_wc_date": "Oct 2026",
+                        "cl_wc_title": "Welcome & Leave Cards — /wire welcomestyle",
+                        "cl_wc_desc": "Greet new members with a proper image card instead of a plain text message. Pick from 11 themes (Rust Metal, Rust Scrap, Neon, Winter and more), add your own accent colour or background image, and check it first with /wire welcomepreview. Prefer the old look? The original embed is still there.",
+                        "cl_lang_date": "Oct 2026",
+                        "cl_lang_title": "Welcome Messages in Your Server's Language",
+                        "cl_lang_desc": "Welcome and leave messages now speak all 18 languages, dates and times included. If you've never picked a language with /wire language set, RustWire simply uses your server's Discord language.",
+                        "cl_sec_date": "Oct 2026",
+                        "cl_sec_title": "Admin-Only Welcome Setup",
+                        "cl_sec_desc": "/wire setwelcome and /wire voterole now need the Administrator permission, so regular members can no longer change these settings.",
                         "cl_sc_date": "Aug 2026",
                         "cl_sm_date": "Jul 2026",
                         "cl1_date": "Jun 2026",
@@ -6963,6 +7200,17 @@
                         "showcase_cta_title": "Ezt szeretnéd a szerveredre is?",
                         "showcase_cta_desc": "Ingyenesen hozzáadható. Nincs beállítási díj. Csak telepítsd, és futtasd a /wire setupchannels parancsot.",
                         "showcase_cta_btn": "RustWire ingyenes hozzáadása →",
+                        "cl_tag_improved": "Fejlesztés",
+                        "cl_tag_fix": "Javítás",
+                        "cl_wc_date": "2026. okt.",
+                        "cl_wc_title": "Üdvözlő és búcsúzó kártyák — /wire welcomestyle",
+                        "cl_wc_desc": "Köszöntsd az új tagokat egy igazi képes kártyával a sima szöveges üzenet helyett. 11 téma közül választhatsz (Rust Metal, Rust Scrap, Neon, Winter és még több), beállíthatsz saját színt vagy háttérképet, és a /wire welcomepreview paranccsal előre megnézheted. A régi kinézet? Az eredeti embed továbbra is választható.",
+                        "cl_lang_date": "2026. okt.",
+                        "cl_lang_title": "Üdvözlő üzenetek a szerver nyelvén",
+                        "cl_lang_desc": "Az üdvözlő és búcsúzó üzenetek mind a 18 nyelven megjelennek, a dátumokkal együtt. Ha még nem választottál nyelvet a /wire language set paranccsal, a RustWire automatikusan a szerver Discord-nyelvét használja.",
+                        "cl_sec_date": "2026. okt.",
+                        "cl_sec_title": "Üdvözlő beállítások csak adminoknak",
+                        "cl_sec_desc": "A /wire setwelcome és a /wire voterole parancshoz mostantól adminisztrátori jog kell, így az egyszerű tagok már nem módosíthatják ezeket a beállításokat.",
                         "cl_sc_date": "2026. aug.",
                         "cl_sm_date": "2026. júl.",
                         "cl1_date": "2026. jún.",
@@ -7236,6 +7484,17 @@
                         "showcase_cta_title": "Willst du das auch auf deinem Server?",
                         "showcase_cta_desc": "Kostenlos hinzufügbar. Keine Einrichtungsgebühr. Einfach installieren und /wire setupchannels ausführen.",
                         "showcase_cta_btn": "RustWire kostenlos hinzufügen →",
+                        "cl_tag_improved": "Verbessert",
+                        "cl_tag_fix": "Fix",
+                        "cl_wc_date": "Okt. 2026",
+                        "cl_wc_title": "Willkommens- & Abschiedskarten — /wire welcomestyle",
+                        "cl_wc_desc": "Begrüße neue Mitglieder mit einer echten Bildkarte statt einer schlichten Textnachricht. Wähle aus 11 Themes (Rust Metal, Rust Scrap, Neon, Winter und mehr), setze deine eigene Akzentfarbe oder ein eigenes Hintergrundbild und sieh dir alles vorher mit /wire welcomepreview an. Lieber der alte Look? Das Original-Embed gibt es weiterhin.",
+                        "cl_lang_date": "Okt. 2026",
+                        "cl_lang_title": "Willkommensnachrichten in der Sprache deines Servers",
+                        "cl_lang_desc": "Willkommens- und Abschiedsnachrichten gibt es jetzt in allen 18 Sprachen, inklusive Datum und Uhrzeit. Hast du mit /wire language set noch keine Sprache gewählt, nutzt RustWire automatisch die Discord-Sprache deines Servers.",
+                        "cl_sec_date": "Okt. 2026",
+                        "cl_sec_title": "Willkommens-Einstellungen nur für Admins",
+                        "cl_sec_desc": "/wire setwelcome und /wire voterole erfordern jetzt Administratorrechte, normale Mitglieder können diese Einstellungen also nicht mehr ändern.",
                         "cl_sc_date": "Aug. 2026",
                         "cl_sm_date": "Jul. 2026",
                         "cl1_date": "Jun. 2026",
@@ -7509,6 +7768,17 @@
                         "showcase_cta_title": "Vous voulez ça sur votre serveur ?",
                         "showcase_cta_desc": "Ajout gratuit. Aucuns frais d'installation. Installez simplement et exécutez /wire setupchannels.",
                         "showcase_cta_btn": "Ajouter RustWire gratuitement →",
+                        "cl_tag_improved": "Amélioré",
+                        "cl_tag_fix": "Correctif",
+                        "cl_wc_date": "oct. 2026",
+                        "cl_wc_title": "Cartes d'arrivée et de départ — /wire welcomestyle",
+                        "cl_wc_desc": "Accueille les nouveaux membres avec une vraie carte illustrée au lieu d'un simple message texte. Choisis parmi 11 thèmes (Rust Metal, Rust Scrap, Neon, Winter et d'autres), ajoute ta propre couleur ou ton image de fond, et vérifie le rendu avec /wire welcomepreview. Tu préfères l'ancien style ? L'embed d'origine est toujours disponible.",
+                        "cl_lang_date": "oct. 2026",
+                        "cl_lang_title": "Messages de bienvenue dans la langue de ton serveur",
+                        "cl_lang_desc": "Les messages d'arrivée et de départ sont désormais disponibles dans les 18 langues, dates et heures comprises. Si tu n'as pas choisi de langue avec /wire language set, RustWire utilise automatiquement la langue Discord de ton serveur.",
+                        "cl_sec_date": "oct. 2026",
+                        "cl_sec_title": "Réglages de bienvenue réservés aux admins",
+                        "cl_sec_desc": "/wire setwelcome et /wire voterole nécessitent désormais la permission Administrateur : les membres classiques ne peuvent plus modifier ces réglages.",
                         "cl_sc_date": "août 2026",
                         "cl_sm_date": "juil. 2026",
                         "cl1_date": "juin 2026",
@@ -7782,6 +8052,17 @@
                         "showcase_cta_title": "¿Quieres esto en tu servidor?",
                         "showcase_cta_desc": "Gratis para añadir. Sin coste de configuración. Solo instala y ejecuta /wire setupchannels.",
                         "showcase_cta_btn": "Añadir RustWire gratis →",
+                        "cl_tag_improved": "Mejorado",
+                        "cl_tag_fix": "Corrección",
+                        "cl_wc_date": "oct. 2026",
+                        "cl_wc_title": "Tarjetas de bienvenida y despedida — /wire welcomestyle",
+                        "cl_wc_desc": "Recibe a los nuevos miembros con una tarjeta con imagen en lugar de un simple mensaje de texto. Elige entre 11 temas (Rust Metal, Rust Scrap, Neon, Winter y más), añade tu propio color o imagen de fondo y compruébalo antes con /wire welcomepreview. ¿Prefieres el estilo de siempre? El embed original sigue disponible.",
+                        "cl_lang_date": "oct. 2026",
+                        "cl_lang_title": "Mensajes de bienvenida en el idioma de tu servidor",
+                        "cl_lang_desc": "Los mensajes de bienvenida y despedida ya están en los 18 idiomas, con fechas y horas incluidas. Si no has elegido idioma con /wire language set, RustWire usa automáticamente el idioma de Discord de tu servidor.",
+                        "cl_sec_date": "oct. 2026",
+                        "cl_sec_title": "Configuración de bienvenida solo para admins",
+                        "cl_sec_desc": "/wire setwelcome y /wire voterole ahora requieren el permiso de Administrador, así que los miembros normales ya no pueden cambiar estos ajustes.",
                         "cl_sc_date": "ago. 2026",
                         "cl_sm_date": "jul. 2026",
                         "cl1_date": "jun. 2026",
@@ -8055,6 +8336,17 @@
                         "showcase_cta_title": "Хотите то же самое на своём сервере?",
                         "showcase_cta_desc": "Бесплатное добавление. Без платы за настройку. Просто установите и выполните /wire setupchannels.",
                         "showcase_cta_btn": "Добавить RustWire бесплатно →",
+                        "cl_tag_improved": "Улучшено",
+                        "cl_tag_fix": "Исправление",
+                        "cl_wc_date": "окт. 2026",
+                        "cl_wc_title": "Карточки приветствия и прощания — /wire welcomestyle",
+                        "cl_wc_desc": "Встречайте новых участников красивой карточкой вместо обычного текста. 11 тем на выбор (Rust Metal, Rust Scrap, Neon, Winter и другие), свой цвет или фоновое изображение, а через /wire welcomepreview можно заранее посмотреть результат. Нравится старый вид? Оригинальный embed никуда не делся.",
+                        "cl_lang_date": "окт. 2026",
+                        "cl_lang_title": "Приветствия на языке вашего сервера",
+                        "cl_lang_desc": "Сообщения о входе и выходе теперь доступны на всех 18 языках, включая даты и время. Если вы не выбирали язык через /wire language set, RustWire автоматически использует язык Discord вашего сервера.",
+                        "cl_sec_date": "окт. 2026",
+                        "cl_sec_title": "Настройка приветствий только для админов",
+                        "cl_sec_desc": "Команды /wire setwelcome и /wire voterole теперь требуют права администратора, поэтому обычные участники больше не могут менять эти настройки.",
                         "cl_sc_date": "авг. 2026",
                         "cl_sm_date": "июль 2026",
                         "cl1_date": "июнь 2026",
@@ -8328,6 +8620,17 @@
                         "showcase_cta_title": "Bunları sunucunuzda da istiyor musunuz?",
                         "showcase_cta_desc": "Eklemesi ücretsiz. Kurulum ücreti yok. Sadece kurun ve /wire setupchannels komutunu çalıştırın.",
                         "showcase_cta_btn": "RustWire'ı Ücretsiz Ekle →",
+                        "cl_tag_improved": "İyileştirme",
+                        "cl_tag_fix": "Düzeltme",
+                        "cl_wc_date": "Eki 2026",
+                        "cl_wc_title": "Hoş Geldin ve Veda Kartları — /wire welcomestyle",
+                        "cl_wc_desc": "Yeni üyeleri düz bir metin yerine gerçek bir resimli kartla karşıla. 11 tema arasından seç (Rust Metal, Rust Scrap, Neon, Winter ve daha fazlası), kendi renk veya arka plan resmini ekle ve /wire welcomepreview ile önceden kontrol et. Eski görünümü mü seviyorsun? Orijinal embed hâlâ seçilebilir.",
+                        "cl_lang_date": "Eki 2026",
+                        "cl_lang_title": "Hoş Geldin Mesajları Sunucunun Dilinde",
+                        "cl_lang_desc": "Hoş geldin ve veda mesajları artık tarih ve saat dahil 18 dilin hepsinde. /wire language set ile dil seçmediysen RustWire otomatik olarak sunucunun Discord dilini kullanır.",
+                        "cl_sec_date": "Eki 2026",
+                        "cl_sec_title": "Hoş Geldin Ayarları Sadece Yöneticilere",
+                        "cl_sec_desc": "/wire setwelcome ve /wire voterole artık Yönetici yetkisi gerektiriyor, yani normal üyeler bu ayarları artık değiştiremez.",
                         "cl_sc_date": "Ağu 2026",
                         "cl_sm_date": "Tem 2026",
                         "cl1_date": "Haz 2026",
@@ -8601,6 +8904,17 @@
                         "showcase_cta_title": "Chcesz mieć to na swoim serwerze?",
                         "showcase_cta_desc": "Dodanie za darmo. Bez opłaty za konfigurację. Po prostu zainstaluj i uruchom /wire setupchannels.",
                         "showcase_cta_btn": "Dodaj RustWire za darmo →",
+                        "cl_tag_improved": "Ulepszenie",
+                        "cl_tag_fix": "Poprawka",
+                        "cl_wc_date": "paź 2026",
+                        "cl_wc_title": "Karty powitalne i pożegnalne — /wire welcomestyle",
+                        "cl_wc_desc": "Witaj nowych członków prawdziwą kartą graficzną zamiast zwykłej wiadomości. Wybierz jeden z 11 motywów (Rust Metal, Rust Scrap, Neon, Winter i inne), dodaj własny kolor lub tło i sprawdź efekt przez /wire welcomepreview. Wolisz stary wygląd? Oryginalny embed nadal jest dostępny.",
+                        "cl_lang_date": "paź 2026",
+                        "cl_lang_title": "Powitania w języku Twojego serwera",
+                        "cl_lang_desc": "Wiadomości powitalne i pożegnalne są teraz dostępne we wszystkich 18 językach, razem z datami i godzinami. Jeśli nie wybrałeś języka przez /wire language set, RustWire automatycznie użyje języka Discorda Twojego serwera.",
+                        "cl_sec_date": "paź 2026",
+                        "cl_sec_title": "Ustawienia powitań tylko dla adminów",
+                        "cl_sec_desc": "/wire setwelcome i /wire voterole wymagają teraz uprawnień Administratora, więc zwykli członkowie nie mogą już zmieniać tych ustawień.",
                         "cl_sc_date": "sie 2026",
                         "cl_sm_date": "lip 2026",
                         "cl1_date": "cze 2026",
@@ -8874,6 +9188,17 @@
                         "showcase_cta_title": "想在你的服务器上拥有这些功能吗？",
                         "showcase_cta_desc": "免费添加，无需设置费用。安装后运行 /wire setupchannels 即可。",
                         "showcase_cta_btn": "免费添加 RustWire →",
+                        "cl_tag_improved": "改进",
+                        "cl_tag_fix": "修复",
+                        "cl_wc_date": "2026年10月",
+                        "cl_wc_title": "欢迎与告别卡片 — /wire welcomestyle",
+                        "cl_wc_desc": "用精美的图片卡片代替普通文字消息来欢迎新成员。共有 11 个主题可选（Rust Metal、Rust Scrap、Neon、Winter 等），还可以设置自己的主题色或背景图，并用 /wire welcomepreview 提前预览。喜欢旧样式？原版 embed 依然可以使用。",
+                        "cl_lang_date": "2026年10月",
+                        "cl_lang_title": "欢迎消息使用服务器的语言",
+                        "cl_lang_desc": "欢迎和告别消息现已支持全部 18 种语言，日期和时间也会本地化。如果你还没有用 /wire language set 选择语言，RustWire 会自动使用服务器的 Discord 语言。",
+                        "cl_sec_date": "2026年10月",
+                        "cl_sec_title": "欢迎设置仅限管理员",
+                        "cl_sec_desc": "/wire setwelcome 和 /wire voterole 现在需要管理员权限，普通成员无法再更改这些设置。",
                         "cl_sc_date": "2026年8月",
                         "cl_sm_date": "2026年7月",
                         "cl1_date": "2026年6月",
