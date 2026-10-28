@@ -5282,7 +5282,7 @@
 
         async function fetchRSS(url) {
             try {
-                const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(8000) });
+                const res = await fetch(RSS2JSON + encodeURIComponent(url), { signal: AbortSignal.timeout(5000) });
                 const json = await res.json();
                 if (json.status !== 'ok') return [];
                 return (json.items || []).slice(0, 2).map(item => {
@@ -5309,7 +5309,7 @@
         let _srvFeed = null;
         function serverFeed() {
             if (!_srvFeed || Date.now() - _srvFeed.at > 5 * 60 * 1000) {
-                _srvFeed = { at: Date.now(), p: fetch('/api/feed', { signal: AbortSignal.timeout(12000) })
+                _srvFeed = { at: Date.now(), p: fetch('/api/feed', { signal: AbortSignal.timeout(8000) })
                     .then(r => r.ok ? r.json() : null)
                     .then(j => { if (j?.errors && Object.keys(j.errors).length) console.warn('[RustWire feed] /api/feed partial:', j.errors); return j; })
                     .catch(() => { console.warn('[RustWire feed] /api/feed not reachable, using browser fallbacks.'); return null; }) };
@@ -5329,15 +5329,15 @@
             u => 'https://api.codetabs.com/v1/proxy/?quest=' + encodeURIComponent(u),
         ];
         async function fetchTextAny(url) {
-            for (const route of CORS_ROUTES) {
-                try {
-                    const res = await fetch(route(url), { signal: AbortSignal.timeout(7000) });
-                    if (!res.ok) continue;
+            // All routes at once, first good answer wins (was one-by-one, up to ~30s)
+            const tries = CORS_ROUTES.map(route =>
+                fetch(route(url), { signal: AbortSignal.timeout(5000) }).then(async res => {
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
                     const text = await res.text();
-                    if (text && text.length > 40) return text;
-                } catch { /* try the next route */ }
-            }
-            return null;
+                    if (!text || text.length <= 40) throw new Error('empty');
+                    return text;
+                }));
+            try { return await Promise.any(tries); } catch { return null; }
         }
         const escHTML = str => String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -5597,27 +5597,44 @@
             </div>`;
         }
 
+        // Live Feed: shows the last known feed instantly, then every source fills in on its own
+        // as soon as it answers, so one slow source can't hold the whole box back.
+        const FEED_CACHE_KEY = 'rw_feed_cache';
+        const mapDevblogs = list => list.filter(i => i.title).map(i => ({ embedType:'devblog', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust devblogs -- ${truncate(i.title,34)}`, sub:'New Facepunch post published', link:i.link, fullTitle:i.title, desc:i.description, image:i.image, date:new Date(i.date) }));
+        const mapCommits  = list => list.filter(i => i.title).map(i => ({ embedType:'commit', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust commits -- Facepunch`, sub:truncate(i.title,46), link:i.link, fullTitle:i.title, desc:i.description, date:new Date(i.date) }));
+        const mapOxide    = list => list.filter(i => i.title).map(i => ({ embedType:'oxide', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust oxide -- uMod Update`, sub:`Oxide ${i.title} released`, link:i.link, fullTitle:`Oxide.Rust ${i.title}`, body:i.body, date:new Date(i.date) }));
         async function loadLiveFeed() {
             const container = document.getElementById('liveFeedItems');
             if (!container) return;
-            let items = [];
-            const [devblogs, commits, oxide, wipeStr] = await Promise.all([
-                fetchDevblogs(),
-                fetchCommits(),
-                fetchOxideLatest(),
-                fetchNextWipe(),
+            const parts = { devblog: [], commit: [], oxide: [], drops: [] };
+            try {
+                const c = JSON.parse(localStorage.getItem(FEED_CACHE_KEY) || 'null');
+                if (c && Date.now() - c.at < 12 * 3600 * 1000) for (const k of Object.keys(parts)) parts[k] = (c.parts[k] || []).map(i => ({ ...i, date: new Date(i.date) }));
+            } catch { /* no cache yet */ }
+            const wipeStr = await fetchNextWipe();
+            const render = () => {
+                let items = [...parts.devblog, ...parts.commit, ...parts.oxide, ...parts.drops,
+                    { embedType:'wipe', time:fmtTime(), cmd:`/rust wipe -- Force Wipe`, sub:wipeStr, link:'', fullTitle:'', date:new Date(0) }];
+                items.sort((a,b) => b.date - a.date);
+                container.innerHTML = items.slice(0,5).map(makeFeedItem).join('');
+            };
+            const save = () => { try { localStorage.setItem(FEED_CACHE_KEY, JSON.stringify({ at: Date.now(), parts })); } catch { /* storage full/blocked */ } };
+            const fill = (key, list) => { if (list.length) { parts[key] = list; render(); save(); } };
+            render();
+            await Promise.allSettled([
+                fetchDevblogs().then(l => fill('devblog', mapDevblogs(l))),
+                fetchCommits().then(l => fill('commit', mapCommits(l))),
+                fetchOxideLatest().then(l => fill('oxide', mapOxide(l))),
+                Promise.all([currentDrops('twitch'), currentDrops('kick')]).then(([tw, kk]) => {
+                    // Drops: an empty answer is real (campaign over), so it replaces the cached one
+                    parts.drops = [tw && dropsFeedItem(tw, 'twitchdrop'), kk && dropsFeedItem(kk, 'kickdrop')].filter(Boolean);
+                    render(); save();
+                }),
             ]);
-            devblogs.forEach(i => { if (i.title) items.push({ embedType:'devblog', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust devblogs -- ${truncate(i.title,34)}`, sub:'New Facepunch post published', link:i.link, fullTitle:i.title, desc:i.description, image:i.image, date:new Date(i.date) }); });
-            commits.forEach(i => { if (i.title) items.push({ embedType:'commit', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust commits -- Facepunch`, sub:truncate(i.title,46), link:i.link, fullTitle:i.title, desc:i.description, date:new Date(i.date) }); });
-            oxide.forEach(i => { if (i.title) items.push({ embedType:'oxide', time:fmtTime(i.date), rawDate:i.date, cmd:`/rust oxide -- uMod Update`, sub:`Oxide ${i.title} released`, link:i.link, fullTitle:`Oxide.Rust ${i.title}`, body:i.body, date:new Date(i.date) }); });
-            items.push({ embedType:'wipe', time:fmtTime(), cmd:`/rust wipe -- Force Wipe`, sub:wipeStr, link:'', fullTitle:'', date:new Date(0) });
-            const now = new Date();
-            const [twitchDrops, kickDrops] = await Promise.all([currentDrops('twitch'), currentDrops('kick')]);
-            if (twitchDrops) items.push(dropsFeedItem(twitchDrops, 'twitchdrop'));
-            if (kickDrops) items.push(dropsFeedItem(kickDrops, 'kickdrop'));
-            items.sort((a,b) => b.date - a.date);
-            items = items.slice(0,5);
-            container.innerHTML = items.map(makeFeedItem).join('');
+
+            // Popup listeners only once (loadLiveFeed re-runs every 5 minutes)
+            if (container.dataset.wired) return;
+            container.dataset.wired = '1';
 
             // ── Embed popup ────────────────────────────────────────────────
             const embed     = document.getElementById('feed-embed');
